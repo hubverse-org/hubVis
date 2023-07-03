@@ -1,0 +1,13 @@
+Package: hubVis
+Title: Plotting methods for hub models output
+Version: 0.0.0.9000
+Authors@R: 
+    person("Lucie", "Contamin", , "contamin@pitt.edu", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0001-5797-1279"))
+Description: Plotting methods for hub models output
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.3
+URL: URL: https://github.com/Infectious-Disease-Modeling-Hubs/hubVis
+BugReports: https://github.com/Infectious-Disease-Modeling-Hubs/hubVis/issues
