@@ -42,6 +42,7 @@ plot_prep_data <- function(df, plain_line, plain_type, ribbon) {
 #' containing the columns: `time_idx` and `value`
 #'@param use_median_as_point a `boolean` for using median quantiles as point
 #' forecasts in plot. Default to FALSE.
+#'@param plot a `boolean` for showing the plot. Default to TRUE.
 #'@param ribbon a vector of `numeric`  output_type_id value, value will be
 #' used a to create a ribbon in the plot.
 #'@param title a `character` string, if not NULL, will be added as title to the
@@ -56,11 +57,12 @@ plot_prep_data <- function(df, plain_line, plain_type, ribbon) {
 #' @importFrom plotly plot_ly add_trace add_lines add_ribbons layout
 #' @importFrom cli cli_abort cli_warn
 #' @importFrom scales hue_pal
+#' @importFrom methods show
 #'
 #' @export
 #'
 plot_step_ahead_forecasts <- function(forecast_data, truth_data,
-                                      use_median_as_point = FALSE,
+                                      use_median_as_point = FALSE, plot = TRUE,
                                       ribbon = c(0.975, 0.025), title = NULL,
                                       ens_color = NULL, ens_name = NULL) {
   # Prerequisite
@@ -172,5 +174,10 @@ plot_step_ahead_forecasts <- function(forecast_data, truth_data,
   if (!is.null(title))
     plot_model <- plotly::layout(plot_model, title = title)
 
-  return(plot_model)
+  if (isTRUE(plot)) {
+    show(plot_model)
+  } else {
+    invisible(plot_model)
+  }
+
 }

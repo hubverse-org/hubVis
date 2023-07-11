@@ -8,6 +8,7 @@ plot_step_ahead_forecasts(
   forecast_data,
   truth_data,
   use_median_as_point = FALSE,
+  plot = TRUE,
   ribbon = c(0.975, 0.025),
   title = NULL,
   ens_color = NULL,
@@ -23,6 +24,8 @@ containing the columns: \code{time_idx} and \code{value}}
 
 \item{use_median_as_point}{a \code{boolean} for using median quantiles as point
 forecasts in plot. Default to FALSE.}
+
+\item{plot}{a \code{boolean} for showing the plot. Default to TRUE.}
 
 \item{ribbon}{a vector of \code{numeric}  output_type_id value, value will be
 used a to create a ribbon in the plot.}
