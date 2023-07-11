@@ -133,7 +133,7 @@ plot_step_ahead_forecasts <- function(forecast_data, truth_data,
       plot_model, data = truth_data, x = ~time_idx, y = ~value,
       type = "scatter", mode = "lines+markers", line = list(color = "#6e6e6e"),
       hoverinfo = "text", name = "ground truth",
-      hovertext = paste("Date: ", truth_data$time_value, "<br>",
+      hovertext = paste("Date: ", truth_data$time_idx, "<br>",
                         "Ground truth: ",
                         format(truth_data$value, big.mark = ","), sep = ""),
       marker = list(color = "#6e6e6e", size = 7))
