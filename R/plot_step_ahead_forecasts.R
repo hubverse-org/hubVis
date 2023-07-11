@@ -1,0 +1,145 @@
+#' Data Process for plotting function
+#'
+#' Data process for plotting function, returns a list with two
+#' data frame: one for plain lines, one for ribbons plotting (in a wide format)
+#'
+#' @param df a `data.frame` object containing the columns: `model_id`,
+#' `output_type_id`, `target_date`, `value`
+#' @param plain_line a `numeric` output_type_id value, value will be used to
+#' create a plain line in the plot. Should be a unique value
+#'@param ribbon a vector of `numeric`  output_type_id value, value will be
+#' used a to create a ribbon in the plot.
+#'
+#' @importFrom stats reshape
+plot_prep_data <- function(df, plain_line, ribbon) {
+  plain_df <- df[which(df$output_type_id == plain_line), ]
+  plain_df$target_date <- as.Date(plain_df$target_date)
+  ribbon_df <- df[which(df$output_type_id %in% ribbon), ]
+  ribbon_df <- transform(
+    ribbon_df, output_type_id = ifelse(
+      ribbon_df$output_type_id == min(ribbon), "min", "max"))
+  ribbon_df <- reshape(
+    ribbon_df, timevar = "output_type_id", direction = "wide",
+    idvar = colnames(ribbon_df)[!colnames(ribbon_df) %in%
+                                  c("output_type_id", "value")])
+  ribbon_df$target_date <- as.Date(ribbon_df$target_date)
+  colnames(ribbon_df) <- gsub("^value\\.", "" , colnames(ribbon_df))
+  return(list("plain_df" = plain_df, "ribbon_df" = ribbon_df))
+}
+
+#' Basic Plot for model outputs
+#'
+#' Create a simple Plotly time-series plot for model projection outputs.
+#'
+#'@param forecast_data a `data.frame` object containing the columns: `model_id`,
+#' `output_type_id`, `target_date`, `value`
+#'@param truth_data a `data.frame` object containing the ground truth data,
+#' containing the columns: `time_idx` and `value`
+#'@param plain_line a `numeric` output_type_id value, value will be used to
+#' create a plain line in the plot. Should be a unique value
+#'@param ribbon a vector of `numeric`  output_type_id value, value will be
+#' used a to create a ribbon in the plot.
+#'@param title a `character` string, if not NULL, will be added as title to the
+#' plot
+#'@param ens_color a `character` string of a color name, if not NULL, will be
+#' use as color for the model name associated with the parameter `ens_name`
+#' (both parameter need to be provided)
+#' @param ens_name a `character` string of a model name, if not NULL, will be
+#' use to change the color for the model name, associated with the parameter
+#' `ens_color`(both parameter need to be provided)
+#'
+#' @importFrom plotly plot_ly add_trace add_lines add_ribbons layout
+#' @importFrom cli cli_abort
+#' @importFrom scales hue_pal
+#'
+#' @export
+#'
+plot_step_ahead_forecasts <- function(forecast_data, truth_data,
+                                      plain_line = 0.5,
+                                      ribbon = c(0.975, 0.025), title = NULL,
+                                      ens_color = NULL, ens_name = NULL) {
+  # Test format input
+  if (!is.data.frame(forecast_data)) {
+    cli::cli_abort(c("x" = "{.arg forecast_data} must be a `data.frame`."))
+  }
+  if (!is.data.frame(truth_data)) {
+    cli::cli_abort(c("x" = "{.arg truth_data} must be a `data.frame`."))
+  }
+  exp_f_col <- c("model_id", "output_type_id", "target_date", "value")
+  forecast_col <- colnames(forecast_data)
+  if (!all(exp_f_col %in% forecast_col)) {
+    cli::cli_abort(c("x" = "{.arg forecast_type_val} did not have all required
+                     columns {.val model_id}, {.val output_type_id},
+                     {.val target_date}, {.val value}"))
+  }
+  exp_td_col <- c("time_idx", "value")
+  truth_data_col <- colnames(truth_data)
+  if (!all(exp_td_col %in% truth_data_col)) {
+    cli::cli_abort(c("x" = "{.arg truth_data} did not have all required
+                     columns {.val time_idx}, {.val value}"))
+  }
+  exp_value <- c(plain_line, ribbon)
+  forecast_type_val <- unique(forecast_data$output_type_id)
+  if (!all(exp_value %in% forecast_type_val)) {
+    cli::cli_abort(c("x" = "{.arg forecast_type_val} did not have the expected
+                     output_type_id value {.val exp_value}"))
+  }
+  if (is.null(ens_color) + is.null(ens_name) == 1) {
+    cli::cli_abort(c("x" = "Both {.arg ens_color} and {.arg ens_name} should
+                     be set to a non NULL value"))
+  }
+  if (length(plain_line) > 1) {
+    cli::cli_abort(c("x" = "{.arg plain_line} should be of a unique value
+                     (length equal to 1)"))
+  }
+
+  # Data process
+  if (!is.null(ens_color) & !is.null(ens_name)) {
+    ens_df <- forecast_data[which(forecast_data$model_id == ens_name), ]
+    all_ens <- plot_prep_data(ens_df, plain_line, ribbon)
+    plot_df <- forecast_data[which(forecast_data$model_id != ens_name), ]
+  } else {
+    all_ens <- NULL
+  }
+  all_plot <- plot_prep_data(plot_df, plain_line, ribbon)
+
+  # Plot
+  plot_model <- plotly::plot_ly(height = 1050, colors = scales::hue_pal()(50))
+  if (!is.null(truth_data)) {
+    truth_data$time_idx <- as.Date(truth_data$time_idx)
+    plot_model <- plotly::add_trace(
+      plot_model, data = truth_data, x = ~time_idx, y = ~value,
+      type = "scatter", mode = "lines+markers", line = list(color = "#6e6e6e"),
+      hoverinfo = "text", name = "ground truth",
+      hovertext = paste("Date: ", truth_data$time_value, "<br>",
+                        "Ground truth: ",
+                        format(truth_data$value, big.mark = ","), sep = ""),
+      marker = list(color = "#6e6e6e", size = 7))
+  }
+  plot_model <- plotly::add_lines(
+    plot_model, data = all_plot$plain_df, x = ~target_date, y = ~value,
+    color = ~model_id)
+  plot_model <- plotly::add_ribbons(
+    plot_model, data = all_plot$ribbon_df, x = ~target_date, ymin = ~min,
+    ymax = ~max, color = ~model_id, opacity = 0.25, line = list(width = 0),
+    showlegend = FALSE)
+
+  # Ensemble color
+  if (!is.null(ens_df)) {
+    plot_model <- plotly::add_lines(
+      plot_model, data = all_ens$plain_df, x = ~target_date, y = ~value,
+      line = list(color = ens_color), color = ~model_id)
+    plot_model <- plotly::add_ribbons(
+      plot_model, data = all_ens$ribbon_df, x = ~target_date, ymin = ~min,
+      ymax = ~max, opacity = 0.25, fillcolor = ens_color,
+      line = list(width = 0, color = ens_color), showlegend = FALSE)
+  }
+
+  # Layout
+  plot_model <- plotly::layout(
+    plot_model, xaxis = list(title = 'Date'), yaxis = list(title = 'Value'))
+  if (!is.null(title))
+    plot_model <- plotly::layout(plot_model, title = title)
+
+  return(plot_model)
+}
