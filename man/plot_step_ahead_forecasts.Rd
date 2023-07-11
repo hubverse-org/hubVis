@@ -7,7 +7,7 @@
 plot_step_ahead_forecasts(
   forecast_data,
   truth_data,
-  plain_line = 0.5,
+  use_median_as_point = FALSE,
   ribbon = c(0.975, 0.025),
   title = NULL,
   ens_color = NULL,
@@ -15,14 +15,14 @@ plot_step_ahead_forecasts(
 )
 }
 \arguments{
-\item{forecast_data}{a \code{data.frame} object containing the columns: \code{model_id},
-\code{output_type_id}, \code{target_date}, \code{value}}
+\item{forecast_data}{a \code{model_output_df} object, containing all the required
+columns, and a "target_date" and a "model_id" column.}
 
 \item{truth_data}{a \code{data.frame} object containing the ground truth data,
 containing the columns: \code{time_idx} and \code{value}}
 
-\item{plain_line}{a \code{numeric} output_type_id value, value will be used to
-create a plain line in the plot. Should be a unique value}
+\item{use_median_as_point}{a \code{boolean} for using median quantiles as point
+forecasts in plot. Default to FALSE.}
 
 \item{ribbon}{a vector of \code{numeric}  output_type_id value, value will be
 used a to create a ribbon in the plot.}

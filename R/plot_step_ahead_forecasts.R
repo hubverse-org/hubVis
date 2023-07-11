@@ -7,12 +7,17 @@
 #' `output_type_id`, `target_date`, `value`
 #' @param plain_line a `numeric` output_type_id value, value will be used to
 #' create a plain line in the plot. Should be a unique value
+#' (for example: 0.5)
+#' @param plain_type a `string` output_type value, value will be used to
+#' create a plain line in the plot. Should be a unique value
+#' (for example: "quantile")
 #'@param ribbon a vector of `numeric`  output_type_id value, value will be
 #' used a to create a ribbon in the plot.
 #'
 #' @importFrom stats reshape
-plot_prep_data <- function(df, plain_line, ribbon) {
-  plain_df <- df[which(df$output_type_id == plain_line), ]
+plot_prep_data <- function(df, plain_line, plain_type, ribbon) {
+  plain_df <- df[which(
+    df$output_type_id == plain_line & df$output_type == plain_type), ]
   plain_df$target_date <- as.Date(plain_df$target_date)
   ribbon_df <- df[which(df$output_type_id %in% ribbon), ]
   ribbon_df <- transform(
@@ -31,12 +36,12 @@ plot_prep_data <- function(df, plain_line, ribbon) {
 #'
 #' Create a simple Plotly time-series plot for model projection outputs.
 #'
-#'@param forecast_data a `data.frame` object containing the columns: `model_id`,
-#' `output_type_id`, `target_date`, `value`
+#'@param forecast_data a `model_output_df` object, containing all the required
+#' columns, and a "target_date" and a "model_id" column.
 #'@param truth_data a `data.frame` object containing the ground truth data,
 #' containing the columns: `time_idx` and `value`
-#'@param plain_line a `numeric` output_type_id value, value will be used to
-#' create a plain line in the plot. Should be a unique value
+#'@param use_median_as_point a `boolean` for using median quantiles as point
+#' forecasts in plot. Default to FALSE.
 #'@param ribbon a vector of `numeric`  output_type_id value, value will be
 #' used a to create a ribbon in the plot.
 #'@param title a `character` string, if not NULL, will be added as title to the
@@ -49,19 +54,32 @@ plot_prep_data <- function(df, plain_line, ribbon) {
 #' `ens_color`(both parameter need to be provided)
 #'
 #' @importFrom plotly plot_ly add_trace add_lines add_ribbons layout
-#' @importFrom cli cli_abort
+#' @importFrom cli cli_abort cli_warn
 #' @importFrom scales hue_pal
 #'
 #' @export
 #'
 plot_step_ahead_forecasts <- function(forecast_data, truth_data,
-                                      plain_line = 0.5,
+                                      use_median_as_point = FALSE,
                                       ribbon = c(0.975, 0.025), title = NULL,
                                       ens_color = NULL, ens_name = NULL) {
+  # Prerequisite
+  if (isTRUE(use_median_as_point)) {
+    plain_line <- 0.5
+    plain_type <- "quantile"
+  } else {
+    plain_line <- NULL
+    plain_type <- NULL
+  }
   # Test format input
   if (!is.data.frame(forecast_data)) {
     cli::cli_abort(c("x" = "{.arg forecast_data} must be a `data.frame`."))
   }
+  if (isFALSE("model_out_tbl" %in% class(forecast_data))) {
+    cli::cli_warn(c("x" = "{.arg forecast_data} must be a `model_output_df`."))
+    forecast_data <- hubUtils::as_model_out_tbl(forecast_data)
+  }
+
   if (!is.data.frame(truth_data)) {
     cli::cli_abort(c("x" = "{.arg truth_data} must be a `data.frame`."))
   }
@@ -78,6 +96,7 @@ plot_step_ahead_forecasts <- function(forecast_data, truth_data,
     cli::cli_abort(c("x" = "{.arg truth_data} did not have all required
                      columns {.val time_idx}, {.val value}"))
   }
+
   exp_value <- c(plain_line, ribbon)
   forecast_type_val <- unique(forecast_data$output_type_id)
   if (!all(exp_value %in% forecast_type_val)) {
@@ -96,12 +115,13 @@ plot_step_ahead_forecasts <- function(forecast_data, truth_data,
   # Data process
   if (!is.null(ens_color) & !is.null(ens_name)) {
     ens_df <- forecast_data[which(forecast_data$model_id == ens_name), ]
-    all_ens <- plot_prep_data(ens_df, plain_line, ribbon)
+    all_ens <- plot_prep_data(ens_df, plain_line, plain_type, ribbon)
     plot_df <- forecast_data[which(forecast_data$model_id != ens_name), ]
   } else {
     all_ens <- NULL
+    plot_df <- forecast_data
   }
-  all_plot <- plot_prep_data(plot_df, plain_line, ribbon)
+  all_plot <- plot_prep_data(plot_df, plain_line, plain_type, ribbon)
 
   # Plot
   plot_model <- plotly::plot_ly(height = 1050, colors = scales::hue_pal()(50))
@@ -116,23 +136,34 @@ plot_step_ahead_forecasts <- function(forecast_data, truth_data,
                         format(truth_data$value, big.mark = ","), sep = ""),
       marker = list(color = "#6e6e6e", size = 7))
   }
-  plot_model <- plotly::add_lines(
-    plot_model, data = all_plot$plain_df, x = ~target_date, y = ~value,
-    color = ~model_id)
+  if (nrow(all_plot$plain_df) > 0) {
+    plot_model <- plotly::add_lines(
+      plot_model, data = all_plot$plain_df, x = ~target_date, y = ~value,
+      color = ~model_id)
+    show_legend = FALSE
+  } else {
+    show_legend = TRUE
+  }
+
   plot_model <- plotly::add_ribbons(
     plot_model, data = all_plot$ribbon_df, x = ~target_date, ymin = ~min,
     ymax = ~max, color = ~model_id, opacity = 0.25, line = list(width = 0),
-    showlegend = FALSE)
+    showlegend = show_legend)
 
   # Ensemble color
-  if (!is.null(ens_df)) {
-    plot_model <- plotly::add_lines(
-      plot_model, data = all_ens$plain_df, x = ~target_date, y = ~value,
-      line = list(color = ens_color), color = ~model_id)
+  if (!is.null(all_ens)) {
+    if (nrow(all_ens$plain_df) > 0) {
+      plot_model <- plotly::add_lines(
+        plot_model, data = all_ens$plain_df, x = ~target_date, y = ~value,
+        line = list(color = ens_color), color = ~model_id)
+      show_legend = FALSE
+    } else {
+      show_legend = TRUE
+    }
     plot_model <- plotly::add_ribbons(
       plot_model, data = all_ens$ribbon_df, x = ~target_date, ymin = ~min,
       ymax = ~max, opacity = 0.25, fillcolor = ens_color,
-      line = list(width = 0, color = ens_color), showlegend = FALSE)
+      line = list(width = 0, color = ens_color), showlegend = show_legend)
   }
 
   # Layout

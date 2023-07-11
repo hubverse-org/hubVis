@@ -4,14 +4,19 @@
 \alias{plot_prep_data}
 \title{Data Process for plotting function}
 \usage{
-plot_prep_data(df, plain_line, ribbon)
+plot_prep_data(df, plain_line, plain_type, ribbon)
 }
 \arguments{
 \item{df}{a \code{data.frame} object containing the columns: \code{model_id},
 \code{output_type_id}, \code{target_date}, \code{value}}
 
 \item{plain_line}{a \code{numeric} output_type_id value, value will be used to
-create a plain line in the plot. Should be a unique value}
+create a plain line in the plot. Should be a unique value
+(for example: 0.5)}
+
+\item{plain_type}{a \code{string} output_type value, value will be used to
+create a plain line in the plot. Should be a unique value
+(for example: "quantile")}
 
 \item{ribbon}{a vector of \code{numeric}  output_type_id value, value will be
 used a to create a ribbon in the plot.}

@@ -2,6 +2,7 @@
 
 export(plot_step_ahead_forecasts)
 importFrom(cli,cli_abort)
+importFrom(cli,cli_warn)
 importFrom(plotly,add_lines)
 importFrom(plotly,add_ribbons)
 importFrom(plotly,add_trace)

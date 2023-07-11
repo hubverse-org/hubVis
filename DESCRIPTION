@@ -9,9 +9,12 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 Imports: 
     cli,
+    hubUtils,
     plotly,
     scales,
     stats
+Remotes:
+    Infectious-Disease-Modeling-Hubs/hubUtils
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
 URL: URL: https://github.com/Infectious-Disease-Modeling-Hubs/hubVis
