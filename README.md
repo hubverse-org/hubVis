@@ -3,7 +3,7 @@
 [![Lifecycle:
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 
-The goal of hubVis is to provide olotting methods for hub model outputs.
+The goal of hubVis is to provide plotting methods for hub model outputs.
 
 ## Installation
 
