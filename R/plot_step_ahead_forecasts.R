@@ -65,25 +65,14 @@ plot_step_ahead_forecasts <- function(forecast_data, truth_data,
                                       use_median_as_point = FALSE, plot = TRUE,
                                       ribbon = c(0.975, 0.025), title = NULL,
                                       ens_color = NULL, ens_name = NULL) {
-  # Prerequisite
-  if (isTRUE(use_median_as_point)) {
-    plain_line <- 0.5
-    plain_type <- "quantile"
-  } else {
-    plain_line <- NULL
-    plain_type <- NULL
-  }
   # Test format input
+  ## Forecast data
   if (!is.data.frame(forecast_data)) {
     cli::cli_abort(c("x" = "{.arg forecast_data} must be a `data.frame`."))
   }
   if (isFALSE("model_out_tbl" %in% class(forecast_data))) {
     cli::cli_warn(c("x" = "{.arg forecast_data} must be a `model_output_df`."))
     forecast_data <- hubUtils::as_model_out_tbl(forecast_data)
-  }
-
-  if (!is.data.frame(truth_data)) {
-    cli::cli_abort(c("x" = "{.arg truth_data} must be a `data.frame`."))
   }
   exp_f_col <- c("model_id", "output_type_id", "target_date", "value")
   forecast_col <- colnames(forecast_data)
@@ -92,13 +81,17 @@ plot_step_ahead_forecasts <- function(forecast_data, truth_data,
                      columns {.val model_id}, {.val output_type_id},
                      {.val target_date}, {.val value}"))
   }
+  ## Truth Data
+  if (!is.data.frame(truth_data)) {
+    cli::cli_abort(c("x" = "{.arg truth_data} must be a `data.frame`."))
+  }
   exp_td_col <- c("time_idx", "value")
   truth_data_col <- colnames(truth_data)
   if (!all(exp_td_col %in% truth_data_col)) {
     cli::cli_abort(c("x" = "{.arg truth_data} did not have all required
                      columns {.val time_idx}, {.val value}"))
   }
-
+  ## Paremeters
   exp_value <- c(plain_line, ribbon)
   forecast_type_val <- unique(forecast_data$output_type_id)
   if (!all(exp_value %in% forecast_type_val)) {
@@ -109,10 +102,22 @@ plot_step_ahead_forecasts <- function(forecast_data, truth_data,
     cli::cli_abort(c("x" = "Both {.arg ens_color} and {.arg ens_name} should
                      be set to a non NULL value"))
   }
-  if (length(plain_line) > 1) {
-    cli::cli_abort(c("x" = "{.arg plain_line} should be of a unique value
-                     (length equal to 1)"))
+
+  # Prerequisite
+  if (isTRUE(use_median_as_point)) {
+    if (grepl("median", forecast_data$ouput_type)) {
+      plain_line <- NA
+      plain_type <- "median"
+    } else {
+      plain_line <- 0.5
+      plain_type <- "quantile"
+
+    }
+  } else {
+    plain_line <- NULL
+    plain_type <- NULL
   }
+
 
   # Data process
   if (!is.null(ens_color) & !is.null(ens_name)) {
