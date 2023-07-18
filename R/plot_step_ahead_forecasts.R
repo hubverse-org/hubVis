@@ -108,7 +108,7 @@ plot_step_ahead_forecasts <- function(forecast_data, truth_data,
   }
   ## Parameters
   if (isTRUE(use_median_as_point)) {
-    if (grepl("median", forecast_data$ouput_type)) {
+    if (any(grepl("median", forecast_data$output_type))) {
       plain_line <- NA
       plain_type <- "median"
     } else {
