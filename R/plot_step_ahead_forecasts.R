@@ -71,15 +71,24 @@ plot_step_ahead_forecasts <- function(forecast_data, truth_data,
     cli::cli_abort(c("x" = "{.arg forecast_data} must be a `data.frame`."))
   }
   if (isFALSE("model_out_tbl" %in% class(forecast_data))) {
-    cli::cli_warn(c("x" = "{.arg forecast_data} must be a `model_output_df`."))
-    forecast_data <- hubUtils::as_model_out_tbl(forecast_data)
+    cli::cli_warn(c("!" = "{.arg forecast_data} must be a `model_output_df`.
+                    Class applied by default"))
+    forecast_data <- hubUtils::as_model_out_tbl(forecast_data,
+                                                remove_empty = TRUE)
   }
   exp_f_col <- c("model_id", "output_type_id", "target_date", "value")
   forecast_col <- colnames(forecast_data)
   if (!all(exp_f_col %in% forecast_col)) {
     cli::cli_abort(c("x" = "{.arg forecast_type_val} did not have all required
-                     columns {.val model_id}, {.val output_type_id},
-                     {.val target_date}, {.val value}"))
+                     columns {.val {exp_f_col}}"))
+  }
+  valid_types <- c("mean", "median", "quantile")
+  forecast_type <- unique(forecast_data$output_type)
+  if (!any(valid_types %in% forecast_type)) {
+    cli::cli_abort(c(
+      "x" = "{.arg forecast_data} should contain at least one supported output type.",
+      "i" = "Supported output types: {.val {valid_types}}."
+    ))
   }
   ## Truth Data
   if (!is.data.frame(truth_data)) {
@@ -89,21 +98,9 @@ plot_step_ahead_forecasts <- function(forecast_data, truth_data,
   truth_data_col <- colnames(truth_data)
   if (!all(exp_td_col %in% truth_data_col)) {
     cli::cli_abort(c("x" = "{.arg truth_data} did not have all required
-                     columns {.val time_idx}, {.val value}"))
+                     columns {.val {expploy_td_col}}"))
   }
-  ## Paremeters
-  exp_value <- c(plain_line, ribbon)
-  forecast_type_val <- unique(forecast_data$output_type_id)
-  if (!all(exp_value %in% forecast_type_val)) {
-    cli::cli_abort(c("x" = "{.arg forecast_type_val} did not have the expected
-                     output_type_id value {.val exp_value}"))
-  }
-  if (is.null(ens_color) + is.null(ens_name) == 1) {
-    cli::cli_abort(c("x" = "Both {.arg ens_color} and {.arg ens_name} should
-                     be set to a non NULL value"))
-  }
-
-  # Prerequisite
+  ## Parameters
   if (isTRUE(use_median_as_point)) {
     if (grepl("median", forecast_data$ouput_type)) {
       plain_line <- NA
@@ -117,6 +114,18 @@ plot_step_ahead_forecasts <- function(forecast_data, truth_data,
     plain_line <- NULL
     plain_type <- NULL
   }
+
+  exp_value <- c(plain_line, ribbon)
+  forecast_type_val <- unique(forecast_data$output_type_id)
+  if (!all(exp_value %in% forecast_type_val)) {
+    cli::cli_abort(c("x" = "{.arg forecast_type_val} did not have the expected
+                     output_type_id value {.val {exp_value}}"))
+  }
+  if (is.null(ens_color) + is.null(ens_name) == 1) {
+    cli::cli_abort(c("x" = "Both {.arg ens_color} and {.arg ens_name} should
+                     be set to a non NULL value"))
+  }
+
 
 
   # Data process
