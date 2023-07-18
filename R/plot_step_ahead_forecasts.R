@@ -39,10 +39,13 @@ plot_prep_data <- function(df, plain_line, plain_type, ribbon) {
 #'@param forecast_data a `model_output_df` object, containing all the required
 #' columns, and a "target_date" and a "model_id" column.
 #'@param truth_data a `data.frame` object containing the ground truth data,
-#' containing the columns: `time_idx` and `value`
+#' containing the columns: `time_idx` and `value`.
+#' Ignored, if `plot_truth = FALSE`
 #'@param use_median_as_point a `boolean` for using median quantiles as point
 #' forecasts in plot. Default to FALSE.
 #'@param plot a `boolean` for showing the plot. Default to TRUE.
+#'@param plot_truth a `boolean` for showing the truth data in the plot.
+#'  Default to TRUE. Data used in the plot comes from the paremeter `truth_data`
 #'@param ribbon a vector of `numeric`  output_type_id value, value will be
 #' used a to create a ribbon in the plot.
 #'@param title a `character` string, if not NULL, will be added as title to the
@@ -63,6 +66,7 @@ plot_prep_data <- function(df, plain_line, plain_type, ribbon) {
 #'
 plot_step_ahead_forecasts <- function(forecast_data, truth_data,
                                       use_median_as_point = FALSE, plot = TRUE,
+                                      plot_truth = TRUE,
                                       ribbon = c(0.975, 0.025), title = NULL,
                                       ens_color = NULL, ens_name = NULL) {
   # Test format input
@@ -91,14 +95,16 @@ plot_step_ahead_forecasts <- function(forecast_data, truth_data,
     ))
   }
   ## Truth Data
-  if (!is.data.frame(truth_data)) {
-    cli::cli_abort(c("x" = "{.arg truth_data} must be a `data.frame`."))
-  }
-  exp_td_col <- c("time_idx", "value")
-  truth_data_col <- colnames(truth_data)
-  if (!all(exp_td_col %in% truth_data_col)) {
-    cli::cli_abort(c("x" = "{.arg truth_data} did not have all required
+  if (plot_truth) {
+    if (!is.data.frame(truth_data)) {
+      cli::cli_abort(c("x" = "{.arg truth_data} must be a `data.frame`."))
+    }
+    exp_td_col <- c("time_idx", "value")
+    truth_data_col <- colnames(truth_data)
+    if (!all(exp_td_col %in% truth_data_col)) {
+      cli::cli_abort(c("x" = "{.arg truth_data} did not have all required
                      columns {.val {expploy_td_col}}"))
+    }
   }
   ## Parameters
   if (isTRUE(use_median_as_point)) {
@@ -108,7 +114,6 @@ plot_step_ahead_forecasts <- function(forecast_data, truth_data,
     } else {
       plain_line <- 0.5
       plain_type <- "quantile"
-
     }
   } else {
     plain_line <- NULL
@@ -126,8 +131,6 @@ plot_step_ahead_forecasts <- function(forecast_data, truth_data,
                      be set to a non NULL value"))
   }
 
-
-
   # Data process
   if (!is.null(ens_color) & !is.null(ens_name)) {
     ens_df <- forecast_data[which(forecast_data$model_id == ens_name), ]
@@ -141,7 +144,7 @@ plot_step_ahead_forecasts <- function(forecast_data, truth_data,
 
   # Plot
   plot_model <- plotly::plot_ly(height = 1050, colors = scales::hue_pal()(50))
-  if (!is.null(truth_data)) {
+  if (plot_truth) {
     truth_data$time_idx <- as.Date(truth_data$time_idx)
     plot_model <- plotly::add_trace(
       plot_model, data = truth_data, x = ~time_idx, y = ~value,

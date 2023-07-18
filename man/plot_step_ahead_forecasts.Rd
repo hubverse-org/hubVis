@@ -9,6 +9,7 @@ plot_step_ahead_forecasts(
   truth_data,
   use_median_as_point = FALSE,
   plot = TRUE,
+  plot_truth = TRUE,
   ribbon = c(0.975, 0.025),
   title = NULL,
   ens_color = NULL,
@@ -20,12 +21,16 @@ plot_step_ahead_forecasts(
 columns, and a "target_date" and a "model_id" column.}
 
 \item{truth_data}{a \code{data.frame} object containing the ground truth data,
-containing the columns: \code{time_idx} and \code{value}}
+containing the columns: \code{time_idx} and \code{value}.
+Ignored, if \code{plot_truth = FALSE}}
 
 \item{use_median_as_point}{a \code{boolean} for using median quantiles as point
 forecasts in plot. Default to FALSE.}
 
 \item{plot}{a \code{boolean} for showing the plot. Default to TRUE.}
+
+\item{plot_truth}{a \code{boolean} for showing the truth data in the plot.
+Default to TRUE. Data used in the plot comes from the paremeter \code{truth_data}}
 
 \item{ribbon}{a vector of \code{numeric}  output_type_id value, value will be
 used a to create a ribbon in the plot.}
