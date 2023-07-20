@@ -10,6 +10,11 @@ plot_step_ahead_forecasts(
   use_median_as_point = FALSE,
   plot = TRUE,
   plot_truth = TRUE,
+  facet = NULL,
+  facet_scales = "fixed",
+  facet_nrow = NULL,
+  facet_ncol = NULL,
+  facet_title = "top left",
   ribbon = c(0.975, 0.025),
   title = NULL,
   ens_color = NULL,
@@ -24,13 +29,30 @@ columns, and a "target_date" and a "model_id" column.}
 containing the columns: \code{time_idx} and \code{value}.
 Ignored, if \code{plot_truth = FALSE}}
 
-\item{use_median_as_point}{a \code{boolean} for using median quantiles as point
+\item{use_median_as_point}{a \code{Boolean} for using median quantile as point
 forecasts in plot. Default to FALSE.}
 
 \item{plot}{a \code{boolean} for showing the plot. Default to TRUE.}
 
 \item{plot_truth}{a \code{boolean} for showing the truth data in the plot.
-Default to TRUE. Data used in the plot comes from the paremeter \code{truth_data}}
+Default to TRUE. Data used in the plot comes from the parameter \code{truth_data}}
+
+\item{facet}{a unique value corresponding as a task_id variable name
+(interpretable as facet option for ggplot)}
+
+\item{facet_scales}{argument for scales as in \link[ggplot2:facet_wrap]{ggplot2::facet_wrap} or
+equivalent to \code{shareX}, \code{shareY} in \link[plotly:subplot]{plotly::subplot}. Default to "fixed"
+(x and y axes are shared).}
+
+\item{facet_nrow}{a numeric, number of rows in the layout.}
+
+\item{facet_ncol}{a numeric, number of columns in the layout
+(ignored in \link[plotly:subplot]{plotly::subplot})}
+
+\item{facet_title}{a \code{string}, position of each subplot tile (value
+associated with the \code{facet} parameter). "top right", "top left" (default),
+"bottom right", "bottom left" are the possible values, \code{NULL} to remove the
+title}
 
 \item{ribbon}{a vector of \code{numeric}  output_type_id value, value will be
 used a to create a ribbon in the plot.}
