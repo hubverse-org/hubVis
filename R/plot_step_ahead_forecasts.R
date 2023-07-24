@@ -138,6 +138,15 @@ plotly_model_plot <- function(plot_model, df_point, df_ribbon, plot_truth,
 #' associated with the `facet` parameter). "top right", "top left" (default),
 #' "bottom right", "bottom left" are the possible values, `NULL` to remove the
 #' title
+#'@param fill_by_model a `boolean` for specifying colors in plot. If `TRUE`,
+#' separate colors will be used for each model, `pal_color` paremeters to change
+#' the palette. If `FALSE`, only blues will be used for all models.
+#' Default to `FALSE`.
+#'@param pal_color a `character` string for specifying the palette color in the
+#' plot if `fill_by_model` is set to `TRUE`. For `plotly` plots, please refer
+#' to [RColorBrewer::display.brewer.all()]. Default to `"Set2"`
+#'@param fill_transparency numeric value used to set transparency of intervals.
+#' 0 means fully transparent, 1 means opaque. Default to `0.25`
 #'@param ribbon a vector of `numeric`  output_type_id value, value will be
 #' used a to create a ribbon in the plot.
 #'@param title a `character` string, if not NULL, will be added as title to the
@@ -156,14 +165,12 @@ plotly_model_plot <- function(plot_model, df_point, df_ribbon, plot_truth,
 #'
 #' @export
 #'
-plot_step_ahead_forecasts <- function(forecast_data, truth_data,
-                                      use_median_as_point = FALSE, plot = TRUE,
-                                      plot_truth = TRUE, show_legend = TRUE,
-                                      facet = NULL, facet_scales = "fixed",
-                                      facet_nrow = NULL, facet_ncol = NULL,
-                                      facet_title = "top left",
-                                      ribbon = c(0.975, 0.025), title = NULL,
-                                      ens_color = NULL, ens_name = NULL) {
+plot_step_ahead_forecasts <- function(
+    forecast_data, truth_data, use_median_as_point = FALSE, plot = TRUE,
+    plot_truth = TRUE, show_legend = TRUE, facet = NULL, facet_scales = "fixed",
+    facet_nrow = NULL, facet_ncol = NULL, facet_title = "top left",
+    fill_by_model = FALSE, pal_color = "Set2", fill_transparency = 0.25,
+    ribbon = c(0.975, 0.025), title = NULL, ens_color = NULL, ens_name = NULL) {
   # Test format input
   ## Forecast data
   if (!is.data.frame(forecast_data)) {
@@ -254,7 +261,12 @@ plot_step_ahead_forecasts <- function(forecast_data, truth_data,
   all_plot <- plot_prep_data(plot_df, plain_line, plain_type, ribbon)
 
   # Plot
-  plot_model <- plotly::plot_ly(height = 1050)
+  if (fill_by_model) {
+    pal_color = pal_color
+  } else {
+    pal_color = "blue"
+  }
+  plot_model <- plotly::plot_ly(height = 1050, colors =  pal_color)
   if (is.null(facet)) {
     df_point <- all_plot$plain_df
     df_ribbon <- all_plot$ribbon_df
@@ -263,13 +275,13 @@ plot_step_ahead_forecasts <- function(forecast_data, truth_data,
       df_ribbon_ens <- all_ens$ribbon_df
     }
     plot_model <- plotly_model_plot(plot_model, df_point, df_ribbon, plot_truth,
-                                    truth_data)
+                                    truth_data, opacity = fill_transparency)
 
     # Ensemble color
     if (!is.null(all_ens)) {
-      plot_model <- plotly_model_plot(plot_model, df_point_ens, df_ribbon_ens,
-                                      plot_truth, FALSE,
-                                      line_color = ens_color)
+      plot_model <- plotly_model_plot(
+        plot_model, df_point_ens, df_ribbon_ens, plot_truth, FALSE,
+        opacity = fill_transparency, line_color = ens_color)
     }
     plot_model <- plotly::layout(
       plot_model, xaxis = list(title = 'Date'), yaxis = list(title = 'Value'))
@@ -296,22 +308,24 @@ plot_step_ahead_forecasts <- function(forecast_data, truth_data,
       }
       if (x == sort(unique(forecast_data[["scenario_id"]]))[1]) {
         plot_model <- plotly_model_plot(
-          plot_model, df_point, df_ribbon, plot_truth, truth_data)
+          plot_model, df_point, df_ribbon, plot_truth, truth_data,
+          opacity = fill_transparency)
       } else {
         plot_model <- plotly_model_plot(
           plot_model, df_point, df_ribbon, plot_truth, truth_data,
-          showlegend = FALSE)
+          opacity = fill_transparency, showlegend = FALSE)
       }
       # Ensemble color
       if (!is.null(all_ens)) {
         if (x == sort(unique(forecast_data[["scenario_id"]]))[1]) {
           plot_model <- plotly_model_plot(
             plot_model, df_point_ens, df_ribbon_ens, FALSE, truth_data,
-            line_color = ens_color)
+            line_color = ens_color, opacity = fill_transparency)
         } else {
           plot_model <- plotly_model_plot(
             plot_model, df_point_ens, df_ribbon_ens, FALSE, truth_data,
-            line_color = ens_color, showlegend = FALSE)
+            line_color = ens_color, opacity = fill_transparency,
+            showlegend = FALSE)
         }
       }
       if (!is.null(facet_title)) {

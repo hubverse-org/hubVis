@@ -16,6 +16,9 @@ plot_step_ahead_forecasts(
   facet_nrow = NULL,
   facet_ncol = NULL,
   facet_title = "top left",
+  fill_by_model = FALSE,
+  pal_color = "Set2",
+  fill_transparency = 0.25,
   ribbon = c(0.975, 0.025),
   title = NULL,
   ens_color = NULL,
@@ -57,6 +60,18 @@ equivalent to \code{shareX}, \code{shareY} in \link[plotly:subplot]{plotly::subp
 associated with the \code{facet} parameter). "top right", "top left" (default),
 "bottom right", "bottom left" are the possible values, \code{NULL} to remove the
 title}
+
+\item{fill_by_model}{a \code{boolean} for specifying colors in plot. If \code{TRUE},
+separate colors will be used for each model, \code{pal_color} paremeters to change
+the palette. If \code{FALSE}, only blues will be used for all models.
+Default to \code{FALSE}.}
+
+\item{pal_color}{a \code{character} string for specifying the palette color in the
+plot if \code{fill_by_model} is set to \code{TRUE}. For \code{plotly} plots, please refer
+to \code{\link[RColorBrewer:ColorBrewer]{RColorBrewer::display.brewer.all()}}. Default to \code{"Set2"}}
+
+\item{fill_transparency}{numeric value used to set transparency of intervals.
+0 means fully transparent, 1 means opaque. Default to \code{0.25}}
 
 \item{ribbon}{a vector of \code{numeric}  output_type_id value, value will be
 used a to create a ribbon in the plot.}
