@@ -10,6 +10,7 @@ plot_step_ahead_forecasts(
   use_median_as_point = FALSE,
   plot = TRUE,
   plot_truth = TRUE,
+  show_legend = TRUE,
   facet = NULL,
   facet_scales = "fixed",
   facet_nrow = NULL,
@@ -36,6 +37,9 @@ forecasts in plot. Default to FALSE.}
 
 \item{plot_truth}{a \code{boolean} for showing the truth data in the plot.
 Default to TRUE. Data used in the plot comes from the parameter \code{truth_data}}
+
+\item{show_legend}{a \code{boolean} for showing the legend in the plot.
+Default to TRUE.}
 
 \item{facet}{a unique value corresponding as a task_id variable name
 (interpretable as facet option for ggplot)}

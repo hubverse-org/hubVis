@@ -124,6 +124,8 @@ plotly_model_plot <- function(plot_model, df_point, df_ribbon, plot_truth,
 #'@param plot a `boolean` for showing the plot. Default to TRUE.
 #'@param plot_truth a `boolean` for showing the truth data in the plot.
 #'  Default to TRUE. Data used in the plot comes from the parameter `truth_data`
+#'@param show_legend a `boolean` for showing the legend in the plot.
+#'  Default to TRUE.
 #'@param facet a unique value corresponding as a task_id variable name
 #' (interpretable as facet option for ggplot)
 #'@param facet_scales argument for scales as in [ggplot2::facet_wrap] or
@@ -156,7 +158,7 @@ plotly_model_plot <- function(plot_model, df_point, df_ribbon, plot_truth,
 #'
 plot_step_ahead_forecasts <- function(forecast_data, truth_data,
                                       use_median_as_point = FALSE, plot = TRUE,
-                                      plot_truth = TRUE,
+                                      plot_truth = TRUE, show_legend = TRUE,
                                       facet = NULL, facet_scales = "fixed",
                                       facet_nrow = NULL, facet_ncol = NULL,
                                       facet_title = "top left",
@@ -342,7 +344,8 @@ plot_step_ahead_forecasts <- function(forecast_data, truth_data,
 
   # Layout
   if (!is.null(title))
-    plot_model <- plotly::layout(plot_model, title = title)
+    plot_model <- plotly::layout(plot_model, title = title,
+                                 showlegend = show_legend)
 
   if (isTRUE(plot)) {
     show(plot_model)
