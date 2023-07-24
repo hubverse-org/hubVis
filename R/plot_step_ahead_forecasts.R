@@ -67,7 +67,8 @@ plotly_model_plot <- function(plot_model, df_point, df_ribbon, plot_truth,
       hoverinfo = "text", name = "ground truth", legendgroup = "ground truth",
       hovertext = paste("Date: ", truth_data$time_idx, "<br>Ground truth: ",
                         format(truth_data$value, big.mark = ","), sep = ""),
-      marker = list(color = "#6e6e6e", size = 7), arguments)
+      marker = list(color = "#6e6e6e", size = 7))
+    arg_list <- c(arg_list, arguments)
     plot_model <- do.call(plotly::add_trace, arg_list)
   }
   if (nrow(df_point) > 0) {
@@ -261,6 +262,7 @@ plot_step_ahead_forecasts <- function(forecast_data, truth_data,
     }
     plot_model <- plotly_model_plot(plot_model, df_point, df_ribbon, plot_truth,
                                     truth_data)
+
     # Ensemble color
     if (!is.null(all_ens)) {
       plot_model <- plotly_model_plot(plot_model, df_point_ens, df_ribbon_ens,
@@ -283,14 +285,14 @@ plot_step_ahead_forecasts <- function(forecast_data, truth_data,
     if (is.null(facet_nrow)) {
       facet_nrow = 1
     }
-    subplot <- lapply(sort(unique(plot_df[[facet]])), function(x) {
+    subplot <- lapply(sort(unique(forecast_data[["scenario_id"]])), function(x) {
       df_point <- all_plot$plain_df[which(all_plot$plain_df[[facet]] == x), ]
       df_ribbon <- all_plot$ribbon_df[which(all_plot$ribbon_df[[facet]] == x), ]
       if (!is.null(all_ens)) {
         df_point_ens <- all_ens$plain_df[which(all_ens$plain_df[[facet]] == x), ]
         df_ribbon_ens <- all_ens$ribbon_df[which(all_ens$ribbon_df[[facet]] == x), ]
       }
-      if (x == sort(unique(plot_df[[facet]]))[1]) {
+      if (x == sort(unique(forecast_data[["scenario_id"]]))[1]) {
         plot_model <- plotly_model_plot(
           plot_model, df_point, df_ribbon, plot_truth, truth_data)
       } else {
@@ -300,7 +302,7 @@ plot_step_ahead_forecasts <- function(forecast_data, truth_data,
       }
       # Ensemble color
       if (!is.null(all_ens)) {
-        if (x == sort(unique(plot_df[[facet]]))[1]) {
+        if (x == sort(unique(forecast_data[["scenario_id"]]))[1]) {
           plot_model <- plotly_model_plot(
             plot_model, df_point_ens, df_ribbon_ens, FALSE, truth_data,
             line_color = ens_color)
@@ -331,6 +333,7 @@ plot_step_ahead_forecasts <- function(forecast_data, truth_data,
                              yref = "paper", xanchor = x_anchor,
                              yanchor = y_anchor, showarrow = FALSE, text = x))
       }
+
       return(plot_model)
     })
     plot_model <- plotly::subplot(subplot, nrows = facet_nrow, shareX = sharex,
@@ -343,6 +346,7 @@ plot_step_ahead_forecasts <- function(forecast_data, truth_data,
 
   if (isTRUE(plot)) {
     show(plot_model)
+    return(plot_model)
   } else {
     invisible(plot_model)
   }
