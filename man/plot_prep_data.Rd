@@ -4,7 +4,7 @@
 \alias{plot_prep_data}
 \title{Data Process for plotting function}
 \usage{
-plot_prep_data(df, plain_line, plain_type, ribbon)
+plot_prep_data(df, plain_line, plain_type, intervals)
 }
 \arguments{
 \item{df}{a \code{data.frame} object containing the columns: \code{model_id},
@@ -18,8 +18,8 @@ create a plain line in the plot. Should be a unique value
 create a plain line in the plot. Should be a unique value
 (for example: "quantile")}
 
-\item{ribbon}{a vector of \code{numeric}  output_type_id value, value will be
-used a to create a ribbon in the plot.}
+\item{intervals}{a named list of \code{numeric}  output_type_id value, value will
+be used a to create one or multiple prediction intervals in the plot.}
 }
 \description{
 Data process for plotting function, returns a list with two

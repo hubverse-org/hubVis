@@ -16,10 +16,10 @@ plot_step_ahead_forecasts(
   facet_nrow = NULL,
   facet_ncol = NULL,
   facet_title = "top left",
-  fill_by_model = FALSE,
+  fill_by_model = TRUE,
   pal_color = "Set2",
   fill_transparency = 0.25,
-  ribbon = c(0.975, 0.025),
+  intervals = c(0.5, 0.8, 0.95),
   title = NULL,
   ens_color = NULL,
   ens_name = NULL
@@ -34,7 +34,9 @@ containing the columns: \code{time_idx} and \code{value}.
 Ignored, if \code{plot_truth = FALSE}}
 
 \item{use_median_as_point}{a \code{Boolean} for using median quantile as point
-forecasts in plot. Default to FALSE.}
+forecasts in plot. Default to FALSE. If TRUE, will select first any \code{median}
+output type value and if no \code{median} value included in \code{forecast_data}; will
+select \code{quantile = 0.5} output type value.}
 
 \item{plot}{a \code{boolean} for showing the plot. Default to TRUE.}
 
@@ -73,8 +75,11 @@ to \code{\link[RColorBrewer:ColorBrewer]{RColorBrewer::display.brewer.all()}}. D
 \item{fill_transparency}{numeric value used to set transparency of intervals.
 0 means fully transparent, 1 means opaque. Default to \code{0.25}}
 
-\item{ribbon}{a vector of \code{numeric}  output_type_id value, value will be
-used a to create a ribbon in the plot.}
+\item{intervals}{a vector of \code{numeric} values indicating which central
+prediction interval levels to plot. \code{NULL} means no interval levels.
+If not provided, it will default to \code{c(.5, .8, .95)}.
+When plotting 6 models or more, the plot will be reduced to show \code{.95}
+interval only. Value possibles: \verb{0.5, 0.8, 0.9, 0.95}}
 
 \item{title}{a \code{character} string, if not NULL, will be added as title to the
 plot}

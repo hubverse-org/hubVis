@@ -11,25 +11,45 @@
 #' @param plain_type a `string` output_type value, value will be used to
 #' create a plain line in the plot. Should be a unique value
 #' (for example: "quantile")
-#'@param ribbon a vector of `numeric`  output_type_id value, value will be
-#' used a to create a ribbon in the plot.
+#'@param intervals a named list of `numeric`  output_type_id value, value will
+#' be used a to create one or multiple prediction intervals in the plot.
 #'
 #' @importFrom stats reshape
-plot_prep_data <- function(df, plain_line, plain_type, ribbon) {
-  plain_df <- df[which(
-    df$output_type_id == plain_line & df$output_type == plain_type), ]
+plot_prep_data <- function(df, plain_line, plain_type, intervals) {
+  # Median
+  if (is.null(plain_line)) {
+    plain_df <- df[which(
+      df$output_type_id == plain_line & df$output_type == plain_type), ]
+  } else if (!is.na(plain_line)) {
+    plain_df <- df[which(
+      df$output_type_id == plain_line & df$output_type == plain_type), ]
+  } else {
+    plain_df <- df[which(
+      is.na(df$output_type_id) & df$output_type == plain_type), ]
+  }
   plain_df$target_date <- as.Date(plain_df$target_date)
-  ribbon_df <- df[which(df$output_type_id %in% ribbon), ]
-  ribbon_df <- transform(
-    ribbon_df, output_type_id = ifelse(
-      ribbon_df$output_type_id == min(ribbon), "min", "max"))
-  id_col <- colnames(ribbon_df)[!colnames(ribbon_df) %in%
-                                  c("output_type_id", "value")]
-  ribbon_df <- reshape(
-    ribbon_df, timevar = "output_type_id", direction = "wide", idvar = id_col)
-  ribbon_df$target_date <- as.Date(ribbon_df$target_date)
-  colnames(ribbon_df) <- gsub("^value\\.", "" , colnames(ribbon_df))
-  return(list("plain_df" = plain_df, "ribbon_df" = ribbon_df))
+  # Intervals
+  if (is.null(intervals)) {
+    ribbon_list <- NULL
+  } else {
+    ribbon_list <- lapply(intervals, function(ribbon) {
+      ribbon_df <- df[which(df$output_type_id %in% ribbon), ]
+      ribbon_df <- transform(
+        ribbon_df, output_type_id = ifelse(
+          ribbon_df$output_type_id == min(ribbon), "min", "max"))
+      id_col <- colnames(ribbon_df)[!colnames(ribbon_df) %in%
+                                      c("output_type_id", "value")]
+      ribbon_df <- reshape(
+        ribbon_df, timevar = "output_type_id", direction = "wide",
+        idvar = id_col)
+      ribbon_df$target_date <- as.Date(ribbon_df$target_date)
+      colnames(ribbon_df) <- gsub("^value\\.", "" , colnames(ribbon_df))
+      return(ribbon_df)
+    })
+    ribbon_list <- setNames(ribbon_list, names(intervals))
+  }
+  # List output
+  return(c(list("median" = plain_df), ribbon_list))
 }
 
 #' Plot forecast data with Plotly
@@ -55,10 +75,18 @@ plot_prep_data <- function(df, plain_line, plain_type, ribbon) {
 plotly_model_plot <- function(plot_model, df_point, df_ribbon, plot_truth,
                               truth_data, opacity = 0.25, line_color = NULL,
                               ...) {
+  # prerequisite
   if (is.null(plot_model)) {
-    plotly::plot_ly(height = 1050)
+    plot_model <- plotly::plot_ly(height = 1050)
   }
   arguments <- list(...)
+  if (length(opacity) < length(df_ribbon)) {
+    val_opacity <- unique(0.25, 0.75, opacity)
+    opacity <- seq(min(val_opacity), max(val_opacity),
+                   length.out = length(df_ribbon))
+  }
+
+  # Truth Data
   if (plot_truth) {
     truth_data$time_idx <- as.Date(truth_data$time_idx)
     arg_list <- list(
@@ -71,9 +99,14 @@ plotly_model_plot <- function(plot_model, df_point, df_ribbon, plot_truth,
     arg_list <- c(arg_list, arguments)
     plot_model <- do.call(plotly::add_trace, arg_list)
   }
+
+  # Projection data
   if (nrow(df_point) > 0) {
     arg_list <- list(p = plot_model, data = df_point, x = ~target_date,
-                     y = ~value, legendgroup = ~model_id, name = ~model_id)
+                     y = ~value, legendgroup = ~model_id, name = ~model_id,
+                     hoverinfo = "text", hovertext = paste(
+                       "Date:", df_point$target_date, "<br>",
+                       "Median: ", round(df_point$value, 2), sep = ""))
     if (is.null(line_color)) {
       arg_list <- c(arg_list, list(color = ~model_id), arguments)
       plot_model <- do.call(plotly::add_lines, arg_list)
@@ -90,23 +123,37 @@ plotly_model_plot <- function(plot_model, df_point, df_ribbon, plot_truth,
       show_legend = TRUE
     }
   }
-  if (nrow(df_ribbon) > 0) {
-    arg_list <- list(plot_model, data = df_ribbon, x = ~target_date,
-                     ymin = ~min, ymax = ~max, opacity = opacity,
-                     showlegend = show_legend, name = ~model_id,
-                     legendgroup = ~model_id)
-    if (is.null(line_color)) {
-      arg_list <- c(arg_list, list(color = ~model_id, line = list(width = 0)),
-                    arguments)
-      plot_model <- do.call(plotly::add_ribbons, arg_list)
-    } else {
-      arg_list <- c(arg_list,
-                    list(fillcolor = line_color,
-                         line = list(width = 0, color = line_color)), arguments)
-      plot_model <- do.call(plotly::add_ribbons, arg_list)
-      plot_model <- do.call(plotly::add_ribbons, arg_list)
+
+  if (!is.null(df_ribbon)) {
+    for (n_rib in seq_along(df_ribbon)) {
+      df_rib <- df_ribbon[[n_rib]]
+      if (n_rib > 1) show_legend <- FALSE
+      if (nrow(df_rib) > 0) {
+        arg_list <- list(plot_model, data = df_rib, x = ~target_date,
+                         ymin = ~min, ymax = ~max, opacity = opacity[n_rib],
+                         showlegend = show_legend, name = ~model_id,
+                         legendgroup = ~model_id, hoverinfo = "text",
+                         hovertext = paste(
+                           "Date:", df_rib$target_date, "<br>",
+                           scales::percent(as.numeric(names(df_ribbon)[n_rib])),
+                           " Intervals: ", round(df_rib$min, 2) , " - ",
+                           round(df_rib$max, 2), sep = ""))
+        if (is.null(line_color)) {
+          arg_list <- c(
+            arg_list, list(color = ~model_id, line = list(width = 0)),
+            arguments)
+          plot_model <- do.call(plotly::add_ribbons, arg_list)
+        } else {
+          arg_list <- c(
+            arg_list, list(fillcolor = line_color,
+                           line = list(width = 0, color = line_color)),
+            arguments)
+          plot_model <- do.call(plotly::add_ribbons, arg_list)
+        }
+      }
     }
   }
+
   return(plot_model)
 }
 
@@ -120,7 +167,9 @@ plotly_model_plot <- function(plot_model, df_point, df_ribbon, plot_truth,
 #' containing the columns: `time_idx` and `value`.
 #' Ignored, if `plot_truth = FALSE`
 #'@param use_median_as_point a `Boolean` for using median quantile as point
-#' forecasts in plot. Default to FALSE.
+#' forecasts in plot. Default to FALSE. If TRUE, will select first any `median`
+#' output type value and if no `median` value included in `forecast_data`; will
+#' select `quantile = 0.5` output type value.
 #'@param plot a `boolean` for showing the plot. Default to TRUE.
 #'@param plot_truth a `boolean` for showing the truth data in the plot.
 #'  Default to TRUE. Data used in the plot comes from the parameter `truth_data`
@@ -147,8 +196,11 @@ plotly_model_plot <- function(plot_model, df_point, df_ribbon, plot_truth,
 #' to [RColorBrewer::display.brewer.all()]. Default to `"Set2"`
 #'@param fill_transparency numeric value used to set transparency of intervals.
 #' 0 means fully transparent, 1 means opaque. Default to `0.25`
-#'@param ribbon a vector of `numeric`  output_type_id value, value will be
-#' used a to create a ribbon in the plot.
+#'@param intervals a vector of `numeric` values indicating which central
+#' prediction interval levels to plot. `NULL` means no interval levels.
+#' If not provided, it will default to `c(.5, .8, .95)`.
+#' When plotting 6 models or more, the plot will be reduced to show `.95`
+#' interval only. Value possibles: `0.5, 0.8, 0.9, 0.95`
 #'@param title a `character` string, if not NULL, will be added as title to the
 #' plot
 #'@param ens_color a `character` string of a color name, if not NULL, will be
@@ -160,8 +212,9 @@ plotly_model_plot <- function(plot_model, df_point, df_ribbon, plot_truth,
 #'
 #' @importFrom plotly plot_ly add_trace add_lines add_ribbons layout subplot
 #' @importFrom cli cli_abort cli_warn
-#' @importFrom scales hue_pal
+#' @importFrom scales percent
 #' @importFrom methods show
+#' @importFrom stats setNames
 #'
 #' @export
 #'
@@ -169,8 +222,9 @@ plot_step_ahead_forecasts <- function(
     forecast_data, truth_data, use_median_as_point = FALSE, plot = TRUE,
     plot_truth = TRUE, show_legend = TRUE, facet = NULL, facet_scales = "fixed",
     facet_nrow = NULL, facet_ncol = NULL, facet_title = "top left",
-    fill_by_model = FALSE, pal_color = "Set2", fill_transparency = 0.25,
-    ribbon = c(0.975, 0.025), title = NULL, ens_color = NULL, ens_name = NULL) {
+    fill_by_model = TRUE, pal_color = "Set2", fill_transparency = 0.25,
+    intervals = c(.5, .8, .95), title = NULL, ens_color = NULL,
+    ens_name = NULL) {
   # Test format input
   ## Forecast data
   if (!is.data.frame(forecast_data)) {
@@ -210,6 +264,37 @@ plot_step_ahead_forecasts <- function(
     }
   }
   ## Parameters
+  ### Intervals
+  list_intervals <- list(
+    "0.95" = c(0.975, 0.025), "0.9" = c(0.95, 0.05),
+    "0.8" = c(0.9, 0.1), "0.5" = c(0.75, 0.25)
+  )
+  if (!is.null(intervals)) {
+    intervals <- as.character(intervals)
+    if (any(!intervals %in% names(list_intervals))) {
+      cli::cli_warn(c("!" = "{.arg intervals} should correspond to one or
+                      multiple of these possible values
+                      {.val {names(list_intervals)}}.
+                      Only the matching value(s) will be used (if no matching
+                      value, the default will be used."))
+      intervals <- intervals[intervals %in% names(list_intervals)]
+      if (length(intervals) == 0) {
+        intervals <- as.character(c(.5, .8, .95))
+      }
+    }
+    if (length(unique(forecast_data[["model_id"]])) > 5 &
+        length(intervals) > 1) {
+      intervals <- max(intervals)[1]
+      cli::cli_warn(c("!" = "{.arg forecast_data} contains 6 or more models, the
+                    plot will be reduced to show only one interval (the
+                    maximum interval value): {.val {intervals}}"))
+    }
+    ribbon <- list_intervals[as.character(sort(intervals, decreasing = TRUE))]
+  } else {
+    ribbon <- NULL
+  }
+
+  ### Median
   if (isTRUE(use_median_as_point)) {
     if (any(grepl("median", forecast_data$output_type))) {
       plain_line <- NA
@@ -222,16 +307,18 @@ plot_step_ahead_forecasts <- function(
     plain_line <- NULL
     plain_type <- NULL
   }
-  exp_value <- c(plain_line, ribbon)
+  exp_value <- c(plain_line, unlist(ribbon))
   forecast_type_val <- unique(forecast_data$output_type_id)
   if (!all(exp_value %in% forecast_type_val)) {
     cli::cli_abort(c("x" = "{.arg forecast_type_val} did not have the expected
                      output_type_id value {.val {exp_value}}"))
   }
+  ### Ensemble specific color
   if (is.null(ens_color) + is.null(ens_name) == 1) {
     cli::cli_abort(c("x" = "Both {.arg ens_color} and {.arg ens_name} should
                      be set to a non NULL value"))
   }
+  ### Facet
   if (!is.null(facet)) {
     if ((length(facet) != 1) |
         !(facet %in% grep("output_type|value", colnames(forecast_data),
@@ -244,8 +331,8 @@ plot_step_ahead_forecasts <- function(
   if (!is.null(facet_title)) {
     facet_title_opt <- c("top right", "top left", "bottom right", "bottom left")
     if (!facet_title %in% facet_title_opt) {
-      cli::cli_abort(c("x" = "{.arg facet_title} should correspond to one of these
-                     possible values: {.val {facet_title_opt}}"))
+      cli::cli_abort(c("x" = "{.arg facet_title} should correspond to one of
+                       these possible values: {.val {facet_title_opt}}"))
     }
   }
 
@@ -268,11 +355,11 @@ plot_step_ahead_forecasts <- function(
   }
   plot_model <- plotly::plot_ly(height = 1050, colors =  pal_color)
   if (is.null(facet)) {
-    df_point <- all_plot$plain_df
-    df_ribbon <- all_plot$ribbon_df
+    df_point <- all_plot$median
+    df_ribbon <- all_plot[names(all_plot) %in% intervals]
     if (!is.null(all_ens)) {
-      df_point_ens <- all_ens$plain_df
-      df_ribbon_ens <- all_ens$ribbon_df
+      df_point_ens <- all_ens$median
+      df_ribbon_ens <- all_ens[names(all_ens) %in% intervals]
     }
     plot_model <- plotly_model_plot(plot_model, df_point, df_ribbon, plot_truth,
                                     truth_data, opacity = fill_transparency)
@@ -299,58 +386,64 @@ plot_step_ahead_forecasts <- function(
     if (is.null(facet_nrow)) {
       facet_nrow = 1
     }
-    subplot <- lapply(sort(unique(forecast_data[["scenario_id"]])), function(x) {
-      df_point <- all_plot$plain_df[which(all_plot$plain_df[[facet]] == x), ]
-      df_ribbon <- all_plot$ribbon_df[which(all_plot$ribbon_df[[facet]] == x), ]
-      if (!is.null(all_ens)) {
-        df_point_ens <- all_ens$plain_df[which(all_ens$plain_df[[facet]] == x), ]
-        df_ribbon_ens <- all_ens$ribbon_df[which(all_ens$ribbon_df[[facet]] == x), ]
-      }
-      if (x == sort(unique(forecast_data[["scenario_id"]]))[1]) {
-        plot_model <- plotly_model_plot(
-          plot_model, df_point, df_ribbon, plot_truth, truth_data,
-          opacity = fill_transparency)
-      } else {
-        plot_model <- plotly_model_plot(
-          plot_model, df_point, df_ribbon, plot_truth, truth_data,
-          opacity = fill_transparency, showlegend = FALSE)
-      }
-      # Ensemble color
-      if (!is.null(all_ens)) {
+    subplot <- lapply(
+      sort(unique(forecast_data[["scenario_id"]])), function(x) {
+        df_point <- all_plot$median[which(all_plot$median[[facet]] == x), ]
+        df_ribbon <- all_plot[names(all_plot) %in% intervals]
+        df_ribbon <- setNames(lapply(df_ribbon, function(df_rib) {
+          df_rib[which(df_rib[[facet]] == x), ]
+        }), names(df_ribbon))
+        if (!is.null(all_ens)) {
+          df_point_ens <- all_ens$median[which(all_ens$median[[facet]] == x), ]
+          df_ribbon_ens <- all_ens[names(all_ens) %in% intervals]
+          df_ribbon_ens <- setNames(lapply(df_ribbon_ens, function(df_rib) {
+            df_rib[which(df_rib[[facet]] == x), ]
+          }), names(df_ribbon_ens))
+        }
         if (x == sort(unique(forecast_data[["scenario_id"]]))[1]) {
           plot_model <- plotly_model_plot(
-            plot_model, df_point_ens, df_ribbon_ens, FALSE, truth_data,
-            line_color = ens_color, opacity = fill_transparency)
+            plot_model, df_point, df_ribbon, plot_truth, truth_data,
+            opacity = fill_transparency)
         } else {
           plot_model <- plotly_model_plot(
-            plot_model, df_point_ens, df_ribbon_ens, FALSE, truth_data,
-            line_color = ens_color, opacity = fill_transparency,
-            showlegend = FALSE)
+            plot_model, df_point, df_ribbon, plot_truth, truth_data,
+            opacity = fill_transparency, showlegend = FALSE)
         }
-      }
-      if (!is.null(facet_title)) {
-        if (grepl("top", facet_title)) {
-          y_title <- 1
-          y_anchor <- "top"
-        } else if  (grepl("bottom", facet_title)) {
-          y_title <- 0
-          y_anchor <- "bottom"
+        # Ensemble color
+        if (!is.null(all_ens)) {
+          if (x == sort(unique(forecast_data[["scenario_id"]]))[1]) {
+            plot_model <- plotly_model_plot(
+              plot_model, df_point_ens, df_ribbon_ens, FALSE, truth_data,
+              line_color = ens_color, opacity = fill_transparency)
+          } else {
+            plot_model <- plotly_model_plot(
+              plot_model, df_point_ens, df_ribbon_ens, FALSE, truth_data,
+              line_color = ens_color, opacity = fill_transparency,
+              showlegend = FALSE)
+          }
         }
-        if (grepl("left", facet_title)) {
-          x_title <- 0
-          x_anchor <- "left"
-        } else if  (grepl("right", facet_title)) {
-          x_title <- 1
-          x_anchor <- "right"
+        if (!is.null(facet_title)) {
+          if (grepl("top", facet_title)) {
+            y_title <- 1
+            y_anchor <- "top"
+          } else if  (grepl("bottom", facet_title)) {
+            y_title <- 0
+            y_anchor <- "bottom"
+          }
+          if (grepl("left", facet_title)) {
+            x_title <- 0
+            x_anchor <- "left"
+          } else if  (grepl("right", facet_title)) {
+            x_title <- 1
+            x_anchor <- "right"
+          }
+          plot_model <- plotly::layout(
+            plot_model,
+            annotations = list(x = x_title, y = y_title, xref = "paper",
+                               yref = "paper", xanchor = x_anchor,
+                               yanchor = y_anchor, showarrow = FALSE, text = x))
         }
-        plot_model <- plotly::layout(
-          plot_model,
-          annotations = list(x = x_title, y = y_title, xref = "paper",
-                             yref = "paper", xanchor = x_anchor,
-                             yanchor = y_anchor, showarrow = FALSE, text = x))
-      }
-
-      return(plot_model)
+        return(plot_model)
     })
     plot_model <- plotly::subplot(subplot, nrows = facet_nrow, shareX = sharex,
                                   shareY = sharey)
