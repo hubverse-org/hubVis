@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot_step_ahead_forecasts.R
 \name{plotly_model_plot}
 \alias{plotly_model_plot}
-\title{Plot forecast data with Plotly}
+\title{Plot simple projection data with Plotly}
 \usage{
 plotly_model_plot(
   plot_model,
@@ -12,6 +12,7 @@ plotly_model_plot(
   truth_data,
   opacity = 0.25,
   line_color = NULL,
+  top_layer = "forecast",
   ...
 )
 }
@@ -36,8 +37,15 @@ Ignored, if \code{plot_truth = FALSE}}
 
 \item{line_color}{a \code{string}, specific color associated with plot}
 
+\item{top_layer}{character vector, where the first element indicates the top
+layer of the resulting plot. Possible options are \code{"forecast"} (default)
+and \code{"truth"}}
+
 \item{...}{ploty parameters}
 }
 \description{
-Use Plotly to plot projection model output
+Use Plotly to plot simple projection model output with or without truth data.
+Simple projection model output are defined as projection associated with one
+particular set of "tasks_ids" value. For more information, please refer to
+\href{https://hubdocs.readthedocs.io/en/latest/format/tasks.html}{HubDocs website}.
 }

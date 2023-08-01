@@ -20,6 +20,7 @@ plot_step_ahead_forecasts(
   pal_color = "Set2",
   fill_transparency = 0.25,
   intervals = c(0.5, 0.8, 0.95),
+  top_layer = "forecast",
   title = NULL,
   ens_color = NULL,
   ens_name = NULL
@@ -80,6 +81,10 @@ prediction interval levels to plot. \code{NULL} means no interval levels.
 If not provided, it will default to \code{c(.5, .8, .95)}.
 When plotting 6 models or more, the plot will be reduced to show \code{.95}
 interval only. Value possibles: \verb{0.5, 0.8, 0.9, 0.95}}
+
+\item{top_layer}{character vector, where the first element indicates the top
+layer of the resulting plot. Possible options are \code{"forecast"} (default)
+and \code{"truth"}}
 
 \item{title}{a \code{character} string, if not NULL, will be added as title to the
 plot}
