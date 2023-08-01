@@ -63,10 +63,12 @@ plot_prep_data <- function(df, plain_line, plain_type, intervals) {
 #'  Ignored, if `plot_truth = FALSE`
 #' @param plot_truth a `boolean` for showing the truth data in the plot.
 #'  Default to TRUE. Data used in the plot comes from the parameter `truth_data`
+#' @param show_legend a `boolean` for showing the legend in the plot.
 #' @param arguments list of others Plotly parameters
 #'
 #' @importFrom plotly add_trace
-plotly_truth_data <- function(plot_model, truth_data, plot_truth, arguments) {
+plotly_truth_data <- function(plot_model, truth_data, plot_truth, show_legend,
+                              arguments) {
   if (plot_truth) {
     truth_data$time_idx <- as.Date(truth_data$time_idx)
     arg_list <- list(
@@ -75,7 +77,7 @@ plotly_truth_data <- function(plot_model, truth_data, plot_truth, arguments) {
       hoverinfo = "text", name = "ground truth", legendgroup = "ground truth",
       hovertext = paste("Date: ", truth_data$time_idx, "<br>Ground truth: ",
                         format(truth_data$value, big.mark = ","), sep = ""),
-      marker = list(color = "#6e6e6e", size = 7))
+      marker = list(color = "#6e6e6e", size = 7), showlegend = show_legend)
     arg_list <- c(arg_list, arguments)
     plot_model <- do.call(plotly::add_trace, arg_list)
   }
@@ -177,12 +179,15 @@ plotly_proj_data <- function(plot_model, df_point, df_ribbon,
 #' @param top_layer character vector, where the first element indicates the top
 #'  layer of the resulting plot. Possible options are `"forecast"` (default)
 #'  and `"truth"`
-#' @param ... ploty parameters
+#' @param show_truth_legend a `boolean` to show legend of the truth data, by
+#'  default `TRUE`
+#' @param ... additional Ploty parameters
 #'
 #' @importFrom plotly plot_ly
 plotly_model_plot <- function(plot_model, df_point, df_ribbon, plot_truth,
                               truth_data, opacity = 0.25, line_color = NULL,
-                              top_layer = "forecast", ...) {
+                              top_layer = "forecast", show_truth_legend = TRUE,
+                              ...) {
   # prerequisite
   if (is.null(plot_model)) {
     plot_model <- plotly::plot_ly(height = 1050)
@@ -192,7 +197,7 @@ plotly_model_plot <- function(plot_model, df_point, df_ribbon, plot_truth,
   if (top_layer == "forecast") {
     # Truth Data
     plot_model <- plotly_truth_data(plot_model, truth_data, plot_truth,
-                                    arguments)
+                                    show_truth_legend, arguments)
     # Projection data
     plot_model <- plotly_proj_data(plot_model, df_point, df_ribbon, line_color,
                                    opacity, arguments)
@@ -202,7 +207,8 @@ plotly_model_plot <- function(plot_model, df_point, df_ribbon, plot_truth,
                                    opacity, arguments)
     # Truth Data
     plot_model <- plotly_truth_data(plot_model, truth_data, plot_truth,
-                                    arguments)
+                                    show_truth_legend, arguments)
+    # Projection data
   }
   plot_model <- plotly::layout(plot_model, xaxis = list(title = "Date"),
                                yaxis = list(title = "Value"))
@@ -310,11 +316,16 @@ plotly_plot <-  function(all_plot, all_ens, plot_truth, truth_data, intervals,
           plot_model <- plotly_model_plot(
             plot_model, df_point, df_ribbon, plot_truth, truth_data,
             opacity = fill_transparency, top_layer = top_layer)
+        } else if (facet == "model_id") {
+          plot_model <- plotly_model_plot(
+            plot_model, df_point, df_ribbon, TRUE, truth_data,
+            opacity = fill_transparency, top_layer = top_layer,
+            show_truth_legend = FALSE)
         } else {
           plot_model <- plotly_model_plot(
             plot_model, df_point, df_ribbon, plot_truth, truth_data,
             opacity = fill_transparency, showlegend = FALSE,
-            top_layer = top_layer)
+            top_layer = top_layer, show_truth_legend = FALSE)
         }
         # Ensemble color
         if (!is.null(all_ens)) {
@@ -323,11 +334,17 @@ plotly_plot <-  function(all_plot, all_ens, plot_truth, truth_data, intervals,
               plot_model, df_point_ens, df_ribbon_ens, FALSE, truth_data,
               line_color = ens_color, opacity = fill_transparency,
               top_layer = top_layer)
+          } else if (facet == "model_id") {
+            plot_model <- plotly_model_plot(
+              plot_model, df_point_ens, df_ribbon_ens, TRUE, truth_data,
+              line_color = ens_color, opacity = fill_transparency,
+              top_layer = top_layer, show_truth_legend = FALSE)
           } else {
             plot_model <- plotly_model_plot(
               plot_model, df_point_ens, df_ribbon_ens, FALSE, truth_data,
               line_color = ens_color, opacity = fill_transparency,
-              showlegend = FALSE, top_layer = top_layer)
+              showlegend = FALSE, top_layer = top_layer,
+              show_truth_legend = FALSE)
           }
         }
         if (!is.null(facet_title)) {
@@ -573,9 +590,10 @@ plot_step_ahead_forecasts <- function(
                             top_layer, ens_color, facet, facet_scales,
                             facet_nrow, facet_title, facet_value)
   # Layout
-  if (!is.null(title))
-    plot_model <- plotly::layout(plot_model, title = title,
-                                 showlegend = show_legend)
+  plot_model <- plotly::layout(plot_model, showlegend = show_legend)
+  if (!is.null(title)) {
+    plot_model <- plotly::layout(plot_model, title = title)
+  }
 
   if (isTRUE(plot)) {
     show(plot_model)

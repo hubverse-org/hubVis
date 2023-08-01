@@ -4,7 +4,7 @@
 \alias{plotly_truth_data}
 \title{Plot Truth data with Plotly}
 \usage{
-plotly_truth_data(plot_model, truth_data, plot_truth, arguments)
+plotly_truth_data(plot_model, truth_data, plot_truth, show_legend, arguments)
 }
 \arguments{
 \item{plot_model}{a plot_ly object to add lines and/or ribbons, if NULL will
@@ -16,6 +16,8 @@ Ignored, if \code{plot_truth = FALSE}}
 
 \item{plot_truth}{a \code{boolean} for showing the truth data in the plot.
 Default to TRUE. Data used in the plot comes from the parameter \code{truth_data}}
+
+\item{show_legend}{a \code{boolean} for showing the legend in the plot.}
 
 \item{arguments}{list of others Plotly parameters}
 }

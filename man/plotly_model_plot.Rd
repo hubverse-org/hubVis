@@ -13,6 +13,7 @@ plotly_model_plot(
   opacity = 0.25,
   line_color = NULL,
   top_layer = "forecast",
+  show_truth_legend = TRUE,
   ...
 )
 }
@@ -41,7 +42,10 @@ Ignored, if \code{plot_truth = FALSE}}
 layer of the resulting plot. Possible options are \code{"forecast"} (default)
 and \code{"truth"}}
 
-\item{...}{ploty parameters}
+\item{show_truth_legend}{a \code{boolean} to show legend of the truth data, by
+default \code{TRUE}}
+
+\item{...}{additional Ploty parameters}
 }
 \description{
 Use Plotly to plot simple projection model output with or without truth data.
