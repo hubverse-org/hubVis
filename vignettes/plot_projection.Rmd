@@ -202,7 +202,7 @@ No intervals can also be plotted:
 ```{r plot_us_no_interv}
 plot_step_ahead_forecasts(projection_data_mod, truth_data_us, 
                           use_median_as_point = TRUE, facet = "scenario_id", 
-                          facet_nrow = 2, intervals = c())
+                          facet_nrow = 2, intervals = NULL)
 ```
 
 ### Other parameters
