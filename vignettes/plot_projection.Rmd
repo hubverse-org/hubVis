@@ -37,6 +37,14 @@ The following vignette describes the principal usage of the
 library(hubVis)
 ```
 
+All the plots are available in two output formats:
+
+- "interactive" format: Plotly output object with interactive legend, hover
+text, zoom-in and zoom-out options, etc.
+- "static" format: ggplot2 output object
+By default, the output plot is "interactive", but it can be change to "static"
+by using the `interactive` parameter. See end of the document for examples.
+
 ## Load and Filter Data
 
 The package contains 2 dataset that can be used for examples:
@@ -261,6 +269,13 @@ plot_step_ahead_forecasts(projection_data_A_us, truth_data_us,
 plot_step_ahead_forecasts(projection_data_A_us, truth_data_us, 
                           fill_by_model = FALSE, use_median_as_point = TRUE)
 ```
+
+- Interactive/Static plot:
+```{r plot_stat}
+plot_step_ahead_forecasts(projection_data_A_us, truth_data_us, 
+                          interactive = FALSE)
+```
+
 
 For other parameter, please consult the documentation associated with 
 the function:  
