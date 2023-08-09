@@ -63,7 +63,7 @@ equivalent to \code{shareX}, \code{shareY} in \link[plotly:subplot]{plotly::subp
 \item{facet_title}{a \code{string}, position of each subplot tile (value
 associated with the \code{facet} parameter). "top right", "top left" (default),
 "bottom right", "bottom left" are the possible values, \code{NULL} to remove the
-title}
+title. For interactive plot only.}
 
 \item{interactive}{a \code{boolean} to output an "interactive" version of the
 plot (using Plotly) or a "static" plot (using ggplot2). By default, \code{TRUE}

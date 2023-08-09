@@ -66,7 +66,7 @@ plot_prep_data <- function(df, plain_line, plain_type, intervals) {
 #' @param show_legend a `boolean` for showing the legend in the plot.
 #' @param arguments list of others Plotly parameters
 #'
-#' @importFrom plotly add_trace
+#' @importFrom plotly add_trace layout
 plotly_truth_data <- function(plot_model, truth_data, plot_truth, show_legend,
                               arguments) {
   if (plot_truth) {
@@ -81,6 +81,8 @@ plotly_truth_data <- function(plot_model, truth_data, plot_truth, show_legend,
     arg_list <- c(arg_list, arguments)
     plot_model <- do.call(plotly::add_trace, arg_list)
   }
+  plot_model <- plotly::layout(
+    plot_model, xaxis = list(title = 'Date'), yaxis = list(title = 'Value'))
   return(plot_model)
 }
 
@@ -137,9 +139,15 @@ plotly_proj_data <- function(plot_model, df_point, df_ribbon,
     if (is.null(line_color)) {
       arg_list <- c(arg_list, list(color = ~model_id), arguments)
       plot_model <- do.call(plotly::add_lines, arg_list)
+      plot_model <- plotly::layout(
+        plot_model, xaxis = list(title = 'Date'),
+        yaxis = list(title = 'Value'))
     } else {
       arg_list <- c(arg_list, list(line = list(color = line_color)), arguments)
       plot_model <- do.call(plotly::add_lines, arg_list)
+      plot_model <- plotly::layout(
+        plot_model, xaxis = list(title = 'Date'),
+        yaxis = list(title = 'Value'))
     }
     show_legend = FALSE
   } else {
@@ -176,6 +184,9 @@ plotly_proj_data <- function(plot_model, df_point, df_ribbon,
                            line = list(width = 0, color = line_color)),
             arguments)
           plot_model <- do.call(plotly::add_ribbons, arg_list)
+          plot_model <- plotly::layout(
+            plot_model, xaxis = list(title = 'Date'),
+            yaxis = list(title = 'Value'))
         }
       }
     }
@@ -260,7 +271,6 @@ static_proj_data <- function(plot_model, df_point, df_ribbon,
 #' @param ... additional Plotly parameters
 #'
 #' @importFrom plotly plot_ly
-#' @importFrom ggplot2 ggplot scale_color_manual scale_fill_manual
 simple_model_plot <- function(plot_model, df_point, df_ribbon, plot_truth,
                               truth_data, opacity = 0.25, line_color = NULL,
                               top_layer = "forecast", show_truth_legend = TRUE,
@@ -355,7 +365,7 @@ simple_model_plot <- function(plot_model, df_point, df_ribbon, plot_truth,
 #' @param facet_title a `string`, position of each subplot tile (value
 #'  associated with the `facet` parameter). "top right", "top left" (default),
 #'  "bottom right", "bottom left" are the possible values, `NULL` to remove the
-#'  title
+#'  title. For interactive plot only.
 #' @param facet_value a vector of all the possible unique values in the
 #'  associated column `facet`
 #' @param interactive a `boolean` to output an "interactive" version of the
@@ -363,6 +373,7 @@ simple_model_plot <- function(plot_model, df_point, df_ribbon, plot_truth,
 #'  (interactive plot)
 #'
 #' @importFrom plotly plot_ly layout subplot
+#' @importFrom ggplot2 ggplot scale_color_manual scale_fill_manual facet_wrap
 output_plot <-  function(all_plot, all_ens, truth_data, plot_truth = TRUE,
                          intervals = c(.5, .8, .95), pal_color = "Set2",
                          fill_transparency = 0.25, pal_value = NULL,
@@ -370,33 +381,13 @@ output_plot <-  function(all_plot, all_ens, truth_data, plot_truth = TRUE,
                          facet_scales = "fixed", facet_nrow = NULL,
                          facet_ncol = NULL,  facet_title = "top left",
                          facet_value = NULL, interactive = TRUE) {
-
   if (interactive) {
     plot_model <- plotly::plot_ly(height = 1050, colors =  pal_color)
   } else {
     plot_model <- ggplot2::ggplot(height = 1050, colors =  pal_color)
   }
 
-  if (is.null(facet)) {
-    df_point <- all_plot$median
-    df_ribbon <- all_plot[names(all_plot) %in% intervals]
-    if (!is.null(all_ens)) {
-      df_point_ens <- all_ens$median
-      df_ribbon_ens <- all_ens[names(all_ens) %in% intervals]
-    }
-    plot_model <- simple_model_plot(plot_model, df_point, df_ribbon, plot_truth,
-                                    truth_data, opacity = fill_transparency,
-                                    top_layer = top_layer,
-                                    interactive = interactive)
-
-    # Ensemble color
-    if (!is.null(all_ens)) {
-      plot_model <- simple_model_plot(
-        plot_model, df_point_ens, df_ribbon_ens, plot_truth, FALSE,
-        opacity = fill_transparency, line_color = ens_color,
-        top_layer = top_layer, interactive = interactive)
-    }
-  } else {
+  if (!is.null(facet) & interactive) {
     sharex = FALSE
     sharey = FALSE
     if (facet_scales == "fixed") {
@@ -411,81 +402,111 @@ output_plot <-  function(all_plot, all_ens, truth_data, plot_truth = TRUE,
       facet_nrow = 1
     }
     subplot <- lapply(facet_value, function(x) {
-        df_point <- all_plot$median[which(all_plot$median[[facet]] == x), ]
-        df_ribbon <- all_plot[names(all_plot) %in% intervals]
-        df_ribbon <- setNames(lapply(df_ribbon, function(df_rib) {
+      # Data preparation
+      df_point <- all_plot$median[which(all_plot$median[[facet]] == x), ]
+      df_ribbon <- all_plot[names(all_plot) %in% intervals]
+      df_ribbon <- setNames(lapply(df_ribbon, function(df_rib) {
+        df_rib[which(df_rib[[facet]] == x), ]
+      }), names(df_ribbon))
+      if (!is.null(all_ens)) {
+        df_point_ens <- all_ens$median[which(all_ens$median[[facet]] == x), ]
+        df_ribbon_ens <- all_ens[names(all_ens) %in% intervals]
+        df_ribbon_ens <- setNames(lapply(df_ribbon_ens, function(df_rib) {
           df_rib[which(df_rib[[facet]] == x), ]
-        }), names(df_ribbon))
-        if (!is.null(all_ens)) {
-          df_point_ens <- all_ens$median[which(all_ens$median[[facet]] == x), ]
-          df_ribbon_ens <- all_ens[names(all_ens) %in% intervals]
-          df_ribbon_ens <- setNames(lapply(df_ribbon_ens, function(df_rib) {
-            df_rib[which(df_rib[[facet]] == x), ]
-          }), names(df_ribbon_ens))
-        }
+        }), names(df_ribbon_ens))
+      }
+      if (plot_truth & facet %in% colnames(truth_data)) {
+        truth_data <- truth_data[which(truth_data[[facet]] == x), ]
+      }
+
+      # Plot
+      if (x == facet_value[1]) {
+        plot_model <- simple_model_plot(
+          plot_model, df_point, df_ribbon, plot_truth, truth_data,
+          opacity = fill_transparency, top_layer = top_layer,
+          interactive = TRUE)
+      } else if (facet == "model_id") {
+        plot_model <- simple_model_plot(
+          plot_model, df_point, df_ribbon, TRUE, truth_data,
+          opacity = fill_transparency, top_layer = top_layer,
+          show_truth_legend = FALSE, interactive = TRUE)
+      } else {
+        plot_model <- simple_model_plot(
+          plot_model, df_point, df_ribbon, plot_truth, truth_data,
+          opacity = fill_transparency, showlegend = FALSE,
+          top_layer = top_layer, show_truth_legend = FALSE,
+          interactive = TRUE)
+      }
+      # Ensemble color
+      if (!is.null(all_ens)) {
         if (x == facet_value[1]) {
           plot_model <- simple_model_plot(
-            plot_model, df_point, df_ribbon, plot_truth, truth_data,
-            opacity = fill_transparency, top_layer = top_layer,
-            interactive = TRUE)
+            plot_model, df_point_ens, df_ribbon_ens, FALSE, truth_data,
+            line_color = ens_color, opacity = fill_transparency,
+            top_layer = top_layer, interactive = TRUE)
         } else if (facet == "model_id") {
           plot_model <- simple_model_plot(
-            plot_model, df_point, df_ribbon, TRUE, truth_data,
-            opacity = fill_transparency, top_layer = top_layer,
-            show_truth_legend = FALSE, interactive = TRUE)
-        } else {
-          plot_model <- simple_model_plot(
-            plot_model, df_point, df_ribbon, plot_truth, truth_data,
-            opacity = fill_transparency, showlegend = FALSE,
+            plot_model, df_point_ens, df_ribbon_ens, TRUE, truth_data,
+            line_color = ens_color, opacity = fill_transparency,
             top_layer = top_layer, show_truth_legend = FALSE,
             interactive = TRUE)
+        } else {
+          plot_model <- simple_model_plot(
+            plot_model, df_point_ens, df_ribbon_ens, FALSE, truth_data,
+            line_color = ens_color, opacity = fill_transparency,
+            showlegend = FALSE, top_layer = top_layer,
+            show_truth_legend = FALSE, interactive = TRUE)
         }
-        # Ensemble color
-        if (!is.null(all_ens)) {
-          if (x == facet_value[1]) {
-            plot_model <- simple_model_plot(
-              plot_model, df_point_ens, df_ribbon_ens, FALSE, truth_data,
-              line_color = ens_color, opacity = fill_transparency,
-              top_layer = top_layer, interactive = TRUE)
-          } else if (facet == "model_id") {
-            plot_model <- simple_model_plot(
-              plot_model, df_point_ens, df_ribbon_ens, TRUE, truth_data,
-              line_color = ens_color, opacity = fill_transparency,
-              top_layer = top_layer, show_truth_legend = FALSE,
-              interactive = TRUE)
-          } else {
-            plot_model <- simple_model_plot(
-              plot_model, df_point_ens, df_ribbon_ens, FALSE, truth_data,
-              line_color = ens_color, opacity = fill_transparency,
-              showlegend = FALSE, top_layer = top_layer,
-              show_truth_legend = FALSE, interactive = TRUE)
-          }
+      }
+      if (!is.null(facet_title)) {
+        if (grepl("top", facet_title)) {
+          y_title <- 1
+          y_anchor <- "top"
+        } else if  (grepl("bottom", facet_title)) {
+          y_title <- 0
+          y_anchor <- "bottom"
         }
-        if (!is.null(facet_title)) {
-          if (grepl("top", facet_title)) {
-            y_title <- 1
-            y_anchor <- "top"
-          } else if  (grepl("bottom", facet_title)) {
-            y_title <- 0
-            y_anchor <- "bottom"
-          }
-          if (grepl("left", facet_title)) {
-            x_title <- 0
-            x_anchor <- "left"
-          } else if  (grepl("right", facet_title)) {
-            x_title <- 1
-            x_anchor <- "right"
-          }
-          plot_model <- plotly::layout(
-            plot_model,
-            annotations = list(x = x_title, y = y_title, xref = "paper",
-                               yref = "paper", xanchor = x_anchor,
-                               yanchor = y_anchor, showarrow = FALSE, text = x))
+        if (grepl("left", facet_title)) {
+          x_title <- 0
+          x_anchor <- "left"
+        } else if  (grepl("right", facet_title)) {
+          x_title <- 1
+          x_anchor <- "right"
         }
-        return(plot_model)
-      })
+        plot_model <- plotly::layout(
+          plot_model,
+          annotations = list(x = x_title, y = y_title, xref = "paper",
+                             yref = "paper", xanchor = x_anchor,
+                             yanchor = y_anchor, showarrow = FALSE, text = x))
+      }
+      return(plot_model)
+    })
     plot_model <- plotly::subplot(subplot, nrows = facet_nrow, shareX = sharex,
                                   shareY = sharey)
+  } else {
+    df_point <- all_plot$median
+    df_ribbon <- all_plot[names(all_plot) %in% intervals]
+    if (!is.null(all_ens)) {
+      df_point_ens <- all_ens$median
+      df_ribbon_ens <- all_ens[names(all_ens) %in% intervals]
+    }
+    plot_model <- simple_model_plot(plot_model, df_point, df_ribbon, plot_truth,
+                                    truth_data, opacity = fill_transparency,
+                                    top_layer = top_layer,
+                                    interactive = interactive)
+
+    # Ensemble color
+    if (!is.null(all_ens)) {
+      plot_model <- simple_model_plot(
+        plot_model, df_point_ens, df_ribbon_ens, truth_data = truth_data,
+        plot_truth = FALSE, opacity = fill_transparency, line_color = ens_color,
+        top_layer = top_layer, interactive = interactive)
+    }
+    if (!is.null(facet)) {
+      plot_model <-  plot_model +
+        ggplot2::facet_wrap(facet, nrow = facet_nrow, ncol = facet_ncol,
+                            scales = facet_scales)
+    }
   }
 
   if (!interactive) {
@@ -493,7 +514,6 @@ output_plot <-  function(all_plot, all_ens, truth_data, plot_truth = TRUE,
       scale_color_manual(values = pal_value, name = "Legend") +
       scale_fill_manual(values = pal_value, name = "Legend")
   }
-
   return(plot_model)
 }
 
@@ -527,7 +547,7 @@ output_plot <-  function(all_plot, all_ens, truth_data, plot_truth = TRUE,
 #'@param facet_title a `string`, position of each subplot tile (value
 #' associated with the `facet` parameter). "top right", "top left" (default),
 #' "bottom right", "bottom left" are the possible values, `NULL` to remove the
-#' title
+#' title. For interactive plot only.
 #'@param interactive a `boolean` to output an "interactive" version of the
 #'  plot (using Plotly) or a "static" plot (using ggplot2). By default, `TRUE`
 #'  (interactive plot)
@@ -563,7 +583,7 @@ output_plot <-  function(all_plot, all_ens, truth_data, plot_truth = TRUE,
 #' @importFrom stats setNames
 #' @importFrom RColorBrewer brewer.pal
 #' @importFrom grDevices col2rgb rgb
-#' @importFrom ggplot2 labs
+#' @importFrom ggplot2 labs guides
 #'
 #' @export
 #'
@@ -760,11 +780,13 @@ plot_step_ahead_forecasts <- function(
     if (!is.null(title)) {
       plot_model <- plot_model + labs(title = title)
     }
-
+    if (isFALSE(show_legend)) {
+      plot_model <- plot_model + guides(fill = "none", color = "none")
+    }
   }
 
   if (isTRUE(plot)) {
-    show(plot_model)
+    if (interactive) show(plot_model)
     return(plot_model)
   } else {
     invisible(plot_model)
