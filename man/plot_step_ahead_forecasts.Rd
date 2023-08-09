@@ -16,6 +16,7 @@ plot_step_ahead_forecasts(
   facet_nrow = NULL,
   facet_ncol = NULL,
   facet_title = "top left",
+  interactive = TRUE,
   fill_by_model = TRUE,
   pal_color = "Set2",
   fill_transparency = 0.25,
@@ -64,13 +65,17 @@ associated with the \code{facet} parameter). "top right", "top left" (default),
 "bottom right", "bottom left" are the possible values, \code{NULL} to remove the
 title}
 
+\item{interactive}{a \code{boolean} to output an "interactive" version of the
+plot (using Plotly) or a "static" plot (using ggplot2). By default, \code{TRUE}
+(interactive plot)}
+
 \item{fill_by_model}{a \code{boolean} for specifying colors in plot. If \code{TRUE},
 separate colors will be used for each model, \code{pal_color} paremeters to change
 the palette. If \code{FALSE}, only blues will be used for all models.
 Default to \code{FALSE}.}
 
 \item{pal_color}{a \code{character} string for specifying the palette color in the
-plot if \code{fill_by_model} is set to \code{TRUE}. For \code{plotly} plots, please refer
+plot if \code{fill_by_model} is set to \code{TRUE}. Please refer
 to \code{\link[RColorBrewer:ColorBrewer]{RColorBrewer::display.brewer.all()}}. Default to \code{"Set2"}}
 
 \item{fill_transparency}{numeric value used to set transparency of intervals.

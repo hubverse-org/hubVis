@@ -11,9 +11,13 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 Imports: 
     cli,
+    ggplot2,
+    grDevices,
     hubUtils,
     methods,
     plotly,
+    purrr,
+    RColorBrewer,
     scales,
     stats
 Remotes:
