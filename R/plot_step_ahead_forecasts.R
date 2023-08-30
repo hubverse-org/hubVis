@@ -552,7 +552,7 @@ output_plot <-  function(all_plot, all_ens, truth_data, plot_truth = TRUE,
 #'  plot (using Plotly) or a "static" plot (using ggplot2). By default, `TRUE`
 #'  (interactive plot)
 #'@param fill_by_model a `boolean` for specifying colors in plot. If `TRUE`,
-#' separate colors will be used for each model, `pal_color` paremeters to change
+#' separate colors will be used for each model, `pal_color` parameters to change
 #' the palette. If `FALSE`, only blues will be used for all models.
 #' Default to `FALSE`.
 #'@param pal_color a `character` string for specifying the palette color in the

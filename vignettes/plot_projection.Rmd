@@ -148,7 +148,7 @@ plot_step_ahead_forecasts(projection_data_us, truth_data_us,
                           facet = "scenario_id")
 ```
 
-The layout of the "facets" can be ajusted:
+The layout of the "facets" can be adjusted:
 
 ```{r plot_us_facet}
 plot_step_ahead_forecasts(projection_data_us, truth_data_us, 
