@@ -18,11 +18,11 @@ knitr::opts_chunk$set(
 )
 ```
 
-The package `hubVis` contains an important function called 
-`plot_step_ahead_forecasts()` and used to plot model projections output.
+The  `hubVis` package contains a function called 
+`plot_step_ahead_forecasts()` that can be used to plot model projections output.
 
-This function plot forecasts/scenario projections and optional truth data. 
-Faceted plots could be created for multiple scenarios, locations, 
+This function plots forecasts/scenario projections and optional truth data. 
+Faceted plots can be created for multiple scenarios, locations, 
 forecast dates, models, etc. 
 Currently, the function can plot only quantiles data, with the possibility to 
 add "median" information from the model projections.
@@ -37,19 +37,19 @@ The following vignette describes the principal usage of the
 library(hubVis)
 ```
 
-All the plots are available in two output formats:
+Plots are available in two output formats:
 
-- "interactive" format: Plotly output object with interactive legend, hover
+- "interactive" format: a [Plotly](https://plotly.com) output object with interactive legend, hover
 text, zoom-in and zoom-out options, etc.
-- "static" format: ggplot2 output object
-By default, the output plot is "interactive", but it can be change to "static"
-by using the `interactive` parameter. See end of the document for examples.
+- "static" format: a [ggplot2](https://ggplot2.tidyverse.org/) output object
+By default, the output plot is "interactive", but it can be changed to "static"
+by setting  the `interactive` parameter to FALSE. See end of the document for examples.
 
 ## Load and Filter Data
 
-The package contains 2 dataset that can be used for examples:
+The package contains 2 datasets that can be used for examples:
 
-- `example_round1.csv`: example of model output for round associated with the 
+- `example_round1.csv`: example of model output for a round associated with the 
 origin date: "2021-03-07" (called "round 1"), target: "incident case", for the
 US national level, from the
 [example-complex-scenario-hub](https://github.com/Infectious-Disease-Modeling-Hubs/example-complex-scenario-hub). The data set also contains an ensemble calculated by applying the 
@@ -85,16 +85,16 @@ head(projection_data)
 The function requires only 2 parameters:
 
 - `forecast_data`: a `model_output_df` object, containing all the Hubverse
-standard columns, and a `"target_date"` and a `"model_id"` column in the 
-`hub_mdl_out_df format`. All forecasts in forecast_data will be plotted, 
-i.e. all filtering needs to happen outside this function.
+ standard columns, a `"target_date"`, and a `"model_id"` column in the 
+`hub_mdl_out_df format`. As all forecasts in forecast_data will be plotted, 
+ all filtering needs to happen outside this function.
 - ` truth_data`: a `data.frame` object containing the ground truth data, and 
 with the columns: `time_idx` and `value`
 
 ### "Simple" plot
 
 The `"projection_data"` and `"truth_data"` contain information for multiple 
-location, and scenario.
+locations, and scenarios.
 
 To plot the model projections for the US, Scenario A:
 
@@ -175,9 +175,9 @@ plot_step_ahead_forecasts(projection_data_A_us, truth_data_us,
 ### Intervals
 
 By default, the 50%, 80% and 95% intervals are plotted. However, it is possible 
-to also plot the 90& intervals or a subset of these intervals.
+to also to plot the 90& intervals or a subset of these intervals.
 When plotting 6 models or more, the plot will be reduced to show the highest 
-intervals inputted (95% by default)
+intervals provided (95% by default),
 
 To illustrate this we will use the projections for only one model
 
