@@ -47,7 +47,7 @@ by setting  the `interactive` parameter to FALSE. See end of the document for ex
 
 ## Load and Filter Data
 
-The package contains 2 dataset that can be used for examples:
+The package contains 2 datasets that can be used for examples:
 
 - `example_round1.csv`: example of model output for a round associated with the 
 origin date: "2021-03-07" (called "round 1"), target: "incident case", for the
