@@ -98,15 +98,15 @@ plotly_truth_data <- function(plot_model, truth_data, plot_truth, show_legend,
 #' @param plot_truth a `boolean` for showing the truth data in the plot.
 #'  Default to TRUE. Data used in the plot comes from the parameter `truth_data`
 #'
-#' @importFrom ggplot2 geom_line geom_point aes
+#' @importFrom ggplot2 geom_line geom_point aes .data
 static_truth_data <- function(plot_model, truth_data, plot_truth) {
   if (plot_truth) {
     truth_data$time_idx <- as.Date(truth_data$time_idx)
     plot_model <- plot_model  +
-      geom_line(data = truth_data, aes(x = time_idx, y = value),
+      geom_line(data = truth_data, aes(x = .data$time_idx, y = .data$value),
                 color = "#6e6e6e",
                 inherit.aes = FALSE) +
-      geom_point(data = truth_data, aes(x = time_idx, y = value),
+      geom_point(data = truth_data, aes(x = .data$time_idx, y = .data$value),
                  color = "#6e6e6e",
                  inherit.aes = FALSE)
   }
@@ -134,8 +134,9 @@ plotly_proj_data <- function(plot_model, df_point, df_ribbon,
     arg_list <- list(p = plot_model, data = df_point, x = ~target_date,
                      y = ~value, legendgroup = ~model_id, name = ~model_id,
                      hoverinfo = "text", hovertext = paste(
-                       "Date:", df_point$target_date, "<br>",
-                       "Median: ", round(df_point$value, 2), sep = ""))
+                       "Date: ", df_point$target_date, "<br>",
+                       "Median: ", format(round(df_point$value, 2),
+                                          big.mark = ","), sep = ""))
     if (is.null(line_color)) {
       arg_list <- c(arg_list, list(color = ~model_id), arguments)
       plot_model <- do.call(plotly::add_lines, arg_list)
@@ -169,10 +170,12 @@ plotly_proj_data <- function(plot_model, df_point, df_ribbon,
                          showlegend = show_legend, name = ~model_id,
                          legendgroup = ~model_id, hoverinfo = "text",
                          hovertext = paste(
-                           "Date:", df_rib$target_date, "<br>",
+                           "Date: ", df_rib$target_date, "<br>",
                            scales::percent(as.numeric(names(df_ribbon)[n_rib])),
-                           " Intervals: ", round(df_rib$min, 2) , " - ",
-                           round(df_rib$max, 2), sep = ""))
+                           "Intervals: ",
+                           format(round(df_rib$min, 2), big.mark = ","), " - ",
+                           format(round(df_rib$max, 2), big.mark = ","),
+                           sep = ""))
         if (is.null(line_color)) {
           arg_list <- c(
             arg_list, list(color = ~model_id, line = list(width = 0)),
@@ -220,8 +223,8 @@ static_proj_data <- function(plot_model, df_point, df_ribbon,
         if (nrow(df_rib) > 0) {
           plot_model <- plot_model +
             geom_ribbon(data = df_rib_mod,
-                        aes(target_date, ymin = min, ymax = max,
-                            fill = model_id),
+                        aes(.data$target_date, ymin = .data$min,
+                            ymax = .data$max, fill = .data$model_id),
                         alpha = opacity, inherit.aes = FALSE)
         }
       }
@@ -230,8 +233,8 @@ static_proj_data <- function(plot_model, df_point, df_ribbon,
 
   if (nrow(df_point) > 0) {
     plot_model <- plot_model  +
-      geom_line(data = df_point, aes(x = target_date, y = value,
-                                     color = model_id),
+      geom_line(data = df_point, aes(x = .data$target_date, y = .data$value,
+                                     color = .data$model_id),
                 inherit.aes = FALSE, linewidth = 1)
   }
 

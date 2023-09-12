@@ -70,7 +70,7 @@ plot (using Plotly) or a "static" plot (using ggplot2). By default, \code{TRUE}
 (interactive plot)}
 
 \item{fill_by_model}{a \code{boolean} for specifying colors in plot. If \code{TRUE},
-separate colors will be used for each model, \code{pal_color} paremeters to change
+separate colors will be used for each model, \code{pal_color} parameters to change
 the palette. If \code{FALSE}, only blues will be used for all models.
 Default to \code{FALSE}.}
 
