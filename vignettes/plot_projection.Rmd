@@ -175,7 +175,7 @@ plot_step_ahead_forecasts(projection_data_A_us, truth_data_us,
 ### Intervals
 
 By default, the 50%, 80% and 95% intervals are plotted. However, it is possible 
-to also plot the 90& intervals or a subset of these intervals.
+to also plot the 90% intervals or a subset of these intervals.
 When plotting 6 or more  models, the plot will be reduced to show the widest 
 intervals provided (95% by default).
 
@@ -206,7 +206,7 @@ plot_step_ahead_forecasts(projection_data_mod, truth_data_us,
                           fill_transparency = 0.15)
 ```
 
-No intervals can also be plotted:
+Plots without intervals are also possible:
 ```{r plot_us_no_interv}
 plot_step_ahead_forecasts(projection_data_mod, truth_data_us, 
                           use_median_as_point = TRUE, facet = "scenario_id", 
@@ -215,7 +215,7 @@ plot_step_ahead_forecasts(projection_data_mod, truth_data_us,
 
 ### Other parameters
 
-Multiple other parameters are available to update the plot output. Here is some
+Several other parameters are available to update the plot output. Here is some
 examples of some parameters.
 
 #### "Ensemble" layout
@@ -277,7 +277,7 @@ plot_step_ahead_forecasts(projection_data_A_us, truth_data_us,
 ```
 
 
-For other parameter, please consult the documentation associated with 
+For other parameters, please consult the documentation associated with 
 the function:  
 `?plot_step_ahead_forecasts`
 
