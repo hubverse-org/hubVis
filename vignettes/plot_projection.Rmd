@@ -255,7 +255,7 @@ plot_step_ahead_forecasts(projection_data_A_us, truth_data_us,
 - Change palette color and behavior:
     - The default palette can be changed. All the available palette names are
     available here:
-```{r palette, fig.height = 6}
+```{r palette, fig.height = 7.5}
 RColorBrewer::display.brewer.all()
 ```
 
