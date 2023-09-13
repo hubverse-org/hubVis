@@ -34,7 +34,7 @@ The function can output 2 types of plots:
 
 > Before plotting, the data might require some preparation (filtering, etc.). 
 > These step is skipped in this example, please consult the 
-> "Plot Model Projections Output" vignette contains in this package for complete
+> "Plot Model Projections Output" vignette contained in this package for complete
 > examples.
 
 ```r
