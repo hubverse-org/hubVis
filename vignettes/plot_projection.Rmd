@@ -41,7 +41,7 @@ Plots are available in two output formats:
 
 - "interactive" format: a [Plotly](https://plotly.com) output object with interactive legend, hover
 text, zoom-in and zoom-out options, etc.
-- "static" format: a [ggplot2](https://ggplot2.tidyverse.org/) output object
+- "static" format: a [ggplot2](https://ggplot2.tidyverse.org/) output object.
 By default, the output plot is "interactive", but it can be changed to "static"
 by setting  the `interactive` parameter to FALSE. See end of the document for examples.
 
@@ -84,12 +84,12 @@ head(projection_data)
 
 The function requires only 2 parameters:
 
-- `forecast_data`: a `model_output_df` object, containing all the Hubverse
- standard columns, a `"target_date"`, and a `"model_id"` column in the 
+- `forecast_data`: a `model_output_df` object containing all the Hubverse
+ standard columns, including a `"target_date"`, and a `"model_id"` column in the 
 `hub_mdl_out_df format`. As all forecasts in forecast_data will be plotted, 
  all filtering needs to happen outside this function.
-- ` truth_data`: a `data.frame` object containing the ground truth data, and 
-with the columns: `time_idx` and `value`
+- ` truth_data`: a `data.frame` object containing the ground truth data, including 
+the columns: `time_idx` and `value`.
 
 ### "Simple" plot
 
