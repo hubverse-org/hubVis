@@ -9,5 +9,6 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
-URL: URL: https://github.com/Infectious-Disease-Modeling-Hubs/hubVis
+URL: https://github.com/Infectious-Disease-Modeling-Hubs/hubVis,
+    https://infectious-disease-modeling-hubs.github.io/hubVis/
 BugReports: https://github.com/Infectious-Disease-Modeling-Hubs/hubVis/issues
