@@ -525,14 +525,14 @@ output_plot <-  function(all_plot, all_ens, truth_data, plot_truth = TRUE,
 #'
 #' Create a simple Plotly time-series plot for model projection outputs.
 #'
-#'@param forecast_data a `model_output_df` object, containing all the required
+#'@param model_output_data a `model_out_tbl` object, containing all the required
 #' columns, and a "target_date" and a "model_id" column.
 #'@param truth_data a `data.frame` object containing the ground truth data,
 #' containing the columns: `time_idx` and `value`.
 #' Ignored, if `plot_truth = FALSE`
 #'@param use_median_as_point a `Boolean` for using median quantile as point
 #' forecasts in plot. Default to FALSE. If TRUE, will select first any `median`
-#' output type value and if no `median` value included in `forecast_data`; will
+#' output type value and if no `median` value included in `model_output_data`; will
 #' select `quantile = 0.5` output type value.
 #'@param plot a `boolean` for showing the plot. Default to TRUE.
 #'@param plot_truth a `boolean` for showing the truth data in the plot.
@@ -591,7 +591,7 @@ output_plot <-  function(all_plot, all_ens, truth_data, plot_truth = TRUE,
 #' @export
 #'
 plot_step_ahead_forecasts <- function(
-    forecast_data, truth_data, use_median_as_point = FALSE, plot = TRUE,
+    model_output_data, truth_data, use_median_as_point = FALSE, plot = TRUE,
     plot_truth = TRUE, show_legend = TRUE, facet = NULL, facet_scales = "fixed",
     facet_nrow = NULL, facet_ncol = NULL, facet_title = "top left",
     interactive = TRUE, fill_by_model = TRUE, pal_color = "Set2",
@@ -600,26 +600,26 @@ plot_step_ahead_forecasts <- function(
 
   # Test format input
   ## Forecast data
-  if (!is.data.frame(forecast_data)) {
-    cli::cli_abort(c("x" = "{.arg forecast_data} must be a `data.frame`."))
+  if (!is.data.frame(model_output_data)) {
+    cli::cli_abort(c("x" = "{.arg model_output_data} must be a `data.frame`."))
   }
-  if (isFALSE("model_out_tbl" %in% class(forecast_data))) {
-    cli::cli_warn(c("!" = "{.arg forecast_data} must be a `model_output_df`.
+  if (isFALSE("model_out_tbl" %in% class(model_output_data))) {
+    cli::cli_warn(c("!" = "{.arg model_output_data} must be a `model_out_tbl`.
                     Class applied by default"))
-    forecast_data <- hubUtils::as_model_out_tbl(forecast_data,
+    model_output_data <- hubUtils::as_model_out_tbl(model_output_data,
                                                 remove_empty = TRUE)
   }
   exp_f_col <- c("model_id", "output_type_id", "target_date", "value")
-  forecast_col <- colnames(forecast_data)
+  forecast_col <- colnames(model_output_data)
   if (!all(exp_f_col %in% forecast_col)) {
     cli::cli_abort(c("x" = "{.arg forecast_type_val} did not have all required
                      columns {.val {exp_f_col}}"))
   }
   valid_types <- c("mean", "median", "quantile")
-  forecast_type <- unique(forecast_data$output_type)
+  forecast_type <- unique(model_output_data$output_type)
   if (!any(valid_types %in% forecast_type)) {
     cli::cli_abort(c(
-      "x" = "{.arg forecast_data} should contain at least one supported output
+      "x" = "{.arg model_output_data} should contain at least one supported output
       type.",
       "i" = "Supported output types: {.val {valid_types}}."
     ))
@@ -655,10 +655,10 @@ plot_step_ahead_forecasts <- function(
         intervals <- as.character(c(.5, .8, .95))
       }
     }
-    if (length(unique(forecast_data[["model_id"]])) > 5 &
+    if (length(unique(model_output_data[["model_id"]])) > 5 &
         length(intervals) > 1) {
       intervals <- max(intervals)[1]
-      cli::cli_warn(c("!" = "{.arg forecast_data} contains 6 or more models, the
+      cli::cli_warn(c("!" = "{.arg model_output_data} contains 6 or more models, the
                     plot will be reduced to show only one interval (the
                     maximum interval value): {.val {intervals}}"))
     }
@@ -669,7 +669,7 @@ plot_step_ahead_forecasts <- function(
 
   ### Median
   if (isTRUE(use_median_as_point)) {
-    if (any(grepl("median", forecast_data$output_type))) {
+    if (any(grepl("median", model_output_data$output_type))) {
       plain_line <- NA
       plain_type <- "median"
     } else {
@@ -681,7 +681,7 @@ plot_step_ahead_forecasts <- function(
     plain_type <- NULL
   }
   exp_value <- c(plain_line, unlist(ribbon))
-  forecast_type_val <- unique(forecast_data$output_type_id)
+  forecast_type_val <- unique(model_output_data$output_type_id)
   if (!all(exp_value %in% forecast_type_val)) {
     cli::cli_abort(c("x" = "{.arg forecast_type_val} did not have the expected
                      output_type_id value {.val {exp_value}}"))
@@ -694,11 +694,11 @@ plot_step_ahead_forecasts <- function(
   ### Facet
   if (!is.null(facet)) {
     if ((length(facet) != 1) |
-        !(facet %in% grep("output_type|value", colnames(forecast_data),
+        !(facet %in% grep("output_type|value", colnames(model_output_data),
                           value = TRUE, invert = TRUE))) {
       cli::cli_abort(c("x" = "if {.arg facet} is not NULL, the argument should
                        be of length 1 and should match one of the task_id column
-                       of {.arg forecast_data}"))
+                       of {.arg model_output_data}"))
     }
   }
   if (!is.null(facet_title)) {
@@ -715,7 +715,7 @@ plot_step_ahead_forecasts <- function(
   }
 
   #### Palette
-  model_id_vect <- unique(forecast_data$model_id)
+  model_id_vect <- unique(model_output_data$model_id)
   if (fill_by_model) {
     if (!pal_color %in% row.names(RColorBrewer::brewer.pal.info)) {
       cli::cli_warn(c("!" = "{.arg pal_color} is not one of the accepted palette
@@ -745,18 +745,18 @@ plot_step_ahead_forecasts <- function(
 
   # Data process
   if (!is.null(ens_color) & !is.null(ens_name)) {
-    ens_df <- forecast_data[which(forecast_data$model_id == ens_name), ]
+    ens_df <- model_output_data[which(model_output_data$model_id == ens_name), ]
     all_ens <- plot_prep_data(ens_df, plain_line, plain_type, ribbon)
-    plot_df <- forecast_data[which(forecast_data$model_id != ens_name), ]
+    plot_df <- model_output_data[which(model_output_data$model_id != ens_name), ]
   } else {
     all_ens <- NULL
-    plot_df <- forecast_data
+    plot_df <- model_output_data
   }
   all_plot <- plot_prep_data(plot_df, plain_line, plain_type, ribbon)
 
   # Plot
   if (!is.null(facet)) {
-    facet_value = sort(unique(forecast_data[[facet]]))
+    facet_value = sort(unique(model_output_data[[facet]]))
   } else {
     facet_value = NULL
   }

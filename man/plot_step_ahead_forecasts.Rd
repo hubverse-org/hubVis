@@ -5,7 +5,7 @@
 \title{Basic Plot for model outputs}
 \usage{
 plot_step_ahead_forecasts(
-  forecast_data,
+  model_output_data,
   truth_data,
   use_median_as_point = FALSE,
   plot = TRUE,
@@ -28,7 +28,7 @@ plot_step_ahead_forecasts(
 )
 }
 \arguments{
-\item{forecast_data}{a \code{model_output_df} object, containing all the required
+\item{model_output_data}{a \code{model_out_tbl} object, containing all the required
 columns, and a "target_date" and a "model_id" column.}
 
 \item{truth_data}{a \code{data.frame} object containing the ground truth data,
@@ -37,7 +37,7 @@ Ignored, if \code{plot_truth = FALSE}}
 
 \item{use_median_as_point}{a \code{Boolean} for using median quantile as point
 forecasts in plot. Default to FALSE. If TRUE, will select first any \code{median}
-output type value and if no \code{median} value included in \code{forecast_data}; will
+output type value and if no \code{median} value included in \code{model_output_data}; will
 select \code{quantile = 0.5} output type value.}
 
 \item{plot}{a \code{boolean} for showing the plot. Default to TRUE.}
