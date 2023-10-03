@@ -4,7 +4,14 @@
 \alias{static_proj_data}
 \title{Plot Projection data with GGPLOT2}
 \usage{
-static_proj_data(plot_model, df_point, df_ribbon, line_color, opacity)
+static_proj_data(
+  plot_model,
+  df_point,
+  df_ribbon,
+  line_color,
+  opacity,
+  fill_by = "model_id"
+)
 }
 \arguments{
 \item{plot_model}{a plot_ly object to add lines and/or ribbons, if NULL will
@@ -19,6 +26,10 @@ use to add ribbons on the plot}
 \item{line_color}{a \code{string}, specific color associated with plot}
 
 \item{opacity}{a \code{numeric}, opacity of the ribbons, default 0.25}
+
+\item{fill_by}{name of a column for specifying colors and legend in plot.
+The \code{pal_color} parameter can be use to change the palette.
+Default to \code{model_id}.}
 }
 \description{
 Use ggplot2 to plot projection model output

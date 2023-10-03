@@ -21,7 +21,8 @@ output_plot(
   facet_ncol = NULL,
   facet_title = "top left",
   facet_value = NULL,
-  interactive = TRUE
+  interactive = TRUE,
+  fill_by = "model_id"
 )
 }
 \arguments{
@@ -85,6 +86,10 @@ associated column \code{facet}}
 \item{interactive}{a \code{boolean} to output an "interactive" version of the
 plot (using Plotly) or a "static" plot (using ggplot2). By default, \code{TRUE}
 (interactive plot)}
+
+\item{fill_by}{name of a column for specifying colors and legend in plot.
+The \code{pal_color} parameter can be use to change the palette.
+Default to \code{model_id}.}
 }
 \description{
 Use Plotly or ggplot2 to plot projection model output with or without

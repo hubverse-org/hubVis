@@ -15,6 +15,7 @@ simple_model_plot(
   top_layer = "model_output",
   show_truth_legend = TRUE,
   interactive = TRUE,
+  fill_by = "model_id",
   ...
 )
 }
@@ -49,6 +50,10 @@ default \code{TRUE}}
 \item{interactive}{a \code{boolean} to output an "interactive" version of the
 plot (using Plotly) or a "static" plot (using ggplot2). By default, \code{TRUE}
 (interactive plot)}
+
+\item{fill_by}{name of a column for specifying colors and legend in plot.
+The \code{pal_color} parameter can be use to change the palette.
+Default to \code{model_id}.}
 
 \item{...}{additional Plotly parameters}
 }

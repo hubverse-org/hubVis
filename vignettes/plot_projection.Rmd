@@ -132,7 +132,7 @@ plotted, so specifying only one interval can be useful:
 
 ```{r plot_A_us_one_int}
 plot_step_ahead_model_output(projection_data_A_us, truth_data_us, 
-                          intervals = 0.8)
+                             intervals = 0.8)
 ```
 
 It is also possible to add a median line on the plot with the `use_median_as_point`
@@ -140,16 +140,16 @@ parameter:
 
 ```{r plot_A_us_med}
 plot_step_ahead_model_output(projection_data_A_us, truth_data_us, 
-                          intervals = 0.8,
-                          use_median_as_point = TRUE)
+                             intervals = 0.8,
+                             use_median_as_point = TRUE)
 ```
 
 By default plots are interactive, but that can be easily switched to static:
 ```{r plot_A_us_med_static}
 plot_step_ahead_model_output(projection_data_A_us, truth_data_us, 
-                          intervals = 0.8,
-                          use_median_as_point = TRUE, 
-                          interactive = FALSE)
+                             intervals = 0.8,
+                             use_median_as_point = TRUE, 
+                             interactive = FALSE)
 ```
 
 ### Facet plot
@@ -168,16 +168,16 @@ truth_data_us <- dplyr::filter(truth_data, location == "US",
 
 ```{r plot_us}
 plot_step_ahead_model_output(projection_data_us, truth_data_us, 
-                          facet = "scenario_id")
+                             facet = "scenario_id")
 ```
 
 The layout of the "facets" can be adjusted:
 
 ```{r plot_us_facet}
 plot_step_ahead_model_output(projection_data_us, truth_data_us, 
-                          use_median_as_point = TRUE,
-                          facet = "scenario_id", facet_scales = "free_x", 
-                          facet_nrow = 2, facet_title = "bottom left")
+                             use_median_as_point = TRUE,
+                             facet = "scenario_id", facet_scales = "free_x", 
+                             facet_nrow = 2, facet_title = "bottom left")
 ```
 
 A "facet" (or subplot) plot can also be created for each model. In this case, 
@@ -185,15 +185,16 @@ the legend will be adapted to return the `model_id` value.
 
 ```{r plot_facet_mod}
 plot_step_ahead_model_output(projection_data_A_us, truth_data_us, 
-                          facet = "model_id")
+                             facet = "model_id")
 ```
 
 The legend can be removed with the parameter `show_legend = FALSE`.
 
 ```{r plot_facet_mod_noleg}
 plot_step_ahead_model_output(projection_data_A_us, truth_data_us, 
-                          facet = "model_id", show_legend = FALSE)
+                             facet = "model_id", show_legend = FALSE)
 ```
+
 
 ### Intervals
 
@@ -207,31 +208,32 @@ To illustrate this we will use the projections for only one model
 ```{r us_modl}
 # Pre-filtering
 projection_data_mod <- dplyr::filter(projection_data,
-                                      location == "US", 
+                                     location == "US", 
                                      model_id == "hub-ensemble")
 ```
 
 
 ```{r plot_us_interv}
 plot_step_ahead_model_output(projection_data_mod, truth_data_us, 
-                          use_median_as_point = TRUE, facet = "scenario_id", 
-                          facet_nrow = 2, intervals = c(0.5, 0.8, 0.9, 0.95))
+                             use_median_as_point = TRUE, facet = "scenario_id", 
+                             facet_nrow = 2, intervals = c(0.5, 0.8, 0.9, 0.95))
 ```
+
 
 The opacity of the intervals can be adjusted:
 
 ```{r plot_us_interv_opa}
 plot_step_ahead_model_output(projection_data_mod, truth_data_us, 
-                          use_median_as_point = TRUE, facet = "scenario_id", 
-                          facet_nrow = 2, intervals = c(0.5, 0.8, 0.9, 0.95),
-                          fill_transparency = 0.15)
+                             use_median_as_point = TRUE, facet = "scenario_id", 
+                             facet_nrow = 2, intervals = c(0.5, 0.8, 0.9, 0.95),
+                             fill_transparency = 0.15)
 ```
 
 Plots without intervals are also possible:
 ```{r plot_us_no_interv}
 plot_step_ahead_model_output(projection_data_mod, truth_data_us, 
-                          use_median_as_point = TRUE, facet = "scenario_id", 
-                          facet_nrow = 2, intervals = NULL)
+                             use_median_as_point = TRUE, facet = "scenario_id", 
+                             facet_nrow = 2, intervals = NULL)
 ```
 
 ### Other parameters
@@ -248,10 +250,10 @@ will be the top layer of the resulting plot.
 
 ```{r plot_us_ens}
 plot_step_ahead_model_output(projection_data_us, truth_data_us,
-                          use_median_as_point = TRUE, 
-                          facet = "scenario_id", facet_nrow = 2,
-                          ens_name = "hub-ensemble", ens_color = "black",
-                          intervals = 0.8)
+                             use_median_as_point = TRUE, 
+                             facet = "scenario_id", facet_nrow = 2,
+                             ens_name = "hub-ensemble", ens_color = "black",
+                             intervals = 0.8)
 ```
 
 #### Layout update
@@ -261,19 +263,19 @@ Multiple layout update are possible:
 - Not showing the truth data in the plot:
 ```{r plot_us_td}
 plot_step_ahead_model_output(projection_data_A_us, truth_data_us, 
-                          plot_truth = FALSE)
+                             plot_truth = FALSE)
 ```
 
 - Change the top layer to the truth data:
 ```{r plot_us_top}
 plot_step_ahead_model_output(projection_data_A_us, truth_data_us, 
-                          top_layer = "truth")
+                             top_layer = "truth")
 ```
 
 - Add a title to the plot:
 ```{r plot_us_title}
 plot_step_ahead_model_output(projection_data_A_us, truth_data_us, 
-                          title = "Incident Cases in the US")
+                             title = "Incident Cases in the US")
 ```
 
 - Change palette color and behavior:
@@ -285,21 +287,31 @@ RColorBrewer::display.brewer.all()
 
 ```{r plot_us_palette}
 plot_step_ahead_model_output(projection_data_A_us, truth_data_us, 
-                          pal_color = "Dark2")
+                             pal_color = "Dark2")
 ```
   
-  - By default, separate colors will be used for each model. It is possible to use only blues for all models, by setting the `fill_by_model` parameter to `FALSE`. This might be especially useful when used for many models in conjunction with highlighting the ensemble forecast using the `ens_name` and `ens_color` argument.
+  - By default, separate colors will be used for each model. 
+  
+The `fill_by` parameter can be change to another valid column names to change
+the legend and colors attributes to this new column.
+```{r plot_facet_mod_scenleg}
+plot_step_ahead_model_output(projection_data_us, truth_data_us, 
+                             facet = "model_id", fill_by = "scenario_id")
+```
+
+  
+It is possible to use only blues for all models, by setting the `pal_color` parameter to `NULL`. This might be especially useful when used for many models in conjunction with highlighting the ensemble forecast using the `ens_name` and `ens_color` argument.
 ```{r plot_us_mod}
 plot_step_ahead_model_output(projection_data_A_us, truth_data_us, 
-                          intervals = 0.8,
-                          ens_name = "hub-ensemble", ens_color = "black",
-                          fill_by_model = FALSE, use_median_as_point = TRUE)
+                             intervals = 0.8,
+                             ens_name = "hub-ensemble", ens_color = "black",
+                             pal_color = NULL, use_median_as_point = TRUE)
 ```
 
 - Interactive/Static plot:
 ```{r plot_stat}
 plot_step_ahead_model_output(projection_data_A_us, truth_data_us, 
-                          interactive = FALSE)
+                             interactive = FALSE)
 ```
 
 

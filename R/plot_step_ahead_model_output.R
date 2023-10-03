@@ -126,19 +126,24 @@ static_truth_data <- function(plot_model, truth_data, plot_truth) {
 #' @param line_color a `string`, specific color associated with plot
 #' @param opacity a `numeric`, opacity of the ribbons, default 0.25
 #' @param arguments list of others Plotly parameters
+#' @param fill_by name of a column for specifying colors and legend in plot.
+#' The `pal_color` parameter can be use to change the palette.
+#' Default to `model_id`.
 #'
 #' @importFrom plotly add_lines add_ribbons
 plotly_proj_data <- function(plot_model, df_point, df_ribbon,
-                             line_color, opacity, arguments) {
+                             line_color, opacity, arguments,
+                             fill_by = "model_id") {
   if (nrow(df_point) > 0) {
     arg_list <- list(p = plot_model, data = df_point, x = ~target_date,
-                     y = ~value, legendgroup = ~model_id, name = ~model_id,
+                     y = ~value, legendgroup = df_point[[fill_by]],
+                     name = df_point[[fill_by]],
                      hoverinfo = "text", hovertext = paste(
                        "Date: ", df_point$target_date, "<br>",
                        "Median: ", format(round(df_point$value, 2),
                                           big.mark = ","), sep = ""))
     if (is.null(line_color)) {
-      arg_list <- c(arg_list, list(color = ~model_id), arguments)
+      arg_list <- c(arg_list, list(color =  df_point[[fill_by]]), arguments)
       plot_model <- do.call(plotly::add_lines, arg_list)
       plot_model <- plotly::layout(
         plot_model, xaxis = list(title = 'Date'),
@@ -167,8 +172,8 @@ plotly_proj_data <- function(plot_model, df_point, df_ribbon,
       if (nrow(df_rib) > 0) {
         arg_list <- list(plot_model, data = df_rib, x = ~target_date,
                          ymin = ~min, ymax = ~max, opacity = opacity,
-                         showlegend = show_legend, name = ~model_id,
-                         legendgroup = ~model_id, hoverinfo = "text",
+                         showlegend = show_legend, name = df_rib[[fill_by]],
+                         legendgroup = df_rib[[fill_by]], hoverinfo = "text",
                          hovertext = paste(
                            "Date: ", df_rib$target_date, "<br>",
                            scales::percent(as.numeric(names(df_ribbon)[n_rib])),
@@ -178,7 +183,7 @@ plotly_proj_data <- function(plot_model, df_point, df_ribbon,
                            sep = ""))
         if (is.null(line_color)) {
           arg_list <- c(
-            arg_list, list(color = ~model_id, line = list(width = 0)),
+            arg_list, list(color = df_rib[[fill_by]], line = list(width = 0)),
             arguments)
           plot_model <- do.call(plotly::add_ribbons, arg_list)
         } else {
@@ -209,22 +214,25 @@ plotly_proj_data <- function(plot_model, df_point, df_ribbon,
 #'  use to add ribbons on the plot
 #' @param line_color a `string`, specific color associated with plot
 #' @param opacity a `numeric`, opacity of the ribbons, default 0.25
+#' @param fill_by name of a column for specifying colors and legend in plot.
+#' The `pal_color` parameter can be use to change the palette.
+#' Default to `model_id`.
 #'
 #' @importFrom ggplot2 geom_ribbon
 #' @importFrom purrr map
 static_proj_data <- function(plot_model, df_point, df_ribbon,
-                             line_color, opacity) {
+                             line_color, opacity, fill_by = "model_id") {
 
   if (!is.null(df_ribbon)) {
-    for (model in unique(unlist(purrr::map(df_ribbon, "model_id")))) {
+    for (fill in unique(unlist(purrr::map(df_ribbon, fill_by)))) {
       for (n_rib in seq_along(df_ribbon)) {
         df_rib <- df_ribbon[[n_rib]]
-        df_rib_mod <- df_rib[which(df_rib$model_id == model), ]
+        df_rib_mod <- df_rib[which(df_rib[[fill_by]] == fill), ]
         if (nrow(df_rib) > 0) {
           plot_model <- plot_model +
             geom_ribbon(data = df_rib_mod,
                         aes(.data$target_date, ymin = .data$min,
-                            ymax = .data$max, fill = .data$model_id),
+                            ymax = .data$max, fill = .data[[fill_by]]),
                         alpha = opacity, inherit.aes = FALSE)
         }
       }
@@ -234,7 +242,7 @@ static_proj_data <- function(plot_model, df_point, df_ribbon,
   if (nrow(df_point) > 0) {
     plot_model <- plot_model  +
       geom_line(data = df_point, aes(x = .data$target_date, y = .data$value,
-                                     color = .data$model_id),
+                                     color = .data[[fill_by]]),
                 inherit.aes = FALSE, linewidth = 1)
   }
 
@@ -272,12 +280,16 @@ static_proj_data <- function(plot_model, df_point, df_ribbon,
 #'  plot (using Plotly) or a "static" plot (using ggplot2). By default, `TRUE`
 #'  (interactive plot)
 #' @param ... additional Plotly parameters
+#' @param fill_by name of a column for specifying colors and legend in plot.
+#' The `pal_color` parameter can be use to change the palette.
+#' Default to `model_id`.
 #'
 #' @importFrom plotly plot_ly
 simple_model_plot <- function(plot_model, df_point, df_ribbon, plot_truth,
                               truth_data, opacity = 0.25, line_color = NULL,
-                              top_layer = "model_output", show_truth_legend = TRUE,
-                              interactive = TRUE, ...) {
+                              top_layer = "model_output",
+                              show_truth_legend = TRUE, interactive = TRUE,
+                              fill_by = "model_id", ...) {
   # prerequisite
   if (is.null(plot_model)) {
     if (interactive) {
@@ -296,27 +308,27 @@ simple_model_plot <- function(plot_model, df_point, df_ribbon, plot_truth,
                                       show_truth_legend, arguments)
       # Projection data
       plot_model <- plotly_proj_data(plot_model, df_point, df_ribbon, line_color,
-                                     opacity, arguments)
+                                     opacity, arguments, fill_by)
     } else {
       # Truth Data
       plot_model <- static_truth_data(plot_model, truth_data, plot_truth)
       # Projection data
       plot_model <- static_proj_data(plot_model, df_point, df_ribbon,
-                                     line_color, opacity)
+                                     line_color, opacity, fill_by)
     }
 
   } else if (top_layer == "truth") {
     if (interactive) {
       # Projection data
-      plot_model <- plotly_proj_data(plot_model, df_point, df_ribbon, line_color,
-                                     opacity, arguments)
+      plot_model <- plotly_proj_data(plot_model, df_point, df_ribbon,
+                                     line_color, opacity, arguments, fill_by)
       # Truth Data
       plot_model <- plotly_truth_data(plot_model, truth_data, plot_truth,
                                       show_truth_legend, arguments)
     } else {
       # Projection data
       plot_model <- static_proj_data(plot_model, df_point, df_ribbon,
-                                     line_color, opacity)
+                                     line_color, opacity, fill_by)
       # Truth Data
       plot_model <- static_truth_data(plot_model, truth_data, plot_truth)
     }
@@ -374,16 +386,20 @@ simple_model_plot <- function(plot_model, df_point, df_ribbon, plot_truth,
 #' @param interactive a `boolean` to output an "interactive" version of the
 #'  plot (using Plotly) or a "static" plot (using ggplot2). By default, `TRUE`
 #'  (interactive plot)
+#' @param fill_by name of a column for specifying colors and legend in plot.
+#' The `pal_color` parameter can be use to change the palette.
+#' Default to `model_id`.
 #'
 #' @importFrom plotly plot_ly layout subplot
 #' @importFrom ggplot2 ggplot scale_color_manual scale_fill_manual facet_wrap
 output_plot <-  function(all_plot, all_ens, truth_data, plot_truth = TRUE,
                          intervals = c(.5, .8, .95), pal_color = "Set2",
                          fill_transparency = 0.25, pal_value = NULL,
-                         top_layer = "model_output", ens_color = NULL, facet = NULL,
-                         facet_scales = "fixed", facet_nrow = NULL,
-                         facet_ncol = NULL,  facet_title = "top left",
-                         facet_value = NULL, interactive = TRUE) {
+                         top_layer = "model_output", ens_color = NULL,
+                         facet = NULL, facet_scales = "fixed",
+                         facet_nrow = NULL, facet_ncol = NULL,
+                         facet_title = "top left", facet_value = NULL,
+                         interactive = TRUE, fill_by = "model_id") {
   if (interactive) {
     plot_model <- plotly::plot_ly(height = 1050, colors =  pal_color)
   } else {
@@ -427,18 +443,18 @@ output_plot <-  function(all_plot, all_ens, truth_data, plot_truth = TRUE,
         plot_model <- simple_model_plot(
           plot_model, df_point, df_ribbon, plot_truth, truth_data,
           opacity = fill_transparency, top_layer = top_layer,
-          interactive = TRUE)
-      } else if (facet == "model_id") {
-        plot_model <- simple_model_plot(
-          plot_model, df_point, df_ribbon, TRUE, truth_data,
-          opacity = fill_transparency, top_layer = top_layer,
-          show_truth_legend = FALSE, interactive = TRUE)
+          interactive = TRUE, fill_by = fill_by)
+  #    } else if (facet == "model_id") {
+  #      plot_model <- simple_model_plot(
+  #        plot_model, df_point, df_ribbon, plot_truth, truth_data,
+  #        opacity = fill_transparency, top_layer = top_layer, showlegend = FALSE,
+  #        show_truth_legend = FALSE, interactive = TRUE, fill_by = fill_by)
       } else {
         plot_model <- simple_model_plot(
           plot_model, df_point, df_ribbon, plot_truth, truth_data,
           opacity = fill_transparency, showlegend = FALSE,
           top_layer = top_layer, show_truth_legend = FALSE,
-          interactive = TRUE)
+          interactive = TRUE, fill_by = fill_by)
       }
       # Ensemble color
       if (!is.null(all_ens)) {
@@ -446,19 +462,19 @@ output_plot <-  function(all_plot, all_ens, truth_data, plot_truth = TRUE,
           plot_model <- simple_model_plot(
             plot_model, df_point_ens, df_ribbon_ens, FALSE, truth_data,
             line_color = ens_color, opacity = fill_transparency,
-            top_layer = top_layer, interactive = TRUE)
+            top_layer = top_layer, interactive = TRUE, fill_by = fill_by)
         } else if (facet == "model_id") {
           plot_model <- simple_model_plot(
             plot_model, df_point_ens, df_ribbon_ens, TRUE, truth_data,
             line_color = ens_color, opacity = fill_transparency,
             top_layer = top_layer, show_truth_legend = FALSE,
-            interactive = TRUE)
+            interactive = TRUE, fill_by = fill_by)
         } else {
           plot_model <- simple_model_plot(
             plot_model, df_point_ens, df_ribbon_ens, FALSE, truth_data,
             line_color = ens_color, opacity = fill_transparency,
             showlegend = FALSE, top_layer = top_layer,
-            show_truth_legend = FALSE, interactive = TRUE)
+            show_truth_legend = FALSE, interactive = TRUE, fill_by = fill_by)
         }
       }
       if (!is.null(facet_title)) {
@@ -495,7 +511,7 @@ output_plot <-  function(all_plot, all_ens, truth_data, plot_truth = TRUE,
     }
     plot_model <- simple_model_plot(plot_model, df_point, df_ribbon, plot_truth,
                                     truth_data, opacity = fill_transparency,
-                                    top_layer = top_layer,
+                                    top_layer = top_layer, fill_by = fill_by,
                                     interactive = interactive)
 
     # Ensemble color
@@ -503,7 +519,7 @@ output_plot <-  function(all_plot, all_ens, truth_data, plot_truth = TRUE,
       plot_model <- simple_model_plot(
         plot_model, df_point_ens, df_ribbon_ens, truth_data = truth_data,
         plot_truth = FALSE, opacity = fill_transparency, line_color = ens_color,
-        top_layer = top_layer, interactive = interactive)
+        top_layer = top_layer, interactive = interactive, fill_by = fill_by)
     }
     if (!is.null(facet)) {
       plot_model <-  plot_model +
@@ -554,13 +570,13 @@ output_plot <-  function(all_plot, all_ens, truth_data, plot_truth = TRUE,
 #'@param interactive a `boolean` to output an "interactive" version of the
 #'  plot (using Plotly) or a "static" plot (using ggplot2). By default, `TRUE`
 #'  (interactive plot)
-#'@param fill_by_model a `boolean` for specifying colors in plot. If `TRUE`,
-#' separate colors will be used for each model, `pal_color` parameters to change
-#' the palette. If `FALSE`, only blues will be used for all models.
-#' Default to `FALSE`.
+#'@param fill_by name of a column for specifying colors and legend in plot.
+#' The `pal_color` parameter can be use to change the palette.
+#' Default to `model_id`.
 #'@param pal_color a `character` string for specifying the palette color in the
 #' plot if `fill_by_model` is set to `TRUE`. Please refer
-#' to [RColorBrewer::display.brewer.all()]. Default to `"Set2"`
+#' to [RColorBrewer::display.brewer.all()]. If `NULL`, only blues will be used
+#' for all models. Default to `"Set2"`
 #'@param fill_transparency numeric value used to set transparency of intervals.
 #' 0 means fully transparent, 1 means opaque. Default to `0.25`
 #'@param intervals a vector of `numeric` values indicating which central
@@ -594,9 +610,10 @@ plot_step_ahead_model_output <- function(
     model_output_data, truth_data, use_median_as_point = FALSE, plot = TRUE,
     plot_truth = TRUE, show_legend = TRUE, facet = NULL, facet_scales = "fixed",
     facet_nrow = NULL, facet_ncol = NULL, facet_title = "top left",
-    interactive = TRUE, fill_by_model = TRUE, pal_color = "Set2",
+    interactive = TRUE, fill_by = "model_id", pal_color = "Set2",
     fill_transparency = 0.25, intervals = c(.5, .8, .95),
-    top_layer = "model_output", title = NULL, ens_color = NULL, ens_name = NULL) {
+    top_layer = "model_output", title = NULL, ens_color = NULL,
+    ens_name = NULL) {
 
   # Test format input
   ## Model Output data
@@ -609,7 +626,8 @@ plot_step_ahead_model_output <- function(
     model_output_data <- hubUtils::as_model_out_tbl(model_output_data,
                                                 remove_empty = TRUE)
   }
-  exp_f_col <- c("model_id", "output_type_id", "target_date", "value")
+  exp_f_col <- unique(c("model_id", "output_type_id", "target_date", "value",
+                        fill_by))
   model_output_col <- colnames(model_output_data)
   if (!all(exp_f_col %in% model_output_col)) {
     cli::cli_abort(c("x" = "{.arg model_output_data} did not have all required
@@ -658,9 +676,9 @@ plot_step_ahead_model_output <- function(
     if (length(unique(model_output_data[["model_id"]])) > 5 &
         length(intervals) > 1) {
       intervals <- max(intervals)[1]
-      cli::cli_warn(c("!" = "{.arg model_output_data} contains 6 or more models, the
-                    plot will be reduced to show only one interval (the
-                    maximum interval value): {.val {intervals}}"))
+      cli::cli_warn(c("!" = "{.arg model_output_data} contains 6 or more models,
+                      the plot will be reduced to show only one interval (the
+                      maximum interval value): {.val {intervals}}"))
     }
     ribbon <- list_intervals[as.character(sort(intervals, decreasing = TRUE))]
   } else {
@@ -683,8 +701,8 @@ plot_step_ahead_model_output <- function(
   exp_value <- c(plain_line, unlist(ribbon))
   model_output_type_val <- unique(model_output_data$output_type_id)
   if (!all(exp_value %in% model_output_type_val)) {
-    cli::cli_abort(c("x" = "{.arg model_output_type_val} did not have the expected
-                     output_type_id value {.val {exp_value}}"))
+    cli::cli_abort(c("x" = "{.arg model_output_type_val} did not have the
+                     expected output_type_id value {.val {exp_value}}"))
   }
   ### Ensemble specific color
   if (is.null(ens_color) + is.null(ens_name) == 1) {
@@ -711,12 +729,13 @@ plot_step_ahead_model_output <- function(
   #### Top layer
   if (!any(top_layer %in% c("model_output", "truth"))) {
     cli::cli_abort(c("x" = "{.arg top_layer} should correspond to one of
-                       these possible values: {.val model_output},  {.val truth}"))
+                       these possible values: {.val model_output},
+                     {.val truth}"))
   }
 
   #### Palette
-  model_id_vect <- unique(model_output_data$model_id)
-  if (fill_by_model) {
+  fill_by_vect <- unique(model_output_data[[fill_by]])
+  if (!is.null(pal_color)) {
     if (!pal_color %in% row.names(RColorBrewer::brewer.pal.info)) {
       cli::cli_warn(c("!" = "{.arg pal_color} is not one of the accepted palette
                        name, accepted values are:
@@ -724,17 +743,17 @@ plot_step_ahead_model_output <- function(
                       {.val Set2} used by default."))
       pal_color <- "Set2"
     }
-    if (length(model_id_vect) < 3) {
+    if (length(fill_by_vect) < 3) {
       n_pal <- 3
     } else {
-      n_pal <- length(model_id_vect)
+      n_pal <- length(fill_by_vect)
     }
     pal_value <- RColorBrewer::brewer.pal(n_pal, pal_color)
   } else {
     pal_color = "blue"
-    pal_value <- rep(pal_color, length(model_id_vect))
+    pal_value <- rep(pal_color, length(fill_by_vect))
   }
-  names(pal_value) <- model_id_vect
+  names(pal_value) <- fill_by_vect
   if (!is.null(ens_color) & !is.null(ens_name))
     pal_value[ens_name] <- grDevices::rgb(
       grDevices::col2rgb(ens_color)[1], grDevices::col2rgb(ens_color)[2],
@@ -743,11 +762,13 @@ plot_step_ahead_model_output <- function(
     pal_value <- c(pal_value, "Truth Data" = "#6e6e6e")
   }
 
+
   # Data process
   if (!is.null(ens_color) & !is.null(ens_name)) {
     ens_df <- model_output_data[which(model_output_data$model_id == ens_name), ]
     all_ens <- plot_prep_data(ens_df, plain_line, plain_type, ribbon)
-    plot_df <- model_output_data[which(model_output_data$model_id != ens_name), ]
+    plot_df <- model_output_data[which(
+      model_output_data$model_id != ens_name), ]
   } else {
     all_ens <- NULL
     plot_df <- model_output_data
@@ -769,7 +790,7 @@ plot_step_ahead_model_output <- function(
                             facet_scales = facet_scales,
                             facet_nrow = facet_nrow,  facet_title = facet_title,
                             facet_value = facet_value,
-                            interactive = interactive)
+                            interactive = interactive, fill_by = fill_by)
   # Layout
   if (interactive) {
     plot_model <- plotly::layout(

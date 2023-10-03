@@ -10,7 +10,8 @@ plotly_proj_data(
   df_ribbon,
   line_color,
   opacity,
-  arguments
+  arguments,
+  fill_by = "model_id"
 )
 }
 \arguments{
@@ -28,6 +29,10 @@ use to add ribbons on the plot}
 \item{opacity}{a \code{numeric}, opacity of the ribbons, default 0.25}
 
 \item{arguments}{list of others Plotly parameters}
+
+\item{fill_by}{name of a column for specifying colors and legend in plot.
+The \code{pal_color} parameter can be use to change the palette.
+Default to \code{model_id}.}
 }
 \description{
 Use Plotly to plot projection model output

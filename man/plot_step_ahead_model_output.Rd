@@ -17,7 +17,7 @@ plot_step_ahead_model_output(
   facet_ncol = NULL,
   facet_title = "top left",
   interactive = TRUE,
-  fill_by_model = TRUE,
+  fill_by = "model_id",
   pal_color = "Set2",
   fill_transparency = 0.25,
   intervals = c(0.5, 0.8, 0.95),
@@ -69,14 +69,14 @@ title. For interactive plot only.}
 plot (using Plotly) or a "static" plot (using ggplot2). By default, \code{TRUE}
 (interactive plot)}
 
-\item{fill_by_model}{a \code{boolean} for specifying colors in plot. If \code{TRUE},
-separate colors will be used for each model, \code{pal_color} parameters to change
-the palette. If \code{FALSE}, only blues will be used for all models.
-Default to \code{FALSE}.}
+\item{fill_by}{name of a column for specifying colors and legend in plot.
+The \code{pal_color} parameter can be use to change the palette.
+Default to \code{model_id}.}
 
 \item{pal_color}{a \code{character} string for specifying the palette color in the
 plot if \code{fill_by_model} is set to \code{TRUE}. Please refer
-to \code{\link[RColorBrewer:ColorBrewer]{RColorBrewer::display.brewer.all()}}. Default to \code{"Set2"}}
+to \code{\link[RColorBrewer:ColorBrewer]{RColorBrewer::display.brewer.all()}}. If \code{NULL}, only blues will be used
+for all models. Default to \code{"Set2"}}
 
 \item{fill_transparency}{numeric value used to set transparency of intervals.
 0 means fully transparent, 1 means opaque. Default to \code{0.25}}
