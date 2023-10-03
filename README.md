@@ -5,7 +5,7 @@
 
 
 The goal of hubVis is to provide plotting methods for hub model outputs, 
-followinf the hubverse format. The hubverse isa collection of open-source 
+following the hubverse format. The hubverse is a collection of open-source 
 software and data tools, developed by the Consortium of Infectious Disease 
 Modeling Hubs. For more information, please consult the 
 [hubDocs](https://hubdocs.readthedocs.io/en/latest/) website
@@ -21,7 +21,7 @@ remotes::install_github("Infectious-Disease-Modeling-Hubs/hubVis")
 
 ## Usage
 
-The R package contains currently one function `plot_step_ahead_forecasts()` 
+The R package contains currently one function `plot_step_ahead_model_output()` 
 plotting 50%, 80%, and 95% quantiles intervals, with a specific color per
 "model_id".
 
@@ -38,7 +38,7 @@ The function can output 2 types of plots:
 > examples.
 
 ```r
-plot_step_ahead_forecasts(projection_data_us, truth_data_us)
+plot_step_ahead_model_output(projection_data_us, truth_data_us)
 ```
 ![](./man/figures/simple_plotly.png)
 
@@ -46,9 +46,9 @@ plot_step_ahead_forecasts(projection_data_us, truth_data_us)
  models, etc.
 
 ```r
-plot_step_ahead_forecasts(projection_data_us, truth_data_us, 
-                          use_median_as_point = TRUE,
-                          facet = "scenario_id", facet_scales = "free_x", 
-                          facet_nrow = 2, facet_title = "bottom left")
+plot_step_ahead_model_output(projection_data_us, truth_data_us, 
+                             use_median_as_point = TRUE,
+                             facet = "scenario_id", facet_scales = "free_x", 
+                             facet_nrow = 2, facet_title = "bottom left")
 ```
 ![](./man/figures/facet_plot.png)

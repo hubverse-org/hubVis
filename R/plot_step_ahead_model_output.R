@@ -264,7 +264,7 @@ static_proj_data <- function(plot_model, df_point, df_ribbon,
 #' @param opacity a `numeric`, opacity of the ribbons, default 0.25
 #' @param line_color a `string`, specific color associated with plot
 #' @param top_layer character vector, where the first element indicates the top
-#'  layer of the resulting plot. Possible options are `"forecast"` (default)
+#'  layer of the resulting plot. Possible options are `"model_output"` (default)
 #'  and `"truth"`
 #' @param show_truth_legend a `boolean` to show legend of the truth data, by
 #'  default `TRUE`
@@ -276,7 +276,7 @@ static_proj_data <- function(plot_model, df_point, df_ribbon,
 #' @importFrom plotly plot_ly
 simple_model_plot <- function(plot_model, df_point, df_ribbon, plot_truth,
                               truth_data, opacity = 0.25, line_color = NULL,
-                              top_layer = "forecast", show_truth_legend = TRUE,
+                              top_layer = "model_output", show_truth_legend = TRUE,
                               interactive = TRUE, ...) {
   # prerequisite
   if (is.null(plot_model)) {
@@ -289,7 +289,7 @@ simple_model_plot <- function(plot_model, df_point, df_ribbon, plot_truth,
   }
   arguments <- list(...)
 
-  if (top_layer == "forecast") {
+  if (top_layer == "model_output") {
     if (interactive) {
       # Truth Data
       plot_model <- plotly_truth_data(plot_model, truth_data, plot_truth,
@@ -354,7 +354,7 @@ simple_model_plot <- function(plot_model, df_point, df_ribbon, plot_truth,
 #' @param pal_value  a `named vector` containing the `model_id` (names) and
 #'  associated color. Default `NULL`, used only for static plot (ggplot2)
 #' @param top_layer character vector, where the first element indicates the top
-#'  layer of the resulting plot. Possible options are `"forecast"` (default)
+#'  layer of the resulting plot. Possible options are `"model_output"` (default)
 #'  and `"truth"`
 #' @param ens_color a `character` string of a color name, if not NULL, will be
 #' use as color for the model name associated with the parameter `ens_name`
@@ -380,7 +380,7 @@ simple_model_plot <- function(plot_model, df_point, df_ribbon, plot_truth,
 output_plot <-  function(all_plot, all_ens, truth_data, plot_truth = TRUE,
                          intervals = c(.5, .8, .95), pal_color = "Set2",
                          fill_transparency = 0.25, pal_value = NULL,
-                         top_layer = "forecast", ens_color = NULL, facet = NULL,
+                         top_layer = "model_output", ens_color = NULL, facet = NULL,
                          facet_scales = "fixed", facet_nrow = NULL,
                          facet_ncol = NULL,  facet_title = "top left",
                          facet_value = NULL, interactive = TRUE) {
@@ -531,7 +531,7 @@ output_plot <-  function(all_plot, all_ens, truth_data, plot_truth = TRUE,
 #' containing the columns: `time_idx` and `value`.
 #' Ignored, if `plot_truth = FALSE`
 #'@param use_median_as_point a `Boolean` for using median quantile as point
-#' forecasts in plot. Default to FALSE. If TRUE, will select first any `median`
+#' in plot. Default to FALSE. If TRUE, will select first any `median`
 #' output type value and if no `median` value included in `model_output_data`; will
 #' select `quantile = 0.5` output type value.
 #'@param plot a `boolean` for showing the plot. Default to TRUE.
@@ -569,7 +569,7 @@ output_plot <-  function(all_plot, all_ens, truth_data, plot_truth = TRUE,
 #' When plotting 6 models or more, the plot will be reduced to show `.95`
 #' interval only. Value possibles: `0.5, 0.8, 0.9, 0.95`
 #'@param top_layer character vector, where the first element indicates the top
-#'  layer of the resulting plot. Possible options are `"forecast"` (default)
+#'  layer of the resulting plot. Possible options are `"model_output"` (default)
 #'  and `"truth"`
 #'@param title a `character` string, if not NULL, will be added as title to the
 #' plot
@@ -590,16 +590,16 @@ output_plot <-  function(all_plot, all_ens, truth_data, plot_truth = TRUE,
 #'
 #' @export
 #'
-plot_step_ahead_forecasts <- function(
+plot_step_ahead_model_output <- function(
     model_output_data, truth_data, use_median_as_point = FALSE, plot = TRUE,
     plot_truth = TRUE, show_legend = TRUE, facet = NULL, facet_scales = "fixed",
     facet_nrow = NULL, facet_ncol = NULL, facet_title = "top left",
     interactive = TRUE, fill_by_model = TRUE, pal_color = "Set2",
     fill_transparency = 0.25, intervals = c(.5, .8, .95),
-    top_layer = "forecast", title = NULL, ens_color = NULL, ens_name = NULL) {
+    top_layer = "model_output", title = NULL, ens_color = NULL, ens_name = NULL) {
 
   # Test format input
-  ## Forecast data
+  ## Model Output data
   if (!is.data.frame(model_output_data)) {
     cli::cli_abort(c("x" = "{.arg model_output_data} must be a `data.frame`."))
   }
@@ -610,14 +610,14 @@ plot_step_ahead_forecasts <- function(
                                                 remove_empty = TRUE)
   }
   exp_f_col <- c("model_id", "output_type_id", "target_date", "value")
-  forecast_col <- colnames(model_output_data)
-  if (!all(exp_f_col %in% forecast_col)) {
-    cli::cli_abort(c("x" = "{.arg forecast_type_val} did not have all required
+  model_output_col <- colnames(model_output_data)
+  if (!all(exp_f_col %in% model_output_col)) {
+    cli::cli_abort(c("x" = "{.arg model_output_data} did not have all required
                      columns {.val {exp_f_col}}"))
   }
   valid_types <- c("mean", "median", "quantile")
-  forecast_type <- unique(model_output_data$output_type)
-  if (!any(valid_types %in% forecast_type)) {
+  model_output_type <- unique(model_output_data$output_type)
+  if (!any(valid_types %in% model_output_type)) {
     cli::cli_abort(c(
       "x" = "{.arg model_output_data} should contain at least one supported output
       type.",
@@ -681,9 +681,9 @@ plot_step_ahead_forecasts <- function(
     plain_type <- NULL
   }
   exp_value <- c(plain_line, unlist(ribbon))
-  forecast_type_val <- unique(model_output_data$output_type_id)
-  if (!all(exp_value %in% forecast_type_val)) {
-    cli::cli_abort(c("x" = "{.arg forecast_type_val} did not have the expected
+  model_output_type_val <- unique(model_output_data$output_type_id)
+  if (!all(exp_value %in% model_output_type_val)) {
+    cli::cli_abort(c("x" = "{.arg model_output_type_val} did not have the expected
                      output_type_id value {.val {exp_value}}"))
   }
   ### Ensemble specific color
@@ -709,9 +709,9 @@ plot_step_ahead_forecasts <- function(
     }
   }
   #### Top layer
-  if (!any(top_layer %in% c("forecast", "truth"))) {
+  if (!any(top_layer %in% c("model_output", "truth"))) {
     cli::cli_abort(c("x" = "{.arg top_layer} should correspond to one of
-                       these possible values: {.val forecast},  {.val truth}"))
+                       these possible values: {.val model_output},  {.val truth}"))
   }
 
   #### Palette
