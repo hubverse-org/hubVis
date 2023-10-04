@@ -308,18 +308,17 @@ static_proj_data <- function(plot_model, df_point, df_ribbon,
 #' By default, "time_idx".
 #'
 #' @importFrom plotly plot_ly
-simple_model_plot <- function(plot_model, df_point, df_ribbon, plot_truth,
-                              truth_data, opacity = 0.25, line_color = NULL,
-                              top_layer = "model_output",
-                              show_truth_legend = TRUE, interactive = TRUE,
-                              fill_by = "model_id", x_col_name = "target_date",
-                              x_truth_col_name = "time_idx", ...) {
+simple_model_plot <- function(
+    plot_model, df_point, df_ribbon, plot_truth, truth_data, opacity = 0.25,
+    line_color = NULL, top_layer = "model_output", show_truth_legend = TRUE,
+    interactive = TRUE, fill_by = "model_id", x_col_name = "target_date",
+    x_truth_col_name = "time_idx", ...) {
   # prerequisite
   if (is.null(plot_model)) {
     if (interactive) {
-      plot_model <- plotly::plot_ly(height = 1050)
+      plot_model <- plotly::plot_ly()
     } else {
-      plot_model <- ggplot2::ggplot(height = 1050)
+      plot_model <- ggplot2::ggplot()
     }
 
   }
@@ -441,9 +440,9 @@ output_plot <-  function(all_plot, all_ens, truth_data, plot_truth = TRUE,
                          x_col_name = "target_date",
                          x_truth_col_name = "time_idx") {
   if (interactive) {
-    plot_model <- plotly::plot_ly(height = 1050, colors =  pal_color)
+    plot_model <- plotly::plot_ly(colors =  pal_color)
   } else {
-    plot_model <- ggplot2::ggplot(height = 1050, colors =  pal_color)
+    plot_model <- ggplot2::ggplot(colors =  pal_color)
   }
 
   if (!is.null(facet) & interactive) {
