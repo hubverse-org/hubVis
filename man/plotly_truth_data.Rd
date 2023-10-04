@@ -4,7 +4,14 @@
 \alias{plotly_truth_data}
 \title{Plot Truth data with Plotly}
 \usage{
-plotly_truth_data(plot_model, truth_data, plot_truth, show_legend, arguments)
+plotly_truth_data(
+  plot_model,
+  truth_data,
+  plot_truth,
+  show_legend,
+  arguments,
+  x_col_name = "time_idx"
+)
 }
 \arguments{
 \item{plot_model}{a plot_ly object to add lines and/or ribbons, if NULL will
@@ -19,7 +26,10 @@ Default to TRUE. Data used in the plot comes from the parameter \code{truth_data
 
 \item{show_legend}{a \code{boolean} for showing the legend in the plot.}
 
-\item{arguments}{list of others Plotly parameters}
+\item{arguments}{list of others Plotly parameters.}
+
+\item{x_col_name}{column name containing the date information for the x-axis.
+By default, "time_idx".}
 }
 \description{
 Use Plotly to plot truth data

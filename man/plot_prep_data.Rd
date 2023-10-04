@@ -4,7 +4,13 @@
 \alias{plot_prep_data}
 \title{Data Process for plotting function}
 \usage{
-plot_prep_data(df, plain_line, plain_type, intervals)
+plot_prep_data(
+  df,
+  plain_line,
+  plain_type,
+  intervals,
+  x_col_name = "target_date"
+)
 }
 \arguments{
 \item{df}{a \code{data.frame} object containing the columns: \code{model_id},
@@ -20,6 +26,9 @@ create a plain line in the plot. Should be a unique value
 
 \item{intervals}{a named list of \code{numeric}  output_type_id value, value will
 be used a to create one or multiple prediction intervals in the plot.}
+
+\item{x_col_name}{column name containing the date information for the x-axis.
+By default, "target_date".}
 }
 \description{
 Data process for plotting function, returns a list with two

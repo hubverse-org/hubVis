@@ -10,6 +10,8 @@ plot_step_ahead_model_output(
   use_median_as_point = FALSE,
   plot = TRUE,
   plot_truth = TRUE,
+  x_col_name = "target_date",
+  x_truth_col_name = "time_idx",
   show_legend = TRUE,
   facet = NULL,
   facet_scales = "fixed",
@@ -29,21 +31,30 @@ plot_step_ahead_model_output(
 }
 \arguments{
 \item{model_output_data}{a \code{model_out_tbl} object, containing all the required
-columns, and a "target_date" and a "model_id" column.}
+columns, a column containing date information (\code{x_col_name} parameter) and
+a column \code{value}.}
 
 \item{truth_data}{a \code{data.frame} object containing the ground truth data,
-containing the columns: \code{time_idx} and \code{value}.
-Ignored, if \code{plot_truth = FALSE}}
+with a column containing date information (\code{x_truth_col_name} parameter) and
+a column \code{value}. Ignored, if \code{plot_truth = FALSE}.}
 
 \item{use_median_as_point}{a \code{Boolean} for using median quantile as point
 in plot. Default to FALSE. If TRUE, will select first any \code{median}
-output type value and if no \code{median} value included in \code{model_output_data}; will
-select \code{quantile = 0.5} output type value.}
+output type value and if no \code{median} value included in \code{model_output_data};
+will select \code{quantile = 0.5} output type value.}
 
 \item{plot}{a \code{boolean} for showing the plot. Default to TRUE.}
 
 \item{plot_truth}{a \code{boolean} for showing the truth data in the plot.
 Default to TRUE. Data used in the plot comes from the parameter \code{truth_data}}
+
+\item{x_col_name}{column name containing the date information for \code{all_plot}
+and \code{all_ens} data frames, value will be map to the x-axis of the plot.
+By default, "target_date".}
+
+\item{x_truth_col_name}{column name containing the date information for
+\code{truth_data} data frame, value will be map to the x-axis of the plot.
+By default, "time_idx".}
 
 \item{show_legend}{a \code{boolean} for showing the legend in the plot.
 Default to TRUE.}

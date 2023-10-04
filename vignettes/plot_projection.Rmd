@@ -298,7 +298,6 @@ the legend and colors attributes to this new column.
 plot_step_ahead_model_output(projection_data_us, truth_data_us, 
                              facet = "model_id", fill_by = "scenario_id")
 ```
-
   
 It is possible to use only blues for all models, by setting the `pal_color` parameter to `NULL`. This might be especially useful when used for many models in conjunction with highlighting the ensemble forecast using the `ens_name` and `ens_color` argument.
 ```{r plot_us_mod}
@@ -314,6 +313,18 @@ plot_step_ahead_model_output(projection_data_A_us, truth_data_us,
                              interactive = FALSE)
 ```
 
+- Column Names:
+
+The input data frames can have different column names for the date information. In this case, 
+the two `x_col_name` and `x_truth_col_name` parameters can be used to indicate the variables that 
+should be mapped to the x-axis. 
+```{r col_names}
+names(truth_data_us)[names(truth_data_us) == "time_idx"] <- "time"
+names(projection_data_A_us)[names(
+  projection_data_A_us) == "target_date"] <- "date"
+plot_step_ahead_model_output(projection_data_A_us, truth_data_us, 
+                             x_col_name = "date", x_truth_col_name = "time")
+```
 
 For other parameters, please consult the documentation associated with 
 the function:  

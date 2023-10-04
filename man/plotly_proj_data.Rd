@@ -11,28 +11,32 @@ plotly_proj_data(
   line_color,
   opacity,
   arguments,
-  fill_by = "model_id"
+  fill_by = "model_id",
+  x_col_name = "target_date"
 )
 }
 \arguments{
 \item{plot_model}{a plot_ly object to add lines and/or ribbons, if NULL will
-create an empty object}
+create an empty object.}
 
 \item{df_point}{a \code{data.frame} with "target_date" and "value" columns, use to
-add lines on the plot}
+add lines on the plot.}
 
 \item{df_ribbon}{a \code{data.frame} with "target_date", "min", and "max" columns,
-use to add ribbons on the plot}
+use to add ribbons on the plot.}
 
-\item{line_color}{a \code{string}, specific color associated with plot}
+\item{line_color}{a \code{string}, specific color associated with plot.}
 
-\item{opacity}{a \code{numeric}, opacity of the ribbons, default 0.25}
+\item{opacity}{a \code{numeric}, opacity of the ribbons, default 0.25.}
 
-\item{arguments}{list of others Plotly parameters}
+\item{arguments}{list of others Plotly parameters.}
 
 \item{fill_by}{name of a column for specifying colors and legend in plot.
 The \code{pal_color} parameter can be use to change the palette.
 Default to \code{model_id}.}
+
+\item{x_col_name}{column name containing the date information for the x-axis.
+By default, "target_date".}
 }
 \description{
 Use Plotly to plot projection model output

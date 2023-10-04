@@ -11,11 +11,14 @@
 #' @param plain_type a `string` output_type value, value will be used to
 #' create a plain line in the plot. Should be a unique value
 #' (for example: "quantile")
-#'@param intervals a named list of `numeric`  output_type_id value, value will
+#' @param intervals a named list of `numeric`  output_type_id value, value will
 #' be used a to create one or multiple prediction intervals in the plot.
+#' @param x_col_name column name containing the date information for the x-axis.
+#' By default, "target_date".
 #'
 #' @importFrom stats reshape
-plot_prep_data <- function(df, plain_line, plain_type, intervals) {
+plot_prep_data <- function(df, plain_line, plain_type, intervals,
+                           x_col_name = "target_date") {
   # Median
   if (is.null(plain_line)) {
     plain_df <- df[which(
@@ -27,7 +30,7 @@ plot_prep_data <- function(df, plain_line, plain_type, intervals) {
     plain_df <- df[which(
       is.na(df$output_type_id) & df$output_type == plain_type), ]
   }
-  plain_df$target_date <- as.Date(plain_df$target_date)
+  plain_df[[x_col_name]] <- as.Date(plain_df[[x_col_name]])
   # Intervals
   if (is.null(intervals)) {
     ribbon_list <- NULL
@@ -42,7 +45,7 @@ plot_prep_data <- function(df, plain_line, plain_type, intervals) {
       ribbon_df <- reshape(
         ribbon_df, timevar = "output_type_id", direction = "wide",
         idvar = id_col)
-      ribbon_df$target_date <- as.Date(ribbon_df$target_date)
+      ribbon_df[[x_col_name]] <- as.Date(ribbon_df[[x_col_name]])
       colnames(ribbon_df) <- gsub("^value\\.", "" , colnames(ribbon_df))
       return(ribbon_df)
     })
@@ -64,19 +67,22 @@ plot_prep_data <- function(df, plain_line, plain_type, intervals) {
 #' @param plot_truth a `boolean` for showing the truth data in the plot.
 #'  Default to TRUE. Data used in the plot comes from the parameter `truth_data`
 #' @param show_legend a `boolean` for showing the legend in the plot.
-#' @param arguments list of others Plotly parameters
+#' @param arguments list of others Plotly parameters.
+#' @param x_col_name column name containing the date information for the x-axis.
+#' By default, "time_idx".
 #'
 #' @importFrom plotly add_trace layout
 plotly_truth_data <- function(plot_model, truth_data, plot_truth, show_legend,
-                              arguments) {
+                              arguments, x_col_name = "time_idx") {
   if (plot_truth) {
-    truth_data$time_idx <- as.Date(truth_data$time_idx)
+    truth_data[[x_col_name]] <- as.Date(truth_data[[x_col_name]])
     arg_list <- list(
-      p = plot_model, data = truth_data, x = ~time_idx, y = ~value,
-      type = "scatter", mode = "lines+markers", line = list(color = "#6e6e6e"),
-      hoverinfo = "text", name = "ground truth", legendgroup = "ground truth",
-      hovertext = paste("Date: ", truth_data$time_idx, "<br>Ground truth: ",
-                        format(truth_data$value, big.mark = ","), sep = ""),
+      p = plot_model, data = truth_data, x = truth_data[[x_col_name]],
+      y = ~value, type = "scatter", mode = "lines+markers",
+      line = list(color = "#6e6e6e"), hoverinfo = "text", name = "ground truth",
+      legendgroup = "ground truth", hovertext =
+        paste("Date: ", truth_data[[x_col_name]], "<br>Ground truth: ",
+              format(truth_data$value, big.mark = ","), sep = ""),
       marker = list(color = "#6e6e6e", size = 7), showlegend = show_legend)
     arg_list <- c(arg_list, arguments)
     plot_model <- do.call(plotly::add_trace, arg_list)
@@ -96,19 +102,23 @@ plotly_truth_data <- function(plot_model, truth_data, plot_truth, show_legend,
 #'  containing the columns: `time_idx` and `value`.
 #'  Ignored, if `plot_truth = FALSE`
 #' @param plot_truth a `boolean` for showing the truth data in the plot.
-#'  Default to TRUE. Data used in the plot comes from the parameter `truth_data`
+#'  Default to TRUE. Data used in the plot comes from the parameter
+#'  `truth_data`.
+#' @param x_col_name column name containing the date information for the x-axis.
+#'  By default, "time_idx".
 #'
 #' @importFrom ggplot2 geom_line geom_point aes .data
-static_truth_data <- function(plot_model, truth_data, plot_truth) {
+static_truth_data <- function(plot_model, truth_data, plot_truth,
+                              x_col_name = "time_idx") {
   if (plot_truth) {
-    truth_data$time_idx <- as.Date(truth_data$time_idx)
+    truth_data[[x_col_name]] <- as.Date(truth_data[[x_col_name]])
     plot_model <- plot_model  +
-      geom_line(data = truth_data, aes(x = .data$time_idx, y = .data$value),
-                color = "#6e6e6e",
-                inherit.aes = FALSE) +
-      geom_point(data = truth_data, aes(x = .data$time_idx, y = .data$value),
-                 color = "#6e6e6e",
-                 inherit.aes = FALSE)
+      geom_line(data = truth_data,
+                aes(x = .data[[x_col_name]],y = .data$value),
+                color = "#6e6e6e", inherit.aes = FALSE) +
+      geom_point(data = truth_data,
+                 aes(x = .data[[x_col_name]], y = .data$value),
+                 color = "#6e6e6e", inherit.aes = FALSE)
   }
   return(plot_model)
 }
@@ -118,28 +128,31 @@ static_truth_data <- function(plot_model, truth_data, plot_truth) {
 #' Use Plotly to plot projection model output
 #'
 #' @param plot_model a plot_ly object to add lines and/or ribbons, if NULL will
-#'  create an empty object
+#'  create an empty object.
 #' @param df_point a `data.frame` with "target_date" and "value" columns, use to
-#'  add lines on the plot
+#'  add lines on the plot.
 #' @param df_ribbon a `data.frame` with "target_date", "min", and "max" columns,
-#'  use to add ribbons on the plot
-#' @param line_color a `string`, specific color associated with plot
-#' @param opacity a `numeric`, opacity of the ribbons, default 0.25
-#' @param arguments list of others Plotly parameters
+#'  use to add ribbons on the plot.
+#' @param line_color a `string`, specific color associated with plot.
+#' @param opacity a `numeric`, opacity of the ribbons, default 0.25.
+#' @param arguments list of others Plotly parameters.
 #' @param fill_by name of a column for specifying colors and legend in plot.
 #' The `pal_color` parameter can be use to change the palette.
 #' Default to `model_id`.
+#' @param x_col_name column name containing the date information for the x-axis.
+#' By default, "target_date".
 #'
 #' @importFrom plotly add_lines add_ribbons
 plotly_proj_data <- function(plot_model, df_point, df_ribbon,
                              line_color, opacity, arguments,
-                             fill_by = "model_id") {
+                             fill_by = "model_id", x_col_name = "target_date") {
   if (nrow(df_point) > 0) {
-    arg_list <- list(p = plot_model, data = df_point, x = ~target_date,
-                     y = ~value, legendgroup = df_point[[fill_by]],
+    arg_list <- list(p = plot_model, data = df_point,
+                     x = df_point[[x_col_name]], y = ~value,
+                     legendgroup = df_point[[fill_by]],
                      name = df_point[[fill_by]],
                      hoverinfo = "text", hovertext = paste(
-                       "Date: ", df_point$target_date, "<br>",
+                       "Date: ", df_point[[x_col_name]], "<br>",
                        "Median: ", format(round(df_point$value, 2),
                                           big.mark = ","), sep = ""))
     if (is.null(line_color)) {
@@ -170,12 +183,12 @@ plotly_proj_data <- function(plot_model, df_point, df_ribbon,
       df_rib <- df_ribbon[[n_rib]]
       if (n_rib > 1) show_legend <- FALSE
       if (nrow(df_rib) > 0) {
-        arg_list <- list(plot_model, data = df_rib, x = ~target_date,
+        arg_list <- list(plot_model, data = df_rib, x = df_rib[[x_col_name]],
                          ymin = ~min, ymax = ~max, opacity = opacity,
                          showlegend = show_legend, name = df_rib[[fill_by]],
                          legendgroup = df_rib[[fill_by]], hoverinfo = "text",
                          hovertext = paste(
-                           "Date: ", df_rib$target_date, "<br>",
+                           "Date: ", df_rib[[x_col_name]], "<br>",
                            scales::percent(as.numeric(names(df_ribbon)[n_rib])),
                            "Intervals: ",
                            format(round(df_rib$min, 2), big.mark = ","), " - ",
@@ -207,21 +220,24 @@ plotly_proj_data <- function(plot_model, df_point, df_ribbon,
 #' Use ggplot2 to plot projection model output
 #'
 #' @param plot_model a plot_ly object to add lines and/or ribbons, if NULL will
-#'  create an empty object
+#'  create an empty object.
 #' @param df_point a `data.frame` with "target_date" and "value" columns, use to
-#'  add lines on the plot
+#'  add lines on the plot.
 #' @param df_ribbon a `data.frame` with "target_date", "min", and "max" columns,
-#'  use to add ribbons on the plot
-#' @param line_color a `string`, specific color associated with plot
-#' @param opacity a `numeric`, opacity of the ribbons, default 0.25
+#'  use to add ribbons on the plot.
+#' @param line_color a `string`, specific color associated with plot.
+#' @param opacity a `numeric`, opacity of the ribbons, default 0.25.
 #' @param fill_by name of a column for specifying colors and legend in plot.
 #' The `pal_color` parameter can be use to change the palette.
 #' Default to `model_id`.
+#' @param x_col_name column name containing the date information for the x-axis.
+#' By default, "target_date".
 #'
 #' @importFrom ggplot2 geom_ribbon
 #' @importFrom purrr map
 static_proj_data <- function(plot_model, df_point, df_ribbon,
-                             line_color, opacity, fill_by = "model_id") {
+                             line_color, opacity, fill_by = "model_id",
+                             x_col_name = "target_date") {
 
   if (!is.null(df_ribbon)) {
     for (fill in unique(unlist(purrr::map(df_ribbon, fill_by)))) {
@@ -231,7 +247,7 @@ static_proj_data <- function(plot_model, df_point, df_ribbon,
         if (nrow(df_rib) > 0) {
           plot_model <- plot_model +
             geom_ribbon(data = df_rib_mod,
-                        aes(.data$target_date, ymin = .data$min,
+                        aes(.data[[x_col_name]], ymin = .data$min,
                             ymax = .data$max, fill = .data[[fill_by]]),
                         alpha = opacity, inherit.aes = FALSE)
         }
@@ -241,7 +257,7 @@ static_proj_data <- function(plot_model, df_point, df_ribbon,
 
   if (nrow(df_point) > 0) {
     plot_model <- plot_model  +
-      geom_line(data = df_point, aes(x = .data$target_date, y = .data$value,
+      geom_line(data = df_point, aes(x = .data[[x_col_name]], y = .data$value,
                                      color = .data[[fill_by]]),
                 inherit.aes = FALSE, linewidth = 1)
   }
@@ -259,37 +275,45 @@ static_proj_data <- function(plot_model, df_point, df_ribbon,
 #' [HubDocs website](https://hubdocs.readthedocs.io/en/latest/format/tasks.html).
 #'
 #' @param plot_model a plot_ly object to add lines and/or ribbons, if NULL will
-#'  create an empty object
-#' @param df_point a `data.frame` with "target_date" and "value" columns, use to
-#'  add lines on the plot
-#' @param df_ribbon a `data.frame` with "target_date", "min", and "max" columns,
-#'  use to add ribbons on the plot
+#'  create an empty object.
+#' @param df_point a `data.frame` with a column containing date information
+#' (`x_col_name` parameter) and "value" columns, use to add lines on the plot.
+#' @param df_ribbon a `data.frame` with a column containing date information
+#' (`x_col_name` parameter), and a "min", and "max" columns, use to add ribbons
+#' on the plot.
 #' @param plot_truth a `boolean` for showing the truth data in the plot.
 #'  Default to TRUE. Data used in the plot comes from the parameter `truth_data`
 #' @param truth_data a `data.frame` object containing the ground truth data,
-#'  containing the columns: `time_idx` and `value`.
-#'  Ignored, if `plot_truth = FALSE`
-#' @param opacity a `numeric`, opacity of the ribbons, default 0.25
-#' @param line_color a `string`, specific color associated with plot
+#'  containing the columns: date information (`x_truth_col_name` parameter) and
+#'  `value`. Ignored, if `plot_truth = FALSE`.
+#' @param opacity a `numeric`, opacity of the ribbons, default 0.25.
+#' @param line_color a `string`, specific color associated with plot.
 #' @param top_layer character vector, where the first element indicates the top
 #'  layer of the resulting plot. Possible options are `"model_output"` (default)
-#'  and `"truth"`
+#'  and `"truth"`.
 #' @param show_truth_legend a `boolean` to show legend of the truth data, by
-#'  default `TRUE`
+#'  default `TRUE`.
 #' @param interactive a `boolean` to output an "interactive" version of the
 #'  plot (using Plotly) or a "static" plot (using ggplot2). By default, `TRUE`
-#'  (interactive plot)
-#' @param ... additional Plotly parameters
+#'  (interactive plot).
+#' @param ... additional Plotly parameters.
 #' @param fill_by name of a column for specifying colors and legend in plot.
 #' The `pal_color` parameter can be use to change the palette.
 #' Default to `model_id`.
+#' @param x_col_name column name containing the date information for `df_point`
+#' and `df_ribbon` data frames, value will be map to the x-axis of the plot.
+#' By default, "target_date".
+#' @param x_truth_col_name  column name containing the date information for
+#' `truth_data` data frame, value will be map to the x-axis of the plot.
+#' By default, "time_idx".
 #'
 #' @importFrom plotly plot_ly
 simple_model_plot <- function(plot_model, df_point, df_ribbon, plot_truth,
                               truth_data, opacity = 0.25, line_color = NULL,
                               top_layer = "model_output",
                               show_truth_legend = TRUE, interactive = TRUE,
-                              fill_by = "model_id", ...) {
+                              fill_by = "model_id", x_col_name = "target_date",
+                              x_truth_col_name = "time_idx", ...) {
   # prerequisite
   if (is.null(plot_model)) {
     if (interactive) {
@@ -305,32 +329,40 @@ simple_model_plot <- function(plot_model, df_point, df_ribbon, plot_truth,
     if (interactive) {
       # Truth Data
       plot_model <- plotly_truth_data(plot_model, truth_data, plot_truth,
-                                      show_truth_legend, arguments)
+                                      show_truth_legend, arguments,
+                                      x_col_name = x_truth_col_name)
       # Projection data
-      plot_model <- plotly_proj_data(plot_model, df_point, df_ribbon, line_color,
-                                     opacity, arguments, fill_by)
+      plot_model <- plotly_proj_data(plot_model, df_point, df_ribbon,
+                                     line_color, opacity, arguments,
+                                     fill_by = fill_by, x_col_name = x_col_name)
     } else {
       # Truth Data
-      plot_model <- static_truth_data(plot_model, truth_data, plot_truth)
+      plot_model <- static_truth_data(plot_model, truth_data, plot_truth,
+                                      x_col_name = x_truth_col_name)
       # Projection data
       plot_model <- static_proj_data(plot_model, df_point, df_ribbon,
-                                     line_color, opacity, fill_by)
+                                     line_color, opacity, fill_by = fill_by,
+                                     x_col_name = x_col_name)
     }
 
   } else if (top_layer == "truth") {
     if (interactive) {
       # Projection data
       plot_model <- plotly_proj_data(plot_model, df_point, df_ribbon,
-                                     line_color, opacity, arguments, fill_by)
+                                     line_color, opacity, arguments,
+                                     fill_by = fill_by, x_col_name = x_col_name)
       # Truth Data
       plot_model <- plotly_truth_data(plot_model, truth_data, plot_truth,
-                                      show_truth_legend, arguments)
+                                      show_truth_legend, arguments,
+                                      x_col_name = x_truth_col_name)
     } else {
       # Projection data
       plot_model <- static_proj_data(plot_model, df_point, df_ribbon,
-                                     line_color, opacity, fill_by)
+                                     line_color, opacity,
+                                     fill_by = fill_by, x_col_name = x_col_name)
       # Truth Data
-      plot_model <- static_truth_data(plot_model, truth_data, plot_truth)
+      plot_model <- static_truth_data(plot_model, truth_data, plot_truth,
+                                      x_col_name = x_truth_col_name)
     }
   }
 
@@ -349,8 +381,8 @@ simple_model_plot <- function(plot_model, df_point, df_ribbon, plot_truth,
 #'  associated with specific color (`ens_color`). NULL is no specific layout
 #'  required
 #' @param truth_data a `data.frame` object containing the ground truth data,
-#'  containing the columns: `time_idx` and `value`.
-#'  Ignored, if `plot_truth = FALSE`
+#'  containing the columns: date information (`x_truth_col_name` parameter) and
+#'  `value`. Ignored, if `plot_truth = FALSE`.
 #' @param plot_truth a `boolean` for showing the truth data in the plot.
 #'  Default to TRUE. Data used in the plot comes from the parameter `truth_data`
 #' @param intervals a vector of `numeric` values indicating which central
@@ -389,6 +421,12 @@ simple_model_plot <- function(plot_model, df_point, df_ribbon, plot_truth,
 #' @param fill_by name of a column for specifying colors and legend in plot.
 #' The `pal_color` parameter can be use to change the palette.
 #' Default to `model_id`.
+#' @param x_col_name column name containing the date information for `all_plot`
+#' and `all_ens` data frames, value will be map to the x-axis of the plot.
+#' By default, "target_date".
+#' @param x_truth_col_name  column name containing the date information for
+#' `truth_data` data frame, value will be map to the x-axis of the plot.
+#' By default, "time_idx".
 #'
 #' @importFrom plotly plot_ly layout subplot
 #' @importFrom ggplot2 ggplot scale_color_manual scale_fill_manual facet_wrap
@@ -399,7 +437,9 @@ output_plot <-  function(all_plot, all_ens, truth_data, plot_truth = TRUE,
                          facet = NULL, facet_scales = "fixed",
                          facet_nrow = NULL, facet_ncol = NULL,
                          facet_title = "top left", facet_value = NULL,
-                         interactive = TRUE, fill_by = "model_id") {
+                         interactive = TRUE, fill_by = "model_id",
+                         x_col_name = "target_date",
+                         x_truth_col_name = "time_idx") {
   if (interactive) {
     plot_model <- plotly::plot_ly(height = 1050, colors =  pal_color)
   } else {
@@ -443,18 +483,15 @@ output_plot <-  function(all_plot, all_ens, truth_data, plot_truth = TRUE,
         plot_model <- simple_model_plot(
           plot_model, df_point, df_ribbon, plot_truth, truth_data,
           opacity = fill_transparency, top_layer = top_layer,
-          interactive = TRUE, fill_by = fill_by)
-  #    } else if (facet == "model_id") {
-  #      plot_model <- simple_model_plot(
-  #        plot_model, df_point, df_ribbon, plot_truth, truth_data,
-  #        opacity = fill_transparency, top_layer = top_layer, showlegend = FALSE,
-  #        show_truth_legend = FALSE, interactive = TRUE, fill_by = fill_by)
+          interactive = TRUE, fill_by = fill_by, x_col_name = x_col_name,
+          x_truth_col_name = x_truth_col_name)
       } else {
         plot_model <- simple_model_plot(
           plot_model, df_point, df_ribbon, plot_truth, truth_data,
           opacity = fill_transparency, showlegend = FALSE,
           top_layer = top_layer, show_truth_legend = FALSE,
-          interactive = TRUE, fill_by = fill_by)
+          interactive = TRUE, fill_by = fill_by, x_col_name = x_col_name,
+          x_truth_col_name = x_truth_col_name)
       }
       # Ensemble color
       if (!is.null(all_ens)) {
@@ -462,19 +499,22 @@ output_plot <-  function(all_plot, all_ens, truth_data, plot_truth = TRUE,
           plot_model <- simple_model_plot(
             plot_model, df_point_ens, df_ribbon_ens, FALSE, truth_data,
             line_color = ens_color, opacity = fill_transparency,
-            top_layer = top_layer, interactive = TRUE, fill_by = fill_by)
+            top_layer = top_layer, interactive = TRUE, fill_by = fill_by,
+            x_col_name = x_col_name, x_truth_col_name = x_truth_col_name)
         } else if (facet == "model_id") {
           plot_model <- simple_model_plot(
             plot_model, df_point_ens, df_ribbon_ens, TRUE, truth_data,
             line_color = ens_color, opacity = fill_transparency,
             top_layer = top_layer, show_truth_legend = FALSE,
-            interactive = TRUE, fill_by = fill_by)
+            interactive = TRUE, fill_by = fill_by, x_col_name = x_col_name,
+            x_truth_col_name = x_truth_col_name)
         } else {
           plot_model <- simple_model_plot(
             plot_model, df_point_ens, df_ribbon_ens, FALSE, truth_data,
             line_color = ens_color, opacity = fill_transparency,
             showlegend = FALSE, top_layer = top_layer,
-            show_truth_legend = FALSE, interactive = TRUE, fill_by = fill_by)
+            show_truth_legend = FALSE, interactive = TRUE, fill_by = fill_by,
+            x_col_name = x_col_name, x_truth_col_name = x_truth_col_name)
         }
       }
       if (!is.null(facet_title)) {
@@ -509,17 +549,19 @@ output_plot <-  function(all_plot, all_ens, truth_data, plot_truth = TRUE,
       df_point_ens <- all_ens$median
       df_ribbon_ens <- all_ens[names(all_ens) %in% intervals]
     }
-    plot_model <- simple_model_plot(plot_model, df_point, df_ribbon, plot_truth,
-                                    truth_data, opacity = fill_transparency,
-                                    top_layer = top_layer, fill_by = fill_by,
-                                    interactive = interactive)
+    plot_model <- simple_model_plot(
+      plot_model, df_point, df_ribbon, plot_truth, truth_data,
+      opacity = fill_transparency, top_layer = top_layer, fill_by = fill_by,
+      interactive = interactive, x_col_name = x_col_name,
+      x_truth_col_name = x_truth_col_name)
 
     # Ensemble color
     if (!is.null(all_ens)) {
       plot_model <- simple_model_plot(
         plot_model, df_point_ens, df_ribbon_ens, truth_data = truth_data,
         plot_truth = FALSE, opacity = fill_transparency, line_color = ens_color,
-        top_layer = top_layer, interactive = interactive, fill_by = fill_by)
+        top_layer = top_layer, interactive = interactive, fill_by = fill_by,
+        x_col_name = x_col_name, x_truth_col_name = x_truth_col_name)
     }
     if (!is.null(facet)) {
       plot_model <-  plot_model +
@@ -542,14 +584,15 @@ output_plot <-  function(all_plot, all_ens, truth_data, plot_truth = TRUE,
 #' Create a simple Plotly time-series plot for model projection outputs.
 #'
 #'@param model_output_data a `model_out_tbl` object, containing all the required
-#' columns, and a "target_date" and a "model_id" column.
+#' columns, a column containing date information (`x_col_name` parameter) and
+#' a column `value`.
 #'@param truth_data a `data.frame` object containing the ground truth data,
-#' containing the columns: `time_idx` and `value`.
-#' Ignored, if `plot_truth = FALSE`
+#' with a column containing date information (`x_truth_col_name` parameter) and
+#' a column `value`. Ignored, if `plot_truth = FALSE`.
 #'@param use_median_as_point a `Boolean` for using median quantile as point
 #' in plot. Default to FALSE. If TRUE, will select first any `median`
-#' output type value and if no `median` value included in `model_output_data`; will
-#' select `quantile = 0.5` output type value.
+#' output type value and if no `median` value included in `model_output_data`;
+#' will select `quantile = 0.5` output type value.
 #'@param plot a `boolean` for showing the plot. Default to TRUE.
 #'@param plot_truth a `boolean` for showing the truth data in the plot.
 #'  Default to TRUE. Data used in the plot comes from the parameter `truth_data`
@@ -592,9 +635,15 @@ output_plot <-  function(all_plot, all_ens, truth_data, plot_truth = TRUE,
 #'@param ens_color a `character` string of a color name, if not NULL, will be
 #' use as color for the model name associated with the parameter `ens_name`
 #' (both parameter need to be provided)
-#' @param ens_name a `character` string of a model name, if not NULL, will be
+#'@param ens_name a `character` string of a model name, if not NULL, will be
 #' use to change the color for the model name, associated with the parameter
 #' `ens_color`(both parameter need to be provided)
+#'@param x_col_name column name containing the date information for `all_plot`
+#' and `all_ens` data frames, value will be map to the x-axis of the plot.
+#' By default, "target_date".
+#'@param x_truth_col_name  column name containing the date information for
+#' `truth_data` data frame, value will be map to the x-axis of the plot.
+#' By default, "time_idx".
 #'
 #' @importFrom cli cli_abort cli_warn
 #' @importFrom scales percent
@@ -608,10 +657,11 @@ output_plot <-  function(all_plot, all_ens, truth_data, plot_truth = TRUE,
 #'
 plot_step_ahead_model_output <- function(
     model_output_data, truth_data, use_median_as_point = FALSE, plot = TRUE,
-    plot_truth = TRUE, show_legend = TRUE, facet = NULL, facet_scales = "fixed",
-    facet_nrow = NULL, facet_ncol = NULL, facet_title = "top left",
-    interactive = TRUE, fill_by = "model_id", pal_color = "Set2",
-    fill_transparency = 0.25, intervals = c(.5, .8, .95),
+    plot_truth = TRUE, x_col_name = "target_date",
+    x_truth_col_name = "time_idx", show_legend = TRUE, facet = NULL,
+    facet_scales = "fixed", facet_nrow = NULL, facet_ncol = NULL,
+    facet_title = "top left", interactive = TRUE, fill_by = "model_id",
+    pal_color = "Set2", fill_transparency = 0.25, intervals = c(.5, .8, .95),
     top_layer = "model_output", title = NULL, ens_color = NULL,
     ens_name = NULL) {
 
@@ -624,9 +674,9 @@ plot_step_ahead_model_output <- function(
     cli::cli_warn(c("!" = "{.arg model_output_data} must be a `model_out_tbl`.
                     Class applied by default"))
     model_output_data <- hubUtils::as_model_out_tbl(model_output_data,
-                                                remove_empty = TRUE)
+                                                    remove_empty = TRUE)
   }
-  exp_f_col <- unique(c("model_id", "output_type_id", "target_date", "value",
+  exp_f_col <- unique(c("model_id", "output_type_id", x_col_name, "value",
                         fill_by))
   model_output_col <- colnames(model_output_data)
   if (!all(exp_f_col %in% model_output_col)) {
@@ -637,8 +687,8 @@ plot_step_ahead_model_output <- function(
   model_output_type <- unique(model_output_data$output_type)
   if (!any(valid_types %in% model_output_type)) {
     cli::cli_abort(c(
-      "x" = "{.arg model_output_data} should contain at least one supported output
-      type.",
+      "x" = "{.arg model_output_data} should contain at least one supported
+      output type.",
       "i" = "Supported output types: {.val {valid_types}}."
     ))
   }
@@ -647,11 +697,11 @@ plot_step_ahead_model_output <- function(
     if (!is.data.frame(truth_data)) {
       cli::cli_abort(c("x" = "{.arg truth_data} must be a `data.frame`."))
     }
-    exp_td_col <- c("time_idx", "value")
+    exp_td_col <- c(x_truth_col_name, "value")
     truth_data_col <- colnames(truth_data)
     if (!all(exp_td_col %in% truth_data_col)) {
       cli::cli_abort(c("x" = "{.arg truth_data} did not have all required
-                     columns {.val {expploy_td_col}}"))
+                     columns {.val {exp_td_col}}"))
     }
   }
   ## Parameters
@@ -766,14 +816,16 @@ plot_step_ahead_model_output <- function(
   # Data process
   if (!is.null(ens_color) & !is.null(ens_name)) {
     ens_df <- model_output_data[which(model_output_data$model_id == ens_name), ]
-    all_ens <- plot_prep_data(ens_df, plain_line, plain_type, ribbon)
+    all_ens <- plot_prep_data(ens_df, plain_line, plain_type, ribbon,
+                              x_col_name = x_col_name)
     plot_df <- model_output_data[which(
       model_output_data$model_id != ens_name), ]
   } else {
     all_ens <- NULL
     plot_df <- model_output_data
   }
-  all_plot <- plot_prep_data(plot_df, plain_line, plain_type, ribbon)
+  all_plot <- plot_prep_data(plot_df, plain_line, plain_type, ribbon,
+                             x_col_name = x_col_name)
 
   # Plot
   if (!is.null(facet)) {
@@ -790,7 +842,9 @@ plot_step_ahead_model_output <- function(
                             facet_scales = facet_scales,
                             facet_nrow = facet_nrow,  facet_title = facet_title,
                             facet_value = facet_value,
-                            interactive = interactive, fill_by = fill_by)
+                            interactive = interactive, fill_by = fill_by,
+                            x_col_name = x_col_name,
+                            x_truth_col_name = x_truth_col_name)
   # Layout
   if (interactive) {
     plot_model <- plotly::layout(

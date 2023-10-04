@@ -22,7 +22,9 @@ output_plot(
   facet_title = "top left",
   facet_value = NULL,
   interactive = TRUE,
-  fill_by = "model_id"
+  fill_by = "model_id",
+  x_col_name = "target_date",
+  x_truth_col_name = "time_idx"
 )
 }
 \arguments{
@@ -35,8 +37,8 @@ associated with specific color (\code{ens_color}). NULL is no specific layout
 required}
 
 \item{truth_data}{a \code{data.frame} object containing the ground truth data,
-containing the columns: \code{time_idx} and \code{value}.
-Ignored, if \code{plot_truth = FALSE}}
+containing the columns: date information (\code{x_truth_col_name} parameter) and
+\code{value}. Ignored, if \code{plot_truth = FALSE}.}
 
 \item{plot_truth}{a \code{boolean} for showing the truth data in the plot.
 Default to TRUE. Data used in the plot comes from the parameter \code{truth_data}}
@@ -90,6 +92,14 @@ plot (using Plotly) or a "static" plot (using ggplot2). By default, \code{TRUE}
 \item{fill_by}{name of a column for specifying colors and legend in plot.
 The \code{pal_color} parameter can be use to change the palette.
 Default to \code{model_id}.}
+
+\item{x_col_name}{column name containing the date information for \code{all_plot}
+and \code{all_ens} data frames, value will be map to the x-axis of the plot.
+By default, "target_date".}
+
+\item{x_truth_col_name}{column name containing the date information for
+\code{truth_data} data frame, value will be map to the x-axis of the plot.
+By default, "time_idx".}
 }
 \description{
 Use Plotly or ggplot2 to plot projection model output with or without

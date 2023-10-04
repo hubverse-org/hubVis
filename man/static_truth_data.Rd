@@ -4,7 +4,7 @@
 \alias{static_truth_data}
 \title{Plot Truth data with GGplot}
 \usage{
-static_truth_data(plot_model, truth_data, plot_truth)
+static_truth_data(plot_model, truth_data, plot_truth, x_col_name = "time_idx")
 }
 \arguments{
 \item{plot_model}{a plot_ly object to add lines and/or ribbons, if NULL will
@@ -15,7 +15,11 @@ containing the columns: \code{time_idx} and \code{value}.
 Ignored, if \code{plot_truth = FALSE}}
 
 \item{plot_truth}{a \code{boolean} for showing the truth data in the plot.
-Default to TRUE. Data used in the plot comes from the parameter \code{truth_data}}
+Default to TRUE. Data used in the plot comes from the parameter
+\code{truth_data}.}
+
+\item{x_col_name}{column name containing the date information for the x-axis.
+By default, "time_idx".}
 }
 \description{
 Use ggplot2 to plot truth data
