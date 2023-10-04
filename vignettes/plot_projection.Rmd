@@ -78,10 +78,14 @@ head(truth_data)
 The model output data in the `projection_data` object follows the structure 
 of [the `model_out_tbl` class](https://infectious-disease-modeling-hubs.github.io/hubUtils/articles/connect_hub.html#structure-of-hubverse-datasets). 
 This dataset is converted to a `model_out_tbl` object after being read-in above.
-In addition to the standard requirements for this class, the plotting function 
-in `hubVis` requires that the dataset have a `"target_date"` column, as this 
-variable is used as the x-axis variable for the plot. This column does not 
-exist in the raw example data, so we add it here:
+In addition to the standard requirements for this class, the `plot_step_ahead_model_output()` function 
+in `hubVis` requires that the dataset have a column whose value corresponds 
+to the variable that should be used for the x-axis of a "step ahead" plot. 
+In general, this should be a date variable that corresponds to the date 
+which is the "target" of a particular prediction. By default it will look for 
+the `"target_date"` column, although this could be over-ridden by specifying 
+a different column using the `x_col_name` argument.
+In our example data, this column does not exist, so we add it below:
 
 ```{r data_prep}
 projection_data <- dplyr::mutate(
