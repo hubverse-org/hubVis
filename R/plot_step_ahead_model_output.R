@@ -484,6 +484,13 @@ output_plot <-  function(all_plot, all_ens, truth_data, plot_truth = TRUE,
           opacity = fill_transparency, top_layer = top_layer,
           interactive = TRUE, fill_by = fill_by, x_col_name = x_col_name,
           x_truth_col_name = x_truth_col_name)
+      } else if (facet == fill_by) {
+         plot_model <- simple_model_plot(
+           plot_model, df_point, df_ribbon, plot_truth, truth_data,
+           opacity = fill_transparency, top_layer = top_layer,
+           show_truth_legend = FALSE, interactive = TRUE,
+           fill_by = fill_by, x_col_name = x_col_name,
+           x_truth_col_name = x_truth_col_name)
       } else {
         plot_model <- simple_model_plot(
           plot_model, df_point, df_ribbon, plot_truth, truth_data,
@@ -500,7 +507,7 @@ output_plot <-  function(all_plot, all_ens, truth_data, plot_truth = TRUE,
             line_color = ens_color, opacity = fill_transparency,
             top_layer = top_layer, interactive = TRUE, fill_by = fill_by,
             x_col_name = x_col_name, x_truth_col_name = x_truth_col_name)
-        } else if (facet == "model_id") {
+        } else if (facet == fill_by) {
           plot_model <- simple_model_plot(
             plot_model, df_point_ens, df_ribbon_ens, TRUE, truth_data,
             line_color = ens_color, opacity = fill_transparency,
@@ -541,6 +548,15 @@ output_plot <-  function(all_plot, all_ens, truth_data, plot_truth = TRUE,
     })
     plot_model <- plotly::subplot(subplot, nrows = facet_nrow, shareX = sharex,
                                   shareY = sharey)
+    if (facet == fill_by) {
+      for (i in seq_along(plot_model$x$data)) {
+        if (purrr::map(plot_model$x$data, "name")[[i]] %in% facet_value) {
+          plot_model$x$data[[i]]$fillcolor <-
+            plot_model$x$data[[i]]$line$color <-
+            pal_value[purrr::map(plot_model$x$data, "name")[[i]]]
+        }
+      }
+    }
   } else {
     df_point <- all_plot$median
     df_ribbon <- all_plot[names(all_plot) %in% intervals]
