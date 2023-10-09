@@ -780,8 +780,8 @@ plot_step_ahead_model_output <- function(
   ### Facet
   if (!is.null(facet)) {
     if ((length(facet) != 1) |
-        !(facet %in% grep("output_type|value", colnames(model_output_data),
-                          value = TRUE, invert = TRUE))) {
+        !all(facet %in% grep("output_type|value", colnames(model_output_data),
+                              value = TRUE, invert = TRUE))) {
       cli::cli_abort(c("x" = "if {.arg facet} is not NULL, the argument should
                        be of length 1 and should match one of the task_id column
                        of {.arg model_output_data}"))
