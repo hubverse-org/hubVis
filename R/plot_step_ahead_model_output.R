@@ -608,7 +608,7 @@ output_plot <-  function(all_plot, all_ens, truth_data, plot_truth = TRUE,
 #' in plot. Default to FALSE. If TRUE, will select first any `median`
 #' output type value and if no `median` value included in `model_output_data`;
 #' will select `quantile = 0.5` output type value.
-#'@param plot a `boolean` for showing the plot. Default to TRUE.
+#'@param show_plot a `boolean` for showing the plot. Default to TRUE.
 #'@param plot_truth a `boolean` for showing the truth data in the plot.
 #'  Default to TRUE. Data used in the plot comes from the parameter `truth_data`
 #'@param show_legend a `boolean` for showing the legend in the plot.
@@ -673,7 +673,7 @@ output_plot <-  function(all_plot, all_ens, truth_data, plot_truth = TRUE,
 #' @export
 #'
 plot_step_ahead_model_output <- function(
-    model_output_data, truth_data, use_median_as_point = FALSE, plot = TRUE,
+    model_output_data, truth_data, use_median_as_point = FALSE, show_plot = TRUE,
     plot_truth = TRUE, x_col_name = "target_date",
     x_truth_col_name = "time_idx", show_legend = TRUE, facet = NULL,
     facet_scales = "fixed", facet_nrow = NULL, facet_ncol = NULL,
@@ -887,7 +887,7 @@ plot_step_ahead_model_output <- function(
     }
   }
 
-  if (isTRUE(plot)) {
+  if (isTRUE(show_plot)) {
     if (interactive) show(plot_model)
     return(plot_model)
   } else {

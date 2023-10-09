@@ -8,7 +8,7 @@ plot_step_ahead_model_output(
   model_output_data,
   truth_data,
   use_median_as_point = FALSE,
-  plot = TRUE,
+  show_plot = TRUE,
   plot_truth = TRUE,
   x_col_name = "target_date",
   x_truth_col_name = "time_idx",
@@ -44,7 +44,7 @@ in plot. Default to FALSE. If TRUE, will select first any \code{median}
 output type value and if no \code{median} value included in \code{model_output_data};
 will select \code{quantile = 0.5} output type value.}
 
-\item{plot}{a \code{boolean} for showing the plot. Default to TRUE.}
+\item{show_plot}{a \code{boolean} for showing the plot. Default to TRUE.}
 
 \item{plot_truth}{a \code{boolean} for showing the truth data in the plot.
 Default to TRUE. Data used in the plot comes from the parameter \code{truth_data}}
