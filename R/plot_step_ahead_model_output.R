@@ -390,8 +390,8 @@ simple_model_plot <- function(
 #'  When plotting 6 models or more, the plot will be reduced to show `.95`
 #'  interval only. Value possibles: `0.5, 0.8, 0.9, 0.95`
 #' @param pal_color a `character` string for specifying the palette color in the
-#'  plot if `fill_by_model` is set to `TRUE`. For `plotly` plots, please refer
-#'  to [RColorBrewer::display.brewer.all()]. Default to `"Set2"`
+#'  plot. For `plotly` plots, please refer to
+#'  [RColorBrewer::display.brewer.all()]. Default to `"Set2"`
 #' @param fill_transparency numeric value used to set transparency of intervals.
 #'  0 means fully transparent, 1 means opaque. Default to `0.25`
 #' @param pal_value  a `named vector` containing the `model_id` (names) and
@@ -632,9 +632,11 @@ output_plot <-  function(all_plot, all_ens, truth_data, plot_truth = TRUE,
 #' The `pal_color` parameter can be use to change the palette.
 #' Default to `model_id`.
 #'@param pal_color a `character` string for specifying the palette color in the
-#' plot if `fill_by_model` is set to `TRUE`. Please refer
-#' to [RColorBrewer::display.brewer.all()]. If `NULL`, only blues will be used
-#' for all models. Default to `"Set2"`
+#' plot. Please refer to [RColorBrewer::display.brewer.all()]. If `NULL`,
+#' only `one_color` parameter will be used for all models. Default to `"Set2"`
+#' @param one_color a `character` string for specifying the color in the
+#' plot if `pal_color` is set to `NULL`. Please refer
+#' to [colors()] for accepted color names. Default to `"blue"`
 #'@param fill_transparency numeric value used to set transparency of intervals.
 #' 0 means fully transparent, 1 means opaque. Default to `0.25`
 #'@param intervals a vector of `numeric` values indicating which central
@@ -665,7 +667,7 @@ output_plot <-  function(all_plot, all_ens, truth_data, plot_truth = TRUE,
 #' @importFrom methods show
 #' @importFrom stats setNames
 #' @importFrom RColorBrewer brewer.pal
-#' @importFrom grDevices col2rgb rgb
+#' @importFrom grDevices col2rgb rgb colors
 #' @importFrom ggplot2 labs guides
 #'
 #' @export
@@ -676,9 +678,9 @@ plot_step_ahead_model_output <- function(
     x_truth_col_name = "time_idx", show_legend = TRUE, facet = NULL,
     facet_scales = "fixed", facet_nrow = NULL, facet_ncol = NULL,
     facet_title = "top left", interactive = TRUE, fill_by = "model_id",
-    pal_color = "Set2", fill_transparency = 0.25, intervals = c(.5, .8, .95),
-    top_layer = "model_output", title = NULL, ens_color = NULL,
-    ens_name = NULL) {
+    pal_color = "Set2", one_color = "blue", fill_transparency = 0.25,
+    intervals = c(.5, .8, .95), top_layer = "model_output", title = NULL,
+    ens_color = NULL, ens_name = NULL) {
 
   # Test format input
   ## Model Output data
@@ -815,7 +817,13 @@ plot_step_ahead_model_output <- function(
     }
     pal_value <- RColorBrewer::brewer.pal(n_pal, pal_color)
   } else {
-    pal_color = "blue"
+    if (!one_color %in% colors()) {
+      cli::cli_warn(c("!" = "{.arg one_color} is not one of the accepted color
+                       name, accepted values are: {.val {color())}}.
+                      {.val blue} used by default."))
+      one_color <- "blue"
+    }
+    pal_color = one_color
     pal_value <- rep(pal_color, length(fill_by_vect))
   }
   names(pal_value) <- fill_by_vect

@@ -21,6 +21,7 @@ plot_step_ahead_model_output(
   interactive = TRUE,
   fill_by = "model_id",
   pal_color = "Set2",
+  one_color = "blue",
   fill_transparency = 0.25,
   intervals = c(0.5, 0.8, 0.95),
   top_layer = "model_output",
@@ -85,9 +86,12 @@ The \code{pal_color} parameter can be use to change the palette.
 Default to \code{model_id}.}
 
 \item{pal_color}{a \code{character} string for specifying the palette color in the
-plot if \code{fill_by_model} is set to \code{TRUE}. Please refer
-to \code{\link[RColorBrewer:ColorBrewer]{RColorBrewer::display.brewer.all()}}. If \code{NULL}, only blues will be used
-for all models. Default to \code{"Set2"}}
+plot. Please refer to \code{\link[RColorBrewer:ColorBrewer]{RColorBrewer::display.brewer.all()}}. If \code{NULL},
+only \code{one_color} parameter will be used for all models. Default to \code{"Set2"}}
+
+\item{one_color}{a \code{character} string for specifying the color in the
+plot if \code{pal_color} is set to \code{NULL}. Please refer
+to \code{\link[=colors]{colors()}} for accepted color names. Default to \code{"blue"}}
 
 \item{fill_transparency}{numeric value used to set transparency of intervals.
 0 means fully transparent, 1 means opaque. Default to \code{0.25}}

@@ -50,8 +50,8 @@ When plotting 6 models or more, the plot will be reduced to show \code{.95}
 interval only. Value possibles: \verb{0.5, 0.8, 0.9, 0.95}}
 
 \item{pal_color}{a \code{character} string for specifying the palette color in the
-plot if \code{fill_by_model} is set to \code{TRUE}. For \code{plotly} plots, please refer
-to \code{\link[RColorBrewer:ColorBrewer]{RColorBrewer::display.brewer.all()}}. Default to \code{"Set2"}}
+plot. For \code{plotly} plots, please refer to
+\code{\link[RColorBrewer:ColorBrewer]{RColorBrewer::display.brewer.all()}}. Default to \code{"Set2"}}
 
 \item{fill_transparency}{numeric value used to set transparency of intervals.
 0 means fully transparent, 1 means opaque. Default to \code{0.25}}

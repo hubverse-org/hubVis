@@ -311,6 +311,14 @@ plot_step_ahead_model_output(projection_data_A_us, truth_data_us,
                              pal_color = NULL, use_median_as_point = TRUE)
 ```
 
+The default blue color can be changed with the `one_color` parameter
+```{r plot_us_mod_orange}
+plot_step_ahead_model_output(projection_data_A_us, truth_data_us, 
+                             intervals = 0.8, one_color = "orange",
+                             ens_name = "hub-ensemble", ens_color = "black",
+                             pal_color = NULL, use_median_as_point = TRUE)
+```
+
 - Interactive/Static plot:
 ```{r plot_stat}
 plot_step_ahead_model_output(projection_data_A_us, truth_data_us, 
