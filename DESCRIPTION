@@ -24,8 +24,10 @@ Remotes:
     Infectious-Disease-Modeling-Hubs/hubUtils
 Suggests:
     dplyr,
-    rmarkdown
+    rmarkdown,
+    testthat (>= 3.0.0)
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
 URL: URL: https://github.com/Infectious-Disease-Modeling-Hubs/hubVis
 BugReports: https://github.com/Infectious-Disease-Modeling-Hubs/hubVis/issues
+Config/testthat/edition: 3

@@ -700,7 +700,7 @@ plot_step_ahead_model_output <- function(
     cli::cli_abort(c("x" = "{.arg model_output_data} did not have all required
                      columns {.val {exp_f_col}}"))
   }
-  valid_types <- c("mean", "median", "quantile")
+  valid_types <- c("median", "quantile")
   model_output_type <- unique(model_output_data$output_type)
   if (!any(valid_types %in% model_output_type)) {
     cli::cli_abort(c(
@@ -709,6 +709,7 @@ plot_step_ahead_model_output <- function(
       "i" = "Supported output types: {.val {valid_types}}."
     ))
   }
+
   ## Truth Data
   if (plot_truth) {
     if (!is.data.frame(truth_data)) {
@@ -734,7 +735,7 @@ plot_step_ahead_model_output <- function(
                       multiple of these possible values
                       {.val {names(list_intervals)}}.
                       Only the matching value(s) will be used (if no matching
-                      value, the default will be used."))
+                      value, the default will be used)."))
       intervals <- intervals[intervals %in% names(list_intervals)]
       if (length(intervals) == 0) {
         intervals <- as.character(c(.5, .8, .95))
@@ -819,7 +820,7 @@ plot_step_ahead_model_output <- function(
   } else {
     if (!one_color %in% colors()) {
       cli::cli_warn(c("!" = "{.arg one_color} is not one of the accepted color
-                       name, accepted values are: {.val {color())}}.
+                       name, accepted values are: {.val {colors()}}.
                       {.val blue} used by default."))
       one_color <- "blue"
     }
