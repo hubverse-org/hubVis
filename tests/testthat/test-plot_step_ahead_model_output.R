@@ -1,6 +1,6 @@
 # Data Preparation
 projection_path <- system.file("example_round1.csv", package = "hubVis")
-projection_data0 <- read.csv(projection_path)
+projection_data0 <- read.csv(projection_path, stringsAsFactors = FALSE)
 projection_data <- dplyr::mutate(
   projection_data0, target_date = as.Date(origin_date) + (horizon * 7) - 1)
 projection_data_A_us <- dplyr::filter(projection_data,
@@ -13,7 +13,7 @@ d_proj = rbind(projection_data_A_us,
 d_proj = hubUtils::as_model_out_tbl(d_proj)
 
 truth_path <- system.file("truth_data.csv", package = "hubVis")
-truth_data <- read.csv(truth_path)
+truth_data <- read.csv(truth_path, stringsAsFactors = FALSE)
 truth_data_us <- dplyr::filter(truth_data, location == "US",
                                time_idx < min(projection_data$target_date) + 21,
                                time_idx > "2020-10-01")
