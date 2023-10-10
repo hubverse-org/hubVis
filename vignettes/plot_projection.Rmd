@@ -64,12 +64,12 @@ function: `hubEnsembles::simple_ensemble(df_round1, agg_fun = "median")`
 
 ```{r load_data}
 projection_path <- system.file("example_round1.csv", package = "hubVis")
-projection_data <- read.csv(projection_path)
+projection_data <- read.csv(projection_path, stringsAsFactors = FALSE)
 projection_data <- as_model_out_tbl(projection_data)
 head(projection_data)
 
 truth_path <- system.file("truth_data.csv", package = "hubVis")
-truth_data <- read.csv(truth_path)
+truth_data <- read.csv(truth_path, stringsAsFactors = FALSE)
 head(truth_data)
 ```
 
