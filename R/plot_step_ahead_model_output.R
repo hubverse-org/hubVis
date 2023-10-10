@@ -401,6 +401,9 @@ simple_model_plot <- function(
 #'  and `"truth"`
 #' @param ens_color a `character` string of a color name, if not NULL, will be
 #' use as color for the model name associated with the parameter `ens_name`
+#'@param ens_name a `character` string of a model name, if not NULL, will be
+#' use to change the color for the model name, associated with the parameter
+#' `ens_color`(both parameter need to be provided)
 #' @param facet a unique value corresponding as a task_id variable name
 #' (interpretable as facet option for ggplot)
 #' @param facet_scales argument for scales as in [ggplot2::facet_wrap] or
@@ -429,16 +432,14 @@ simple_model_plot <- function(
 #'
 #' @importFrom plotly plot_ly layout subplot
 #' @importFrom ggplot2 ggplot scale_color_manual scale_fill_manual facet_wrap
-output_plot <-  function(all_plot, all_ens, truth_data, plot_truth = TRUE,
-                         intervals = c(.5, .8, .95), pal_color = "Set2",
-                         fill_transparency = 0.25, pal_value = NULL,
-                         top_layer = "model_output", ens_color = NULL,
-                         facet = NULL, facet_scales = "fixed",
-                         facet_nrow = NULL, facet_ncol = NULL,
-                         facet_title = "top left", facet_value = NULL,
-                         interactive = TRUE, fill_by = "model_id",
-                         x_col_name = "target_date",
-                         x_truth_col_name = "time_idx") {
+output_plot <-  function(
+    all_plot, all_ens, truth_data, plot_truth = TRUE,
+    intervals = c(.5, .8, .95), pal_color = "Set2", fill_transparency = 0.25,
+    pal_value = NULL, top_layer = "model_output", ens_color = NULL,
+    ens_name = NULL, facet = NULL, facet_scales = "fixed", facet_nrow = NULL,
+    facet_ncol = NULL, facet_title = "top left", facet_value = NULL,
+    interactive = TRUE, fill_by = "model_id", x_col_name = "target_date",
+    x_truth_col_name = "time_idx") {
   if (interactive) {
     plot_model <- plotly::plot_ly(colors =  pal_color)
   } else {
@@ -508,12 +509,14 @@ output_plot <-  function(all_plot, all_ens, truth_data, plot_truth = TRUE,
             top_layer = top_layer, interactive = TRUE, fill_by = fill_by,
             x_col_name = x_col_name, x_truth_col_name = x_truth_col_name)
         } else if (facet == fill_by) {
-          plot_model <- simple_model_plot(
-            plot_model, df_point_ens, df_ribbon_ens, TRUE, truth_data,
-            line_color = ens_color, opacity = fill_transparency,
-            top_layer = top_layer, show_truth_legend = FALSE,
-            interactive = TRUE, fill_by = fill_by, x_col_name = x_col_name,
-            x_truth_col_name = x_truth_col_name)
+          if (facet == "model_id" & ens_name == x) {
+            plot_model <- simple_model_plot(
+              plot_model, df_point_ens, df_ribbon_ens, TRUE, truth_data,
+              line_color = ens_color, opacity = fill_transparency,
+              top_layer = top_layer, show_truth_legend = FALSE,
+              interactive = TRUE, fill_by = fill_by, x_col_name = x_col_name,
+              x_truth_col_name = x_truth_col_name)
+          }
         } else {
           plot_model <- simple_model_plot(
             plot_model, df_point_ens, df_ribbon_ens, FALSE, truth_data,
@@ -862,8 +865,8 @@ plot_step_ahead_model_output <- function(
                             intervals =  intervals, pal_color = pal_color,
                             fill_transparency = fill_transparency,
                             pal_value = pal_value, top_layer = top_layer,
-                            ens_color = ens_color, facet = facet,
-                            facet_scales = facet_scales,
+                            ens_color = ens_color, ens_name = ens_name,
+                            facet = facet, facet_scales = facet_scales,
                             facet_nrow = facet_nrow,  facet_title = facet_title,
                             facet_value = facet_value,
                             interactive = interactive, fill_by = fill_by,

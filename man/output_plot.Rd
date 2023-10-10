@@ -15,6 +15,7 @@ output_plot(
   pal_value = NULL,
   top_layer = "model_output",
   ens_color = NULL,
+  ens_name = NULL,
   facet = NULL,
   facet_scales = "fixed",
   facet_nrow = NULL,
@@ -65,6 +66,10 @@ and \code{"truth"}}
 
 \item{ens_color}{a \code{character} string of a color name, if not NULL, will be
 use as color for the model name associated with the parameter \code{ens_name}}
+
+\item{ens_name}{a \code{character} string of a model name, if not NULL, will be
+use to change the color for the model name, associated with the parameter
+\code{ens_color}(both parameter need to be provided)}
 
 \item{facet}{a unique value corresponding as a task_id variable name
 (interpretable as facet option for ggplot)}
