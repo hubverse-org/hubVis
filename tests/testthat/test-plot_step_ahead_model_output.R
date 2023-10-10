@@ -192,7 +192,8 @@ testthat::test_that("Output", {
 
   plot_test <- plot_step_ahead_model_output(
     projection_data, truth_data_us, facet = "model_id", title = "My Plot",
-    facet_scales = "free_y", facet_nrow = 3, fill_transparency = 0.75)
+    facet_scales = "free_y", facet_nrow = 3, fill_transparency = 0.75,
+    use_median_as_point = TRUE)
   testthat::expect_gt(length(unique(purrr::map(plot_test$x$data, "yaxis"))), 1)
   testthat::expect_equal(length(unique(purrr::map(plot_test$x$data, "xaxis"))),
                          1)
@@ -220,7 +221,8 @@ testthat::test_that("Output", {
     "rgba(255,165,0,1)")
 
   plot_test <- plot_step_ahead_model_output(
-    projection_data_A_us, truth_data_us, intervals = 0.9)
+    projection_data_A_us, truth_data_us, intervals = 0.9, ens_color = "black",
+    ens_name = "hub-ensemble", facet = "model_id")
   testthat::expect_equal(
     strsplit(strsplit(tail(purrr::map(
       plot_test$x$attrs, "hovertext"), 1)[[1]], "<br>")[[1]][2],
