@@ -868,7 +868,7 @@ plot_step_ahead_model_output <- function(
                             ens_color = ens_color, ens_name = ens_name,
                             facet = facet, facet_scales = facet_scales,
                             facet_nrow = facet_nrow,  facet_title = facet_title,
-                            facet_value = facet_value,
+                            facet_value = facet_value, facet_ncol = facet_ncol,
                             interactive = interactive, fill_by = fill_by,
                             x_col_name = x_col_name,
                             x_truth_col_name = x_truth_col_name)

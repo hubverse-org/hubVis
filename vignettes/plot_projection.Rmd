@@ -175,13 +175,23 @@ plot_step_ahead_model_output(projection_data_us, truth_data_us,
                              facet = "scenario_id")
 ```
 
-The layout of the "facets" can be adjusted:
+The layout of the "facets" can be adjusted, with the different `facet_` 
+parameters. 
 
-```{r plot_us_facet}
+```{r plot_us_facet_interact}
 plot_step_ahead_model_output(projection_data_us, truth_data_us, 
                              use_median_as_point = TRUE,
                              facet = "scenario_id", facet_scales = "free_x", 
                              facet_nrow = 2, facet_title = "bottom left")
+```
+
+Or with the additional `facet_ncol` parameter for the statics plot
+```{r plot_us_facet_stat}
+plot_step_ahead_model_output(projection_data_us, truth_data_us, 
+                             use_median_as_point = TRUE, interactive = FALSE,
+                             facet = "scenario_id", facet_scales = "free_x", 
+                             facet_ncol = 4, facet_title = "bottom left"
+                             )
 ```
 
 A "facet" (or subplot) plot can also be created for each model. In this case, 
