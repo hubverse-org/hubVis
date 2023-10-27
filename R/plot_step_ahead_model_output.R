@@ -5,9 +5,8 @@
 #'
 #' @param df a `data.frame` object containing the columns: `model_id`,
 #' `output_type_id`, `target_date`, `value`
-#' @param plain_line a `numeric` output_type_id value, value will be used to
-#' create a plain line in the plot. Should be a unique value
-#' (for example: 0.5)
+#' @param plain_line a unique `numeric` output_type_id value, value will be
+#' used to create a plain line in the plot (for example: `0.5`).
 #' @param plain_type a `string` output_type value, value will be used to
 #' create a plain line in the plot. Should be a unique value
 #' (for example: "quantile")
@@ -16,7 +15,9 @@
 #' @param x_col_name column name containing the date information for the x-axis.
 #' By default, "target_date".
 #'
+#' @noRd
 #' @importFrom stats reshape
+#' @importFrom dplyr near
 plot_prep_data <- function(df, plain_line, plain_type, intervals,
                            x_col_name = "target_date") {
   # Median
@@ -39,7 +40,7 @@ plot_prep_data <- function(df, plain_line, plain_type, intervals,
       ribbon_df <- df[which(df$output_type_id %in% ribbon), ]
       ribbon_df <- transform(
         ribbon_df, output_type_id = ifelse(
-          ribbon_df$output_type_id == min(ribbon), "min", "max"))
+          dplyr::near(ribbon_df$output_type_id, min(ribbon)), "min", "max"))
       id_col <- colnames(ribbon_df)[!colnames(ribbon_df) %in%
                                       c("output_type_id", "value")]
       ribbon_df <- reshape(
@@ -71,6 +72,7 @@ plot_prep_data <- function(df, plain_line, plain_type, intervals,
 #' @param x_col_name column name containing the date information for the x-axis.
 #' By default, "time_idx".
 #'
+#' @noRd
 #' @importFrom plotly add_trace layout
 plotly_truth_data <- function(plot_model, truth_data, plot_truth, show_legend,
                               arguments, x_col_name = "time_idx") {
@@ -107,6 +109,7 @@ plotly_truth_data <- function(plot_model, truth_data, plot_truth, show_legend,
 #' @param x_col_name column name containing the date information for the x-axis.
 #'  By default, "time_idx".
 #'
+#' @noRd
 #' @importFrom ggplot2 geom_line geom_point aes .data
 static_truth_data <- function(plot_model, truth_data, plot_truth,
                               x_col_name = "time_idx") {
@@ -142,6 +145,7 @@ static_truth_data <- function(plot_model, truth_data, plot_truth,
 #' @param x_col_name column name containing the date information for the x-axis.
 #' By default, "target_date".
 #'
+#' @noRd
 #' @importFrom plotly add_lines add_ribbons
 plotly_proj_data <- function(plot_model, df_point, df_ribbon,
                              line_color, opacity, arguments,
@@ -233,6 +237,7 @@ plotly_proj_data <- function(plot_model, df_point, df_ribbon,
 #' @param x_col_name column name containing the date information for the x-axis.
 #' By default, "target_date".
 #'
+#' @noRd
 #' @importFrom ggplot2 geom_ribbon
 #' @importFrom purrr map
 static_proj_data <- function(plot_model, df_point, df_ribbon,
@@ -307,6 +312,7 @@ static_proj_data <- function(plot_model, df_point, df_ribbon,
 #' `truth_data` data frame, value will be map to the x-axis of the plot.
 #' By default, "time_idx".
 #'
+#' @noRd
 #' @importFrom plotly plot_ly
 simple_model_plot <- function(
     plot_model, df_point, df_ribbon, plot_truth, truth_data, opacity = 0.25,
@@ -430,6 +436,7 @@ simple_model_plot <- function(
 #' `truth_data` data frame, value will be map to the x-axis of the plot.
 #' By default, "time_idx".
 #'
+#' @noRd
 #' @importFrom plotly plot_ly layout subplot
 #' @importFrom ggplot2 ggplot scale_color_manual scale_fill_manual facet_wrap
 output_plot <-  function(
