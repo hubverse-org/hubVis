@@ -69,7 +69,6 @@
 #' @importFrom cli cli_abort cli_warn
 #' @importFrom scales percent
 #' @importFrom methods show
-#' @importFrom stats setNames
 #' @importFrom RColorBrewer brewer.pal
 #' @importFrom grDevices col2rgb rgb colors
 #' @importFrom ggplot2 labs guides
@@ -259,9 +258,9 @@ plot_step_ahead_model_output <- function(
 
   # Plot
   if (!is.null(facet)) {
-    facet_value = sort(unique(model_output_data[[facet]]))
+    facet_value <- sort(unique(model_output_data[[facet]]))
   } else {
-    facet_value = NULL
+    facet_value <- NULL
   }
   plot_model <- output_plot(all_plot, all_ens, truth_data,
                             plot_truth = plot_truth,

@@ -17,7 +17,7 @@
 #'
 #' @noRd
 #' @importFrom dplyr near
-#' @importFrom stats reshape
+#' @importFrom stats reshape setNames
 plot_prep_data <- function(df, plain_line, plain_type, intervals,
                            x_col_name = "target_date") {
   # Median
@@ -50,7 +50,7 @@ plot_prep_data <- function(df, plain_line, plain_type, intervals,
       colnames(ribbon_df) <- gsub("^value\\.", "" , colnames(ribbon_df))
       return(ribbon_df)
     })
-    ribbon_list <- setNames(ribbon_list, names(intervals))
+    ribbon_list <- stats::setNames(ribbon_list, names(intervals))
   }
   # List output
   return(c(list("median" = plain_df), ribbon_list))
@@ -471,13 +471,13 @@ output_plot <-  function(
       # Data preparation
       df_point <- all_plot$median[which(all_plot$median[[facet]] == x), ]
       df_ribbon <- all_plot[names(all_plot) %in% intervals]
-      df_ribbon <- setNames(lapply(df_ribbon, function(df_rib) {
+      df_ribbon <- stats::setNames(lapply(df_ribbon, function(df_rib) {
         df_rib[which(df_rib[[facet]] == x), ]
       }), names(df_ribbon))
       if (!is.null(all_ens)) {
         df_point_ens <- all_ens$median[which(all_ens$median[[facet]] == x), ]
         df_ribbon_ens <- all_ens[names(all_ens) %in% intervals]
-        df_ribbon_ens <- setNames(lapply(df_ribbon_ens, function(df_rib) {
+        df_ribbon_ens <- stats::setNames(lapply(df_ribbon_ens, function(df_rib) {
           df_rib[which(df_rib[[facet]] == x), ]
         }), names(df_ribbon_ens))
       }
