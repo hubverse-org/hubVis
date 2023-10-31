@@ -120,3 +120,27 @@ use to change the color for the model name, associated with the parameter
 \description{
 Create a simple Plotly time-series plot for model projection outputs.
 }
+\examples{
+
+# Load and Prepare Data
+# The package contains example files, please consult the vignette for
+# more information. The vignette also contains more examples.
+projection_path <- system.file("example_round1.csv", package = "hubVis")
+projection_data <- read.csv(projection_path, stringsAsFactors = FALSE)
+
+projection_data <- dplyr::mutate(projection_data,
+     target_date = as.Date(origin_date) + (horizon * 7) - 1)
+projection_data <- dplyr::filter(projection_data,
+     scenario_id == "A-2021-03-05", location == "US")
+projection_data <- hubUtils::as_model_out_tbl(projection_data)
+
+truth_path <- system.file("truth_data.csv", package = "hubVis")
+truth_data <- read.csv(truth_path, stringsAsFactors = FALSE)
+truth_data_us <- dplyr::filter(truth_data, location == "US",
+     time_idx < min(projection_data$target_date) + 21,
+     time_idx > "2020-10-01")
+
+# Plot
+plot_step_ahead_model_output(projection_data, truth_data_us)
+
+}
