@@ -26,6 +26,12 @@ test_that("Input parameters", {
   expect_warning(plot_step_ahead_model_output(projection_data_A_us,
                                                         truth_data_us))
   projection_data_A_us <- hubUtils::as_model_out_tbl(projection_data_A_us)
+  projection_data_A_us_w <-  dplyr::mutate(
+    projection_data_A_us, output_type_id = as.character(output_type_id))
+  expect_warning(plot_step_ahead_model_output(projection_data_A_us_w,
+                                              truth_data_us))
+
+
   # Column
   expect_error(plot_step_ahead_model_output(
     projection_data_A_us, truth_data_us, x_col_name = "date"))
