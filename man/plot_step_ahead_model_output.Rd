@@ -32,8 +32,8 @@ plot_step_ahead_model_output(
 }
 \arguments{
 \item{model_output_data}{a \code{model_out_tbl} object, containing all the required
-columns, a column containing date information (\code{x_col_name} parameter) and
-a column \code{value}.}
+columns including a column containing date information (\code{x_col_name}
+parameter) and a column \code{value}.}
 
 \item{truth_data}{a \code{data.frame} object containing the ground truth data,
 with a column containing date information (\code{x_truth_col_name} parameter) and

@@ -3,8 +3,8 @@
 #' Create a simple Plotly time-series plot for model projection outputs.
 #'
 #'@param model_output_data a `model_out_tbl` object, containing all the required
-#' columns, a column containing date information (`x_col_name` parameter) and
-#' a column `value`.
+#' columns including a column containing date information (`x_col_name`
+#' parameter) and a column `value`.
 #'@param truth_data a `data.frame` object containing the ground truth data,
 #' with a column containing date information (`x_truth_col_name` parameter) and
 #' a column `value`. Ignored, if `plot_truth = FALSE`.
@@ -198,6 +198,14 @@ plot_step_ahead_model_output <- function(
     cli::cli_abort(c("x" = "{.arg model_output_type_val} did not have the
                      expected output_type_id value {.val {exp_value}}"))
   }
+  if (!class(exp_value) %in% class(model_output_type_val)) {
+    model_output_data$output_type_id <- as.numeric(
+      model_output_data$output_type_id)
+    cli::cli_warn(c("!" = "{.arg output_type_id} column must be a numeric.
+                    . Class applied by default."))
+  }
+
+
   ### Ensemble specific color
   if (is.null(ens_color) + is.null(ens_name) == 1) {
     cli::cli_abort(c("x" = "Both {.arg ens_color} and {.arg ens_name} should
