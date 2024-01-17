@@ -202,7 +202,7 @@ plot_step_ahead_model_output <- function(
     model_output_data$output_type_id <- as.numeric(
       model_output_data$output_type_id)
     cli::cli_warn(c("!" = "{.arg output_type_id} column must be a numeric.
-                    . Class applied by default."))
+                    Class applied by default."))
   }
 
 
