@@ -38,7 +38,7 @@ The function can output 2 types of plots:
 > examples.
 
 ```r
-plot_step_ahead_model_output(projection_data_us, truth_data_us)
+plot_step_ahead_model_output(projection_data_us, target_data_us)
 ```
 ![](./man/figures/simple_plotly.png)
 
@@ -46,7 +46,7 @@ plot_step_ahead_model_output(projection_data_us, truth_data_us)
  models, etc.
 
 ```r
-plot_step_ahead_model_output(projection_data_us, truth_data_us, 
+plot_step_ahead_model_output(projection_data_us, target_data_us, 
                              use_median_as_point = TRUE,
                              facet = "scenario_id", facet_scales = "free_x", 
                              facet_nrow = 2, facet_title = "bottom left")
