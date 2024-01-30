@@ -223,6 +223,15 @@ plot_step_ahead_model_output <- function(
                        be of length 1 and should match one of the task_id column
                        of {.arg model_output_data}"))
     }
+    facet_max <- length(unique(model_output_data[[facet]]))
+    if ((interactive) & !is.null(facet_nrow)) {
+      if (facet_nrow > facet_max) {
+        cli::cli_warn(c("!" = "{.arg facet_nrow} should be less or equal to the
+                    number of unique {.arg facet} value. By default, the
+                    parameter will be set to {.val {facet_max}}"))
+        facet_nrow <- facet_max
+      }
+    }
   }
   if (!is.null(facet_title)) {
     facet_title_opt <- c("top right", "top left", "bottom right", "bottom left")

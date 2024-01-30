@@ -83,6 +83,9 @@ test_that("Input parameters", {
     projection_data_A_us, target_data_us, ens_color = "black"))
   expect_error(plot_step_ahead_model_output(
     projection_data_A_us, target_data_us, facet = "value"))
+  testthat::expect_warning(plot_step_ahead_model_output(
+    hubUtils::as_model_out_tbl(projection_data), target_data_us,
+    facet = "scenario_id", facet_nrow = 5))
   expect_error(plot_step_ahead_model_output(
     projection_data_A_us, target_data_us, facet = c("target", "scenario_id")))
   expect_error(plot_step_ahead_model_output(
