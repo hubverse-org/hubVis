@@ -1,3 +1,11 @@
+# hubVis 0.0.0.9002
+
+This release contains an update to apply standardized hub vocabulary and use 
+"target data" rather than "truth data" in the hub (including in the functions 
+parameter and associated documentation) (#21)
+It also contains a patch for `plot_step_ahead_model_output()` to return a
+warning instead of an error if the output plot is interactive and the `facet_nrow` 
+parameter is higher than the number of maximum facet expected. (#19)
 
 # hubVis 0.0.0.9001
 
