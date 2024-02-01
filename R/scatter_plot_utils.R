@@ -22,14 +22,14 @@ plot_prep_data <- function(df, plain_line, plain_type, intervals,
                            x_col_name = "target_date") {
   # Median
   if (is.null(plain_line)) {
-    plain_df <- df[which(
-      df$output_type_id == plain_line & df$output_type == plain_type), ]
+    plain_df <- df[which(df$output_type_id == plain_line &
+                           df$output_type == plain_type), ]
   } else if (!is.na(plain_line)) {
-    plain_df <- df[which(
-      df$output_type_id == plain_line & df$output_type == plain_type), ]
+    plain_df <- df[which(df$output_type_id == plain_line &
+                           df$output_type == plain_type), ]
   } else {
-    plain_df <- df[which(
-      is.na(df$output_type_id) & df$output_type == plain_type), ]
+    plain_df <- df[which(is.na(df$output_type_id) &
+                           df$output_type == plain_type), ]
   }
   plain_df[[x_col_name]] <- as.Date(plain_df[[x_col_name]])
   # Intervals
@@ -38,16 +38,17 @@ plot_prep_data <- function(df, plain_line, plain_type, intervals,
   } else {
     ribbon_list <- lapply(intervals, function(ribbon) {
       ribbon_df <- df[which(df$output_type_id %in% ribbon), ]
-      ribbon_df <- transform(
-        ribbon_df, output_type_id = ifelse(
-          dplyr::near(ribbon_df$output_type_id, min(ribbon)), "min", "max"))
+      ribbon_df <-
+        transform(ribbon_df,
+                  output_type_id = ifelse(dplyr::near(ribbon_df$output_type_id,
+                                                      min(ribbon)), "min",
+                                          "max"))
       id_col <- colnames(ribbon_df)[!colnames(ribbon_df) %in%
                                       c("output_type_id", "value")]
-      ribbon_df <- reshape(
-        ribbon_df, timevar = "output_type_id", direction = "wide",
-        idvar = id_col)
+      ribbon_df <- reshape(ribbon_df, timevar = "output_type_id",
+                           direction = "wide", idvar = id_col)
       ribbon_df[[x_col_name]] <- as.Date(ribbon_df[[x_col_name]])
-      colnames(ribbon_df) <- gsub("^value\\.", "" , colnames(ribbon_df))
+      colnames(ribbon_df) <- gsub("^value\\.", "", colnames(ribbon_df))
       return(ribbon_df)
     })
     ribbon_list <- stats::setNames(ribbon_list, names(intervals))
@@ -78,19 +79,22 @@ plotly_target_data <- function(plot_model, target_data, plot_target, show_legend
                               arguments, x_col_name = "time_idx") {
   if (plot_target) {
     target_data[[x_col_name]] <- as.Date(target_data[[x_col_name]])
-    arg_list <- list(
-      p = plot_model, data = target_data, x = target_data[[x_col_name]],
-      y = ~value, type = "scatter", mode = "lines+markers",
-      line = list(color = "#6e6e6e"), hoverinfo = "text", name = "target",
-      legendgroup = "target", hovertext =
-        paste("Date: ", target_data[[x_col_name]], "<br>Target Data: ",
-              format(target_data$value, big.mark = ","), sep = ""),
-      marker = list(color = "#6e6e6e", size = 7), showlegend = show_legend)
+    arg_list <- list(p = plot_model, data = target_data,
+                     x = target_data[[x_col_name]], y = ~value, type = "scatter",
+                     mode = "lines+markers", line = list(color = "#6e6e6e"),
+                     hoverinfo = "text", name = "target",
+                     legendgroup = "target",
+                     hovertext = paste("Date: ", target_data[[x_col_name]],
+                                       "<br>target: ",
+                                       format(target_data$value, big.mark = ","),
+                                       sep = ""),
+                     marker = list(color = "#6e6e6e", size = 7),
+                     showlegend = show_legend)
     arg_list <- c(arg_list, arguments)
     plot_model <- do.call(plotly::add_trace, arg_list)
   }
-  plot_model <- plotly::layout(
-    plot_model, xaxis = list(title = 'Date'), yaxis = list(title = 'Value'))
+  plot_model <- plotly::layout(plot_model, xaxis = list(title = "Date"),
+                               yaxis = list(title = "Value"))
   return(plot_model)
 }
 
@@ -117,7 +121,7 @@ static_target_data <- function(plot_model, target_data, plot_target,
     target_data[[x_col_name]] <- as.Date(target_data[[x_col_name]])
     plot_model <- plot_model  +
       geom_line(data = target_data,
-                aes(x = .data[[x_col_name]],y = .data$value),
+                aes(x = .data[[x_col_name]], y = .data$value),
                 color = "#6e6e6e", inherit.aes = FALSE) +
       geom_point(data = target_data,
                  aes(x = .data[[x_col_name]], y = .data$value),
@@ -151,34 +155,31 @@ plotly_proj_data <- function(plot_model, df_point, df_ribbon,
                              line_color, opacity, arguments,
                              fill_by = "model_id", x_col_name = "target_date") {
   if (nrow(df_point) > 0) {
-    arg_list <- list(p = plot_model, data = df_point,
-                     x = df_point[[x_col_name]], y = ~value,
-                     legendgroup = df_point[[fill_by]],
-                     name = df_point[[fill_by]],
-                     hoverinfo = "text", hovertext = paste(
-                       "Date: ", df_point[[x_col_name]], "<br>",
-                       "Median: ", format(round(df_point$value, 2),
-                                          big.mark = ","), sep = ""))
+    arg_list <-
+      list(p = plot_model, data = df_point, x = df_point[[x_col_name]],
+           y = ~value, legendgroup = df_point[[fill_by]],
+           name = df_point[[fill_by]], hoverinfo = "text",
+           hovertext = paste("Date: ", df_point[[x_col_name]], "<br>",
+                             "Median: ", format(round(df_point$value, 2),
+                                                big.mark = ","), sep = ""))
     if (is.null(line_color)) {
       arg_list <- c(arg_list, list(color =  df_point[[fill_by]]), arguments)
       plot_model <- do.call(plotly::add_lines, arg_list)
-      plot_model <- plotly::layout(
-        plot_model, xaxis = list(title = 'Date'),
-        yaxis = list(title = 'Value'))
+      plot_model <- plotly::layout(plot_model, xaxis = list(title = "Date"),
+                                   yaxis = list(title = "Value"))
     } else {
       arg_list <- c(arg_list, list(line = list(color = line_color)), arguments)
       plot_model <- do.call(plotly::add_lines, arg_list)
-      plot_model <- plotly::layout(
-        plot_model, xaxis = list(title = 'Date'),
-        yaxis = list(title = 'Value'))
+      plot_model <- plotly::layout(plot_model, xaxis = list(title = "Date"),
+                                   yaxis = list(title = "Value"))
     }
-    show_legend = FALSE
+    show_legend <- FALSE
   } else {
     if (exists("arguments")) {
       show_legend <- arguments$showlegend
       if (is.null(show_legend)) show_legend <- TRUE
     } else {
-      show_legend = TRUE
+      show_legend <- TRUE
     }
   }
 
@@ -187,31 +188,28 @@ plotly_proj_data <- function(plot_model, df_point, df_ribbon,
       df_rib <- df_ribbon[[n_rib]]
       if (n_rib > 1) show_legend <- FALSE
       if (nrow(df_rib) > 0) {
-        arg_list <- list(plot_model, data = df_rib, x = df_rib[[x_col_name]],
-                         ymin = ~min, ymax = ~max, opacity = opacity,
-                         showlegend = show_legend, name = df_rib[[fill_by]],
-                         legendgroup = df_rib[[fill_by]], hoverinfo = "text",
-                         hovertext = paste(
-                           "Date: ", df_rib[[x_col_name]], "<br>",
-                           scales::percent(as.numeric(names(df_ribbon)[n_rib])),
-                           "Intervals: ",
-                           format(round(df_rib$min, 2), big.mark = ","), " - ",
-                           format(round(df_rib$max, 2), big.mark = ","),
-                           sep = ""))
+        hover_text <-
+          paste("Date: ", df_rib[[x_col_name]], "<br>",
+                scales::percent(as.numeric(names(df_ribbon)[n_rib])),
+                "Intervals: ", format(round(df_rib$min, 2), big.mark = ","),
+                " - ", format(round(df_rib$max, 2), big.mark = ","), sep = "")
+        arg_list <-
+          list(plot_model, data = df_rib, x = df_rib[[x_col_name]], ymin = ~min,
+               ymax = ~max, opacity = opacity, showlegend = show_legend,
+               name = df_rib[[fill_by]], legendgroup = df_rib[[fill_by]],
+               hoverinfo = "text", hovertext = hover_text)
         if (is.null(line_color)) {
-          arg_list <- c(
-            arg_list, list(color = df_rib[[fill_by]], line = list(width = 0)),
-            arguments)
+          arg_list <- c(arg_list, list(color = df_rib[[fill_by]],
+                                       line = list(width = 0)), arguments)
           plot_model <- do.call(plotly::add_ribbons, arg_list)
         } else {
-          arg_list <- c(
-            arg_list, list(fillcolor = line_color,
-                           line = list(width = 0, color = line_color)),
-            arguments)
+          arg_list <- c(arg_list, list(fillcolor = line_color,
+                                       line = list(width = 0,
+                                                   color = line_color)),
+                        arguments)
           plot_model <- do.call(plotly::add_ribbons, arg_list)
-          plot_model <- plotly::layout(
-            plot_model, xaxis = list(title = 'Date'),
-            yaxis = list(title = 'Value'))
+          plot_model <- plotly::layout(plot_model, xaxis = list(title = "Date"),
+                                       yaxis = list(title = "Value"))
         }
       }
     }
@@ -277,7 +275,8 @@ static_proj_data <- function(plot_model, df_point, df_ribbon,
 #' without target data.
 #' Simple projection model output are defined as projection associated with one
 #' particular set of "tasks_ids" value. For more information, please refer to
-#' [HubDocs website](https://hubdocs.readthedocs.io/en/latest/format/tasks.html).
+#' [HubDocs website](https://hubdocs.readthedocs.io/en/latest/format/tasks.html)
+#' .
 #'
 #' @param plot_model a plot_ly object to add lines and/or ribbons, if NULL will
 #'  create an empty object.
@@ -453,19 +452,19 @@ output_plot <-  function(
     plot_model <- ggplot2::ggplot(colors =  pal_color)
   }
 
-  if (!is.null(facet) & interactive) {
-    sharex = FALSE
-    sharey = FALSE
+  if (!is.null(facet) && interactive) {
+    sharex <- FALSE
+    sharey <- FALSE
     if (facet_scales == "fixed") {
-      sharex = TRUE
-      sharey = TRUE
+      sharex <- TRUE
+      sharey <- TRUE
     } else if (facet_scales == "free_x") {
-      sharey = TRUE
+      sharey <- TRUE
     } else if (facet_scales == "free_y") {
-      sharex = TRUE
+      sharex <- TRUE
     }
     if (is.null(facet_nrow)) {
-      facet_nrow = 1
+      facet_nrow <- 1
     }
     subplot <- lapply(facet_value, function(x) {
       # Data preparation
@@ -477,9 +476,11 @@ output_plot <-  function(
       if (!is.null(all_ens)) {
         df_point_ens <- all_ens$median[which(all_ens$median[[facet]] == x), ]
         df_ribbon_ens <- all_ens[names(all_ens) %in% intervals]
-        df_ribbon_ens <- stats::setNames(lapply(df_ribbon_ens, function(df_rib) {
-          df_rib[which(df_rib[[facet]] == x), ]
-        }), names(df_ribbon_ens))
+        list_name <-
+          lapply(df_ribbon_ens,
+                 function(df_rib) {
+                                   df_rib[which(df_rib[[facet]] == x), ]})
+        df_ribbon_ens <- stats::setNames(list_name, names(df_ribbon_ens))
       }
       if (plot_target & facet %in% colnames(target_data)) {
         target_data <- target_data[which(target_data[[facet]] == x), ]
@@ -487,50 +488,70 @@ output_plot <-  function(
 
       # Plot
       if (x == facet_value[1]) {
-        plot_model <- simple_model_plot(
-          plot_model, df_point, df_ribbon, plot_target, target_data,
-          opacity = fill_transparency, top_layer = top_layer,
-          interactive = TRUE, fill_by = fill_by, x_col_name = x_col_name,
-          x_target_col_name = x_target_col_name)
+        plot_model <- simple_model_plot(plot_model, df_point, df_ribbon,
+                                        plot_target, target_data,
+                                        opacity = fill_transparency,
+                                        top_layer = top_layer,
+                                        interactive = TRUE, fill_by = fill_by,
+                                        x_col_name = x_col_name,
+                                        x_target_col_name = x_target_col_name)
       } else if (facet == fill_by) {
-        plot_model <- simple_model_plot(
-          plot_model, df_point, df_ribbon, plot_target, target_data,
-          opacity = fill_transparency, top_layer = top_layer,
-          show_target_legend = FALSE, interactive = TRUE,
-          fill_by = fill_by, x_col_name = x_col_name,
-          x_target_col_name = x_target_col_name)
+        plot_model <- simple_model_plot(plot_model, df_point, df_ribbon,
+                                        plot_target, target_data,
+                                        opacity = fill_transparency,
+                                        top_layer = top_layer,
+                                        show_target_legend = FALSE,
+                                        interactive = TRUE,
+                                        fill_by = fill_by,
+                                        x_col_name = x_col_name,
+                                        x_target_col_name = x_target_col_name)
       } else {
-        plot_model <- simple_model_plot(
-          plot_model, df_point, df_ribbon, plot_target, target_data,
-          opacity = fill_transparency, showlegend = FALSE,
-          top_layer = top_layer, show_target_legend = FALSE,
-          interactive = TRUE, fill_by = fill_by, x_col_name = x_col_name,
-          x_target_col_name = x_target_col_name)
+        plot_model <- simple_model_plot(plot_model, df_point, df_ribbon,
+                                        plot_target, target_data,
+                                        opacity = fill_transparency,
+                                        showlegend = FALSE,
+                                        top_layer = top_layer,
+                                        show_target_legend = FALSE,
+                                        interactive = TRUE, fill_by = fill_by,
+                                        x_col_name = x_col_name,
+                                        x_target_col_name = x_target_col_name)
       }
       # Ensemble color
       if (!is.null(all_ens)) {
         if (x == facet_value[1]) {
-          plot_model <- simple_model_plot(
-            plot_model, df_point_ens, df_ribbon_ens, FALSE, target_data,
-            line_color = ens_color, opacity = fill_transparency,
-            top_layer = top_layer, interactive = TRUE, fill_by = fill_by,
-            x_col_name = x_col_name, x_target_col_name = x_target_col_name)
+          plot_model <- simple_model_plot(plot_model, df_point_ens,
+                                          df_ribbon_ens, FALSE, target_data,
+                                          line_color = ens_color,
+                                          opacity = fill_transparency,
+                                          top_layer = top_layer,
+                                          interactive = TRUE,
+                                          fill_by = fill_by,
+                                          x_col_name = x_col_name,
+                                          x_target_col_name = x_target_col_name)
         } else if (facet == fill_by) {
           if (facet == "model_id" & ens_name == x) {
-            plot_model <- simple_model_plot(
-              plot_model, df_point_ens, df_ribbon_ens, TRUE, target_data,
-              line_color = ens_color, opacity = fill_transparency,
-              top_layer = top_layer, show_target_legend = FALSE,
-              interactive = TRUE, fill_by = fill_by, x_col_name = x_col_name,
-              x_target_col_name = x_target_col_name)
+            plot_model <- simple_model_plot(plot_model, df_point_ens,
+                                            df_ribbon_ens, TRUE, target_data,
+                                            line_color = ens_color,
+                                            opacity = fill_transparency,
+                                            top_layer = top_layer,
+                                            show_target_legend = FALSE,
+                                            interactive = TRUE,
+                                            fill_by = fill_by,
+                                            x_col_name = x_col_name,
+                                            x_target_col_name = x_target_col_name)
           }
         } else {
-          plot_model <- simple_model_plot(
-            plot_model, df_point_ens, df_ribbon_ens, FALSE, target_data,
-            line_color = ens_color, opacity = fill_transparency,
-            showlegend = FALSE, top_layer = top_layer,
-            show_target_legend = FALSE, interactive = TRUE, fill_by = fill_by,
-            x_col_name = x_col_name, x_target_col_name = x_target_col_name)
+          plot_model <- simple_model_plot(plot_model, df_point_ens,
+                                          df_ribbon_ens, FALSE, target_data,
+                                          line_color = ens_color,
+                                          opacity = fill_transparency,
+                                          showlegend = FALSE,
+                                          top_layer = top_layer,
+                                          show_target_legend = FALSE,
+                                          interactive = TRUE, fill_by = fill_by,
+                                          x_col_name = x_col_name,
+                                          x_target_col_name = x_target_col_name)
         }
       }
       if (!is.null(facet_title)) {
@@ -548,11 +569,13 @@ output_plot <-  function(
           x_title <- 1
           x_anchor <- "right"
         }
-        plot_model <- plotly::layout(
-          plot_model,
-          annotations = list(x = x_title, y = y_title, xref = "paper",
-                             yref = "paper", xanchor = x_anchor,
-                             yanchor = y_anchor, showarrow = FALSE, text = x))
+        plot_model <-
+          plotly::layout(plot_model,
+                         annotations = list(x = x_title, y = y_title,
+                                            xref = "paper", yref = "paper",
+                                            xanchor = x_anchor,
+                                            yanchor = y_anchor,
+                                            showarrow = FALSE, text = x))
       }
       return(plot_model)
     })
@@ -574,19 +597,25 @@ output_plot <-  function(
       df_point_ens <- all_ens$median
       df_ribbon_ens <- all_ens[names(all_ens) %in% intervals]
     }
-    plot_model <- simple_model_plot(
-      plot_model, df_point, df_ribbon, plot_target, target_data,
-      opacity = fill_transparency, top_layer = top_layer, fill_by = fill_by,
-      interactive = interactive, x_col_name = x_col_name,
-      x_target_col_name = x_target_col_name)
+    plot_model <- simple_model_plot(plot_model, df_point, df_ribbon, plot_target,
+                                    target_data, opacity = fill_transparency,
+                                    top_layer = top_layer, fill_by = fill_by,
+                                    interactive = interactive,
+                                    x_col_name = x_col_name,
+                                    x_target_col_name = x_target_col_name)
 
     # Ensemble color
     if (!is.null(all_ens)) {
-      plot_model <- simple_model_plot(
-        plot_model, df_point_ens, df_ribbon_ens, target_data = target_data,
-        plot_target = FALSE, opacity = fill_transparency, line_color = ens_color,
-        top_layer = top_layer, interactive = interactive, fill_by = fill_by,
-        x_col_name = x_col_name, x_target_col_name = x_target_col_name)
+      plot_model <- simple_model_plot(plot_model, df_point_ens, df_ribbon_ens,
+                                      target_data = target_data,
+                                      plot_target = FALSE,
+                                      opacity = fill_transparency,
+                                      line_color = ens_color,
+                                      top_layer = top_layer,
+                                      interactive = interactive,
+                                      fill_by = fill_by,
+                                      x_col_name = x_col_name,
+                                      x_target_col_name = x_target_col_name)
     }
     if (!is.null(facet)) {
       plot_model <-  plot_model +

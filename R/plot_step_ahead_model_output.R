@@ -100,8 +100,8 @@
 #' plot_step_ahead_model_output(projection_data, target_data_us)
 #'
 plot_step_ahead_model_output <- function(
-    model_output_data, target_data, use_median_as_point = FALSE, show_plot = TRUE,
-    plot_target = TRUE, x_col_name = "target_date",
+    model_output_data, target_data, use_median_as_point = FALSE,
+    show_plot = TRUE, plot_target = TRUE, x_col_name = "target_date",
     x_target_col_name = "time_idx", show_legend = TRUE, facet = NULL,
     facet_scales = "fixed", facet_nrow = NULL, facet_ncol = NULL,
     facet_title = "top left", interactive = TRUE, fill_by = "model_id",
@@ -168,8 +168,8 @@ plot_step_ahead_model_output <- function(
         intervals <- as.character(c(.5, .8, .95))
       }
     }
-    if (length(unique(model_output_data[["model_id"]])) > 5 &
-        length(intervals) > 1) {
+    if (length(unique(model_output_data[["model_id"]])) > 5 &&
+          length(intervals) > 1) {
       intervals <- max(intervals)[1]
       cli::cli_warn(c("!" = "{.arg model_output_data} contains 6 or more models,
                       the plot will be reduced to show only one interval (the
@@ -200,8 +200,8 @@ plot_step_ahead_model_output <- function(
                      expected output_type_id value {.val {exp_value}}"))
   }
   if (!class(exp_value) %in% class(model_output_type_val)) {
-    model_output_data$output_type_id <- as.numeric(
-      model_output_data$output_type_id)
+    model_output_data$output_type_id <-
+      as.numeric(model_output_data$output_type_id)
     cli::cli_warn(c("!" = "{.arg output_type_id} column must be a numeric.
                     Class applied by default."))
   }
@@ -214,11 +214,11 @@ plot_step_ahead_model_output <- function(
   }
   ### Facet
   if (!is.null(facet)) {
-    if ((length(facet) != 1) |
-        !all(facet %in% setdiff(
-          colnames(model_output_data),
-          hubUtils::std_colnames[names(hubUtils::std_colnames) != "model_id"]
-        ))) {
+    if ((length(facet) != 1) ||
+          !all(facet %in%
+                 setdiff(colnames(model_output_data),
+                         hubUtils::std_colnames[names(hubUtils::std_colnames) !=
+                                                  "model_id"]))) {
       cli::cli_abort(c("x" = "if {.arg facet} is not NULL, the argument should
                        be of length 1 and should match one of the task_id column
                        of {.arg model_output_data}"))
@@ -270,26 +270,26 @@ plot_step_ahead_model_output <- function(
                       {.val blue} used by default."))
       one_color <- "blue"
     }
-    pal_color = one_color
+    pal_color <- one_color
     pal_value <- rep(pal_color, length(fill_by_vect))
   }
   names(pal_value) <- fill_by_vect
-  if (!is.null(ens_color) & !is.null(ens_name))
-    pal_value[ens_name] <- grDevices::rgb(
-      grDevices::col2rgb(ens_color)[1], grDevices::col2rgb(ens_color)[2],
-      grDevices::col2rgb(ens_color)[3])
+  if (!is.null(ens_color) && !is.null(ens_name))
+    pal_value[ens_name] <- grDevices::rgb(grDevices::col2rgb(ens_color)[1],
+                                          grDevices::col2rgb(ens_color)[2],
+                                          grDevices::col2rgb(ens_color)[3])
   if (plot_target) {
-    pal_value <- c(pal_value, "Target Data" = "#6e6e6e")
+    pal_value <- c(pal_value, "Target Dat" = "#6e6e6e")
   }
 
 
   # Data process
-  if (!is.null(ens_color) & !is.null(ens_name)) {
+  if (!is.null(ens_color) && !is.null(ens_name)) {
     ens_df <- model_output_data[which(model_output_data$model_id == ens_name), ]
     all_ens <- plot_prep_data(ens_df, plain_line, plain_type, ribbon,
                               x_col_name = x_col_name)
-    plot_df <- model_output_data[which(
-      model_output_data$model_id != ens_name), ]
+    plot_df <- model_output_data[which(model_output_data$model_id !=
+                                         ens_name), ]
   } else {
     all_ens <- NULL
     plot_df <- model_output_data
@@ -317,9 +317,9 @@ plot_step_ahead_model_output <- function(
                             x_target_col_name = x_target_col_name)
   # Layout
   if (interactive) {
-    plot_model <- plotly::layout(
-      plot_model, xaxis = list(title = 'Date'), yaxis = list(title = 'Value'),
-      showlegend = show_legend)
+    plot_model <- plotly::layout(plot_model, xaxis = list(title = "Date"),
+                                 yaxis = list(title = "Value"),
+                                 showlegend = show_legend)
     if (!is.null(title)) {
       plot_model <- plotly::layout(plot_model, title = title)
     }
