@@ -67,7 +67,8 @@ plot_prep_data <- function(df, plain_line, plain_type, intervals,
 #'  containing the columns: `time_idx` and `value`.
 #'  Ignored, if `plot_target = FALSE`
 #' @param plot_target a `boolean` for showing the target data in the plot.
-#'  Default to TRUE. Data used in the plot comes from the parameter `target_data`
+#'  Default to TRUE. Data used in the plot comes from the parameter
+#'  `target_data`
 #' @param show_legend a `boolean` for showing the legend in the plot.
 #' @param arguments list of others Plotly parameters.
 #' @param x_col_name column name containing the date information for the x-axis.
@@ -75,19 +76,20 @@ plot_prep_data <- function(df, plain_line, plain_type, intervals,
 #'
 #' @noRd
 #' @importFrom plotly add_trace layout
-plotly_target_data <- function(plot_model, target_data, plot_target, show_legend,
-                              arguments, x_col_name = "time_idx") {
+plotly_target_data <- function(plot_model, target_data, plot_target,
+                               show_legend, arguments,
+                               x_col_name = "time_idx") {
   if (plot_target) {
     target_data[[x_col_name]] <- as.Date(target_data[[x_col_name]])
     arg_list <- list(p = plot_model, data = target_data,
-                     x = target_data[[x_col_name]], y = ~value, type = "scatter",
-                     mode = "lines+markers", line = list(color = "#6e6e6e"),
-                     hoverinfo = "text", name = "target",
-                     legendgroup = "target",
+                     x = target_data[[x_col_name]], y = ~value,
+                     type = "scatter", mode = "lines+markers",
+                     line = list(color = "#6e6e6e"), hoverinfo = "text",
+                     name = "target", legendgroup = "target",
                      hovertext = paste("Date: ", target_data[[x_col_name]],
                                        "<br>target: ",
-                                       format(target_data$value, big.mark = ","),
-                                       sep = ""),
+                                       format(target_data$value,
+                                              big.mark = ","), sep = ""),
                      marker = list(color = "#6e6e6e", size = 7),
                      showlegend = show_legend)
     arg_list <- c(arg_list, arguments)
@@ -116,7 +118,7 @@ plotly_target_data <- function(plot_model, target_data, plot_target, show_legend
 #' @noRd
 #' @importFrom ggplot2 geom_line geom_point aes .data
 static_target_data <- function(plot_model, target_data, plot_target,
-                              x_col_name = "time_idx") {
+                               x_col_name = "time_idx") {
   if (plot_target) {
     target_data[[x_col_name]] <- as.Date(target_data[[x_col_name]])
     plot_model <- plot_model  +
@@ -286,7 +288,8 @@ static_proj_data <- function(plot_model, df_point, df_ribbon,
 #' (`x_col_name` parameter), and a "min", and "max" columns, use to add ribbons
 #' on the plot.
 #' @param plot_target a `boolean` for showing the target data in the plot.
-#'  Default to TRUE. Data used in the plot comes from the parameter `target_data`
+#'  Default to TRUE. Data used in the plot comes from the parameter
+#'  `target_data`
 #' @param target_data a `data.frame` object containing the target data,
 #'  containing the columns: date information (`x_target_col_name` parameter) and
 #'  `value`. Ignored, if `plot_target = FALSE`.
@@ -333,8 +336,8 @@ simple_model_plot <- function(
     if (interactive) {
       # Target Data
       plot_model <- plotly_target_data(plot_model, target_data, plot_target,
-                                      show_target_legend, arguments,
-                                      x_col_name = x_target_col_name)
+                                       show_target_legend, arguments,
+                                       x_col_name = x_target_col_name)
       # Projection data
       plot_model <- plotly_proj_data(plot_model, df_point, df_ribbon,
                                      line_color, opacity, arguments,
@@ -342,7 +345,7 @@ simple_model_plot <- function(
     } else {
       # Target Data
       plot_model <- static_target_data(plot_model, target_data, plot_target,
-                                      x_col_name = x_target_col_name)
+                                       x_col_name = x_target_col_name)
       # Projection data
       plot_model <- static_proj_data(plot_model, df_point, df_ribbon,
                                      line_color, opacity, fill_by = fill_by,
@@ -357,8 +360,8 @@ simple_model_plot <- function(
                                      fill_by = fill_by, x_col_name = x_col_name)
       # Target Data
       plot_model <- plotly_target_data(plot_model, target_data, plot_target,
-                                      show_target_legend, arguments,
-                                      x_col_name = x_target_col_name)
+                                       show_target_legend, arguments,
+                                       x_col_name = x_target_col_name)
     } else {
       # Projection data
       plot_model <- static_proj_data(plot_model, df_point, df_ribbon,
@@ -366,7 +369,7 @@ simple_model_plot <- function(
                                      fill_by = fill_by, x_col_name = x_col_name)
       # Target Data
       plot_model <- static_target_data(plot_model, target_data, plot_target,
-                                      x_col_name = x_target_col_name)
+                                       x_col_name = x_target_col_name)
     }
   }
 
@@ -388,7 +391,8 @@ simple_model_plot <- function(
 #'  containing the columns: date information (`x_target_col_name` parameter) and
 #'  `value`. Ignored, if `plot_target = FALSE`.
 #' @param plot_target a `boolean` for showing the target data in the plot.
-#'  Default to TRUE. Data used in the plot comes from the parameter `target_data`
+#'  Default to TRUE. Data used in the plot comes from the parameter
+#'  `target_data`
 #' @param intervals a vector of `numeric` values indicating which central
 #'  prediction interval levels to plot. `NULL` means no interval levels.
 #'  If not provided, it will default to `c(.5, .8, .95)`.
@@ -530,16 +534,14 @@ output_plot <-  function(
                                           x_target_col_name = x_target_col_name)
         } else if (facet == fill_by) {
           if (facet == "model_id" & ens_name == x) {
-            plot_model <- simple_model_plot(plot_model, df_point_ens,
-                                            df_ribbon_ens, TRUE, target_data,
-                                            line_color = ens_color,
-                                            opacity = fill_transparency,
-                                            top_layer = top_layer,
-                                            show_target_legend = FALSE,
-                                            interactive = TRUE,
-                                            fill_by = fill_by,
-                                            x_col_name = x_col_name,
-                                            x_target_col_name = x_target_col_name)
+            plot_model <-
+              simple_model_plot(plot_model, df_point_ens, df_ribbon_ens, TRUE,
+                                target_data, line_color = ens_color,
+                                opacity = fill_transparency,
+                                top_layer = top_layer,
+                                show_target_legend = FALSE, interactive = TRUE,
+                                fill_by = fill_by, x_col_name = x_col_name,
+                                x_target_col_name = x_target_col_name)
           }
         } else {
           plot_model <- simple_model_plot(plot_model, df_point_ens,
@@ -597,8 +599,9 @@ output_plot <-  function(
       df_point_ens <- all_ens$median
       df_ribbon_ens <- all_ens[names(all_ens) %in% intervals]
     }
-    plot_model <- simple_model_plot(plot_model, df_point, df_ribbon, plot_target,
-                                    target_data, opacity = fill_transparency,
+    plot_model <- simple_model_plot(plot_model, df_point, df_ribbon,
+                                    plot_target, target_data,
+                                    opacity = fill_transparency,
                                     top_layer = top_layer, fill_by = fill_by,
                                     interactive = interactive,
                                     x_col_name = x_col_name,

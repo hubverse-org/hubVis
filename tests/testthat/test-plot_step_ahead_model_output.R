@@ -15,9 +15,10 @@ d_proj <- hubUtils::as_model_out_tbl(d_proj)
 
 target_path <- system.file("target_data.csv", package = "hubVis")
 target_data <- read.csv(target_path, stringsAsFactors = FALSE)
-target_data_us <- dplyr::filter(
-  target_data, location == "US",
-  time_idx < min(projection_data$target_date) + 21, time_idx > "2020-10-01")
+target_data_us <-
+  dplyr::filter(target_data, location == "US",
+                time_idx < min(projection_data$target_date) + 21,
+                time_idx > "2020-10-01")
 # Test input information
 test_that("Input parameters", {
 
@@ -34,9 +35,11 @@ test_that("Input parameters", {
                                               target_data_us))
 
   # Column
-  expect_error(plot_step_ahead_model_output(projection_data_a_us, target_data_us,
+  expect_error(plot_step_ahead_model_output(projection_data_a_us,
+                                            target_data_us,
                                             x_col_name = "date"))
-  expect_error(plot_step_ahead_model_output(projection_data_a_us, target_data_us,
+  expect_error(plot_step_ahead_model_output(projection_data_a_us,
+                                            target_data_us,
                                             fill_by = "model_name"))
   df_test <- dplyr::rename(projection_data_a_us, type_id = output_type_id)
   expect_error(plot_step_ahead_model_output(df_test, target_data_us))
@@ -58,7 +61,8 @@ test_that("Input parameters", {
   # target Data
   expect_error(plot_step_ahead_model_output(projection_data_a_us,
                                             as.list(target_data_us)))
-  expect_error(plot_step_ahead_model_output(projection_data_a_us, target_data_us,
+  expect_error(plot_step_ahead_model_output(projection_data_a_us,
+                                            target_data_us,
                                             x_target_col_name = "date"))
 
   # Intervals & Median value
@@ -74,15 +78,24 @@ test_that("Input parameters", {
   expect_no_error(plot_step_ahead_model_output(df_test, target_data_us))
 
   # Parameter input
-  expect_error(plot_step_ahead_model_output(projection_data_a_us, target_data_us,
+  expect_error(plot_step_ahead_model_output(projection_data_a_us,
+                                            target_data_us,
                                             ens_color = "black"))
-  expect_error(plot_step_ahead_model_output(projection_data_a_us, target_data_us,
+  expect_error(plot_step_ahead_model_output(projection_data_a_us,
+                                            target_data_us,
                                             facet = "value"))
-  expect_error(plot_step_ahead_model_output(projection_data_a_us, target_data_us,
+  df_test <- hubUtils::as_model_out_tbl(projection_data)
+  expect_warning(plot_step_ahead_model_output(df_test, target_data_us,
+                                              facet = "scenario_id",
+                                              facet_nrow = 5))
+  expect_error(plot_step_ahead_model_output(projection_data_a_us,
+                                            target_data_us,
                                             facet = c("target", "scenario_id")))
-  expect_error(plot_step_ahead_model_output(projection_data_a_us, target_data_us,
+  expect_error(plot_step_ahead_model_output(projection_data_a_us,
+                                            target_data_us,
                                             facet_title = "center"))
-  expect_error(plot_step_ahead_model_output(projection_data_a_us, target_data_us,
+  expect_error(plot_step_ahead_model_output(projection_data_a_us,
+                                            target_data_us,
                                             top_layer = "model"))
 
   # Palette/Color input
@@ -231,7 +244,8 @@ test_that("Output", {
   test_value <- unique(unlist(test_value)["color"])
   expect_equal(test_value, "rgba(255,165,0,1)")
 
-  plot_test <- plot_step_ahead_model_output(projection_data_a_us, target_data_us,
+  plot_test <- plot_step_ahead_model_output(projection_data_a_us,
+                                            target_data_us,
                                             intervals = 0.9,
                                             ens_color = "black",
                                             ens_name = "hub-ensemble",

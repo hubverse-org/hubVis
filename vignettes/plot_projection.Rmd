@@ -120,9 +120,10 @@ projection_data_a_us <- dplyr::filter(projection_data,
                                       location == "US")
 
 # Limit time_idx for layout reason
-target_data_us <- dplyr::filter(target_data, location == "US",
-                               time_idx < min(projection_data$target_date) + 21,
-                               time_idx > "2020-10-01")
+target_data_us <-
+  dplyr::filter(target_data, location == "US",
+                time_idx < min(projection_data$target_date) + 21,
+                time_idx > "2020-10-01")
 ```
 
 ```{r plot_A_us}
@@ -166,9 +167,10 @@ A "facet" (or subplot) plot can also be created for each scenario
 projection_data_us <- dplyr::filter(projection_data,
                                     location == "US")
 # Limit time_idx for layout reason
-target_data_us <- dplyr::filter(target_data, location == "US",
-                               time_idx < min(projection_data$target_date) + 21,
-                               time_idx > "2020-10-01")
+target_data_us <-
+  dplyr::filter(target_data, location == "US",
+                time_idx < min(projection_data$target_date) + 21,
+                time_idx > "2020-10-01")
 ```
 
 ```{r plot_us}
@@ -346,7 +348,7 @@ should be mapped to the x-axis.
 names(target_data_us)[names(target_data_us) == "time_idx"] <- "time"
 names(projection_data_a_us)[names(projection_data_a_us) == "target_date"] <-
   "date"
-plot_step_ahead_model_output(projection_data_a_us,target_data_us,
+plot_step_ahead_model_output(projection_data_a_us, target_data_us,
                              x_col_name = "date", x_target_col_name = "time")
 ```
 
