@@ -1,4 +1,5 @@
-# hubVis
+# hubVis <a href="https://infectious-disease-modeling-hubs.github.io/hubVis/"><img src="man/figures/logo.png" align="right" height="131" alt="hubVis website" /></a>
+
 
 [![Lifecycle:experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 [![R-CMD-check](https://github.com/Infectious-Disease-Modeling-Hubs/hubVis/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/Infectious-Disease-Modeling-Hubs/hubVis/actions/workflows/R-CMD-check.yaml)
@@ -53,3 +54,15 @@ plot_step_ahead_model_output(projection_data_us, target_data_us,
                              facet_nrow = 2, facet_title = "bottom left")
 ```
 ![](./man/figures/facet_plot.png)
+
+
+***
+
+## Code of Conduct
+
+Please note that the hubVis package is released with a [Contributor Code of Conduct](.github/CODE_OF_CONDUCT.md). By contributing to this project, you agree to abide by its terms.
+
+## Contributing
+
+Interested in contributing back to the open-source Hubverse project?
+Learn more about how to [get involved in the Hubverse Community](https://hubdocs.readthedocs.io/en/latest/overview/contribute.html) or [how to contribute to the hubVis package](.github/CONTRIBUTING.md).
