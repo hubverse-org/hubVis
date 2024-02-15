@@ -33,13 +33,30 @@ The function can output 2 types of plots:
  - interactive (Plotly object)
  - static (ggplot2 object)
 
+```r
+library(hubVis)
+```
+```r
+projection_path <- system.file("example_round1.csv", package = "hubVis")
+projection_data <- read.csv(projection_path, stringsAsFactors = FALSE)
+projection_data <- hubUtils::as_model_out_tbl(projection_data)
+projection_data <- dplyr::mutate(projection_data,
+                                 target_date = as.Date(origin_date) +
+                                   (horizon * 7) - 1)
 
-> Before plotting, the data might require some preparation (filtering, etc.). 
-> These step is skipped in this example, please consult the 
-> "Plot Model Projections Output" vignette contained in this package for complete
-> examples.
+target_path <- system.file("target_data.csv", package = "hubVis")
+target_data <- read.csv(target_path, stringsAsFactors = FALSE)
+target_data_us <-
+  dplyr::filter(target_data, location == "US",
+                time_idx < min(projection_data$target_date) + 21,
+                time_idx > "2020-10-01")
+```
+
 
 ```r
+projection_data_us <- dplyr::filter(projection_data,
+                                    scenario_id == "A-2021-03-05",
+                                    location == "US")
 plot_step_ahead_model_output(projection_data_us, target_data_us)
 ```
 ![](./man/figures/simple_plotly.png)
@@ -48,6 +65,8 @@ plot_step_ahead_model_output(projection_data_us, target_data_us)
  models, etc.
 
 ```r
+projection_data_us <- dplyr::filter(projection_data,
+                                    location == "US")
 plot_step_ahead_model_output(projection_data_us, target_data_us, 
                              use_median_as_point = TRUE,
                              facet = "scenario_id", facet_scales = "free_x", 
