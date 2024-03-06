@@ -25,7 +25,7 @@ Imports:
     scales,
     stats
 Remotes:
-    Infectious-Disease-Modeling-Hubs/hubUtils#143
+    Infectious-Disease-Modeling-Hubs/hubUtils
 Suggests:
     rmarkdown,
     testthat (>= 3.0.0)
