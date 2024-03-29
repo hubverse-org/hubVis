@@ -236,13 +236,17 @@ plotly_proj_data <- function(plot_model, df_point, df_ribbon,
 #' Default to `model_id`.
 #' @param x_col_name column name containing the date information for the x-axis.
 #' By default, "target_date".
+#' @param group column name for partitioning the data in the data according
+#'  the the value in the column. Please refer to [ggplot2::aes_group_order] for
+#'  more information. By default, NULL (no partitioning).ONLY available for
+#'  "static" plot.
 #'
 #' @noRd
 #' @importFrom ggplot2 geom_ribbon
 #' @importFrom purrr map
 static_proj_data <- function(plot_model, df_point, df_ribbon,
                              line_color, opacity, fill_by = "model_id",
-                             x_col_name = "target_date") {
+                             x_col_name = "target_date", group = NULL) {
 
   if (!is.null(df_ribbon)) {
     for (fill in unique(unlist(purrr::map(df_ribbon, fill_by)))) {
@@ -250,10 +254,16 @@ static_proj_data <- function(plot_model, df_point, df_ribbon,
         df_rib <- df_ribbon[[n_rib]]
         df_rib_mod <- df_rib[which(df_rib[[fill_by]] == fill), ]
         if (nrow(df_rib) > 0) {
+          if (is.null(group)) {
+            plot_aes <- aes(.data[[x_col_name]], ymin = .data$min,
+                            ymax = .data$max, fill = .data[[fill_by]])
+          } else {
+            plot_aes <- aes(.data[[x_col_name]], ymin = .data$min,
+                            ymax = .data$max, fill = .data[[fill_by]],
+                            group = .data[[group]])
+          }
           plot_model <- plot_model +
-            geom_ribbon(data = df_rib_mod,
-                        aes(.data[[x_col_name]], ymin = .data$min,
-                            ymax = .data$max, fill = .data[[fill_by]]),
+            geom_ribbon(data = df_rib_mod, plot_aes,
                         alpha = opacity, inherit.aes = FALSE)
         }
       }
@@ -261,10 +271,17 @@ static_proj_data <- function(plot_model, df_point, df_ribbon,
   }
 
   if (nrow(df_point) > 0) {
+    if (is.null(group)) {
+      plot_aes <- aes(x = .data[[x_col_name]], y = .data$value,
+                      color = .data[[fill_by]])
+    } else {
+      df_point$group <- as.factor(paste0(df_point[[fill_by]],
+                                         df_point[[group]]))
+      plot_aes <- aes(x = .data[[x_col_name]], y = .data$value,
+                      color = .data[[fill_by]], group = .data[["group"]])
+    }
     plot_model <- plot_model  +
-      geom_line(data = df_point, aes(x = .data[[x_col_name]], y = .data$value,
-                                     color = .data[[fill_by]]),
-                inherit.aes = FALSE, linewidth = 1)
+      geom_line(data = df_point, plot_aes, inherit.aes = FALSE, linewidth = 1)
   }
 
   return(plot_model)
@@ -313,6 +330,10 @@ static_proj_data <- function(plot_model, df_point, df_ribbon,
 #' @param x_target_col_name  column name containing the date information for
 #' `target_data` data frame, value will be map to the x-axis of the plot.
 #' By default, "time_idx".
+#' @param group column name for partitioning the data in the data according
+#'  the the value in the column. Please refer to [ggplot2::aes_group_order] for
+#'  more information. By default, NULL (no partitioning).ONLY available for
+#'  "static" plot.
 #'
 #' @noRd
 #' @importFrom plotly plot_ly
@@ -320,7 +341,7 @@ simple_model_plot <- function(
     plot_model, df_point, df_ribbon, plot_target, target_data, opacity = 0.25,
     line_color = NULL, top_layer = "model_output", show_target_legend = TRUE,
     interactive = TRUE, fill_by = "model_id", x_col_name = "target_date",
-    x_target_col_name = "time_idx", ...) {
+    x_target_col_name = "time_idx", group = NULL, ...) {
   # prerequisite
   if (is.null(plot_model)) {
     if (interactive) {
@@ -349,7 +370,7 @@ simple_model_plot <- function(
       # Projection data
       plot_model <- static_proj_data(plot_model, df_point, df_ribbon,
                                      line_color, opacity, fill_by = fill_by,
-                                     x_col_name = x_col_name)
+                                     x_col_name = x_col_name, group = group)
     }
 
   } else if (top_layer == "target") {
@@ -365,7 +386,7 @@ simple_model_plot <- function(
     } else {
       # Projection data
       plot_model <- static_proj_data(plot_model, df_point, df_ribbon,
-                                     line_color, opacity,
+                                     line_color, opacity, group = group,
                                      fill_by = fill_by, x_col_name = x_col_name)
       # Target Data
       plot_model <- static_target_data(plot_model, target_data, plot_target,
@@ -438,6 +459,10 @@ simple_model_plot <- function(
 #' @param x_target_col_name  column name containing the date information for
 #' `target_data` data frame, value will be map to the x-axis of the plot.
 #' By default, "time_idx".
+#' @param group column name for partitioning the data in the data according
+#'  the the value in the column. Please refer to [ggplot2::aes_group_order] for
+#'  more information. By default, NULL (no partitioning).ONLY available for
+#'  "static" plot.
 #'
 #' @noRd
 #' @importFrom plotly plot_ly layout subplot
@@ -449,7 +474,8 @@ output_plot <-  function(
     ens_name = NULL, facet = NULL, facet_scales = "fixed", facet_nrow = NULL,
     facet_ncol = NULL, facet_title = "top left", facet_value = NULL,
     interactive = TRUE, fill_by = "model_id", x_col_name = "target_date",
-    x_target_col_name = "time_idx") {
+    x_target_col_name = "time_idx", group = NULL) {
+
   if (interactive) {
     plot_model <- plotly::plot_ly(colors =  pal_color)
   } else {
@@ -508,7 +534,8 @@ output_plot <-  function(
                                         interactive = TRUE,
                                         fill_by = fill_by,
                                         x_col_name = x_col_name,
-                                        x_target_col_name = x_target_col_name)
+                                        x_target_col_name = x_target_col_name,
+                                        group = group)
       } else {
         plot_model <- simple_model_plot(plot_model, df_point, df_ribbon,
                                         plot_target, target_data,
@@ -518,7 +545,8 @@ output_plot <-  function(
                                         show_target_legend = FALSE,
                                         interactive = TRUE, fill_by = fill_by,
                                         x_col_name = x_col_name,
-                                        x_target_col_name = x_target_col_name)
+                                        x_target_col_name = x_target_col_name,
+                                        group = group)
       }
       # Ensemble color
       if (!is.null(all_ens)) {
@@ -531,7 +559,8 @@ output_plot <-  function(
                                           interactive = TRUE,
                                           fill_by = fill_by,
                                           x_col_name = x_col_name,
-                                          x_target_col_name = x_target_col_name)
+                                          x_target_col_name = x_target_col_name,
+                                          group = group)
         } else if (facet == fill_by) {
           if (facet == "model_id" & ens_name == x) {
             plot_model <-
@@ -541,7 +570,8 @@ output_plot <-  function(
                                 top_layer = top_layer,
                                 show_target_legend = FALSE, interactive = TRUE,
                                 fill_by = fill_by, x_col_name = x_col_name,
-                                x_target_col_name = x_target_col_name)
+                                x_target_col_name = x_target_col_name,
+                                group = group)
           }
         } else {
           plot_model <- simple_model_plot(plot_model, df_point_ens,
@@ -553,7 +583,8 @@ output_plot <-  function(
                                           show_target_legend = FALSE,
                                           interactive = TRUE, fill_by = fill_by,
                                           x_col_name = x_col_name,
-                                          x_target_col_name = x_target_col_name)
+                                          x_target_col_name = x_target_col_name,
+                                          group = group)
         }
       }
       if (!is.null(facet_title)) {
@@ -605,7 +636,8 @@ output_plot <-  function(
                                     top_layer = top_layer, fill_by = fill_by,
                                     interactive = interactive,
                                     x_col_name = x_col_name,
-                                    x_target_col_name = x_target_col_name)
+                                    x_target_col_name = x_target_col_name,
+                                    group = group)
 
     # Ensemble color
     if (!is.null(all_ens)) {
@@ -618,7 +650,8 @@ output_plot <-  function(
                                       interactive = interactive,
                                       fill_by = fill_by,
                                       x_col_name = x_col_name,
-                                      x_target_col_name = x_target_col_name)
+                                      x_target_col_name = x_target_col_name,
+                                      group = group)
     }
     if (!is.null(facet)) {
       plot_model <-  plot_model +

@@ -41,6 +41,9 @@ test_that("Input parameters", {
   expect_error(plot_step_ahead_model_output(projection_data_a_us,
                                             target_data_us,
                                             fill_by = "model_name"))
+  expect_error(plot_step_ahead_model_output(projection_data_A_us,
+                                            target_data_us,
+                                            group = "forecast_date"))
   df_test <- dplyr::rename(projection_data_a_us, type_id = output_type_id)
   expect_error(plot_step_ahead_model_output(df_test, target_data_us))
 
@@ -111,6 +114,13 @@ test_that("Input parameters", {
 # Update data
 projection_data_a_us <- hubUtils::as_model_out_tbl(projection_data_a_us)
 projection_data <- hubUtils::as_model_out_tbl(projection_data)
+test_date <- unique(projection_data_a_us$target_date)[1:8]
+static_proj <- dplyr::filter(projection_data_a_us, target_date %in% test_date)
+static_proj <-
+  dplyr::mutate(static_proj,
+                forecast_date = ifelse(target_date <= test_date[4],
+                                       as.character(test_date[1]),
+                                       as.character(test_date[5])))
 
 # Test output
 test_that("Output", {
@@ -150,14 +160,14 @@ test_that("Output", {
   expect_false(plot_test$facet$params$free$y)
 
   plot_test <-
-    plot_step_ahead_model_output(dplyr::filter(projection_data_a_us,
+    plot_step_ahead_model_output(dplyr::filter(static_proj,
                                                model_id != "HUBuni-simexamp"),
                                  target_data_us, interactive = FALSE,
                                  ens_color = "black", ens_name = "hub-ensemble",
                                  use_median_as_point = TRUE,
-                                 show_legend = FALSE)
-  expect_equal(plot_test$guides$fill, "none")
-  expect_equal(plot_test$guides$colour, "none")
+                                 show_legend = FALSE, group = "forecast_date")
+  expect_equal(plot_test$guides$guides$fill, "none")
+  expect_equal(plot_test$guides$guides$colour, "none")
   expect_equal(tail(plot_test$layers, 1)[[1]]$geom$default_aes$colour, "black")
 
   # Layout (interactive)
