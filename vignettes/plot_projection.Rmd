@@ -37,7 +37,7 @@ The following vignette describes the principal usage of the
 
 ```{r lib}
 library(hubVis)
-library(hubUtils)
+library(hubData)
 ```
 
 Plots are available in two output formats:
@@ -65,7 +65,7 @@ function: `hubEnsembles::simple_ensemble(df_round1, agg_fun = "median")`
 ```{r load_data}
 projection_path <- system.file("example_round1.csv", package = "hubVis")
 projection_data <- read.csv(projection_path, stringsAsFactors = FALSE)
-projection_data <- as_model_out_tbl(projection_data)
+projection_data <- hubData::as_model_out_tbl(projection_data)
 head(projection_data)
 
 target_path <- system.file("target_data.csv", package = "hubVis")
