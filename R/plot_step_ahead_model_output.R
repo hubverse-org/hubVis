@@ -66,6 +66,10 @@
 #'@param x_target_col_name  column name containing the date information for
 #' `target_data` data frame, value will be map to the x-axis of the plot.
 #' By default, "time_idx".
+#' @param group column name for partitioning the data in the data according
+#'  the the value in the column. Please refer to [ggplot2::aes_group_order] for
+#'  more information. By default, NULL (no partitioning).ONLY available for
+#'  "static" plot.
 #'
 #' @importFrom cli cli_abort cli_warn
 #' @importFrom scales percent
@@ -107,7 +111,7 @@ plot_step_ahead_model_output <- function(
     facet_title = "top left", interactive = TRUE, fill_by = "model_id",
     pal_color = "Set2", one_color = "blue", fill_transparency = 0.25,
     intervals = c(.5, .8, .95), top_layer = "model_output", title = NULL,
-    ens_color = NULL, ens_name = NULL) {
+    ens_color = NULL, ens_name = NULL, group = NULL) {
 
   # Test format input
   ## Model Output data
@@ -121,7 +125,7 @@ plot_step_ahead_model_output <- function(
                                                     remove_empty = TRUE)
   }
   exp_f_col <- unique(c("model_id", "output_type_id", x_col_name, "value",
-                        fill_by))
+                        fill_by, group))
   model_output_col <- colnames(model_output_data)
   if (!all(exp_f_col %in% model_output_col)) {
     cli::cli_abort(c("x" = "{.arg model_output_data} did not have all required
@@ -314,7 +318,9 @@ plot_step_ahead_model_output <- function(
                             facet_value = facet_value, facet_ncol = facet_ncol,
                             interactive = interactive, fill_by = fill_by,
                             x_col_name = x_col_name,
-                            x_target_col_name = x_target_col_name)
+                            x_target_col_name = x_target_col_name,
+                            group = group)
+
   # Layout
   if (interactive) {
     plot_model <- plotly::layout(plot_model, xaxis = list(title = "Date"),

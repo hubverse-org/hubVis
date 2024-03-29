@@ -27,7 +27,8 @@ plot_step_ahead_model_output(
   top_layer = "model_output",
   title = NULL,
   ens_color = NULL,
-  ens_name = NULL
+  ens_name = NULL,
+  group = NULL
 )
 }
 \arguments{
@@ -117,6 +118,11 @@ use as color for the model name associated with the parameter \code{ens_name}
 \item{ens_name}{a \code{character} string of a model name, if not NULL, will be
 use to change the color for the model name, associated with the parameter
 \code{ens_color}(both parameter need to be provided)}
+
+\item{group}{column name for partitioning the data in the data according
+the the value in the column. Please refer to \link[ggplot2:aes_group_order]{ggplot2::aes_group_order} for
+more information. By default, NULL (no partitioning).ONLY available for
+"static" plot.}
 }
 \description{
 Create a simple Plotly time-series plot for model projection outputs.
