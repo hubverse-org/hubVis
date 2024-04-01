@@ -177,12 +177,8 @@ plotly_proj_data <- function(plot_model, df_point, df_ribbon,
     }
     show_legend <- FALSE
   } else {
-    if (exists("arguments")) {
-      show_legend <- arguments$showlegend
-      if (is.null(show_legend)) show_legend <- TRUE
-    } else {
-      show_legend <- TRUE
-    }
+    show_legend <- arguments$showlegend
+    if (is.null(show_legend)) show_legend <- TRUE
   }
 
   if (!is.null(df_ribbon)) {
@@ -343,14 +339,6 @@ simple_model_plot <- function(
     interactive = TRUE, fill_by = "model_id", x_col_name = "target_date",
     x_target_col_name = "time_idx", group = NULL, ...) {
   # prerequisite
-  if (is.null(plot_model)) {
-    if (interactive) {
-      plot_model <- plotly::plot_ly()
-    } else {
-      plot_model <- ggplot2::ggplot()
-    }
-
-  }
   arguments <- list(...)
 
   if (top_layer == "model_output") {
