@@ -115,75 +115,26 @@ plot_step_ahead_model_output <- function(
 
   # Test format input
   ## Model Output data
-  if (!is.data.frame(model_output_data)) {
-    cli::cli_abort(c("x" = "{.arg model_output_data} must be a `data.frame`."))
-  }
-  if (isFALSE("model_out_tbl" %in% class(model_output_data))) {
-    cli::cli_warn(c("!" = "{.arg model_output_data} must be a `model_out_tbl`.
-                    Class applied by default"))
-    model_output_data <- hubUtils::as_model_out_tbl(model_output_data,
-                                                    remove_empty = TRUE)
-  }
   exp_f_col <- unique(c("model_id", "output_type_id", x_col_name, "value",
                         fill_by, group))
-  model_output_col <- colnames(model_output_data)
-  if (!all(exp_f_col %in% model_output_col)) {
-    cli::cli_abort(c("x" = "{.arg model_output_data} did not have all required
-                     columns {.val {exp_f_col}}"))
-  }
-  valid_types <- c("median", "quantile")
-  model_output_type <- unique(model_output_data$output_type)
-  if (!any(valid_types %in% model_output_type)) {
-    cli::cli_abort(c(
-      "x" = "{.arg model_output_data} should contain at least one supported
-      output type.",
-      "i" = "Supported output types: {.val {valid_types}}."
-    ))
-  }
+  mdl_out_validation(model_output_data, col_names = exp_f_col)
 
   ## Target Data
   if (plot_target) {
-    if (!is.data.frame(target_data)) {
-      cli::cli_abort(c("x" = "{.arg target_data} must be a `data.frame`."))
-    }
     exp_td_col <- c(x_target_col_name, "value")
-    target_data_col <- colnames(target_data)
-    if (!all(exp_td_col %in% target_data_col)) {
-      cli::cli_abort(c("x" = "{.arg target_data} did not have all required
-                     columns {.val {exp_td_col}}"))
-    }
+    target_validation(target_data, col_names = exp_td_col)
   }
   ## Parameters
   ### Intervals
-  list_intervals <- list(
-    "0.95" = c(0.975, 0.025), "0.9" = c(0.95, 0.05),
-    "0.8" = c(0.9, 0.1), "0.5" = c(0.75, 0.25)
-  )
+  list_intervals <- list("0.95" = c(0.975, 0.025), "0.9" = c(0.95, 0.05),
+                         "0.8" = c(0.9, 0.1), "0.5" = c(0.75, 0.25))
   if (!is.null(intervals)) {
-    intervals <- as.character(intervals)
-    if (any(!intervals %in% names(list_intervals))) {
-      cli::cli_warn(c("!" = "{.arg intervals} should correspond to one or
-                      multiple of these possible values
-                      {.val {names(list_intervals)}}.
-                      Only the matching value(s) will be used (if no matching
-                      value, the default will be used)."))
-      intervals <- intervals[intervals %in% names(list_intervals)]
-      if (length(intervals) == 0) {
-        intervals <- as.character(c(.5, .8, .95))
-      }
-    }
-    if (length(unique(model_output_data[["model_id"]])) > 5 &&
-          length(intervals) > 1) {
-      intervals <- max(intervals)[1]
-      cli::cli_warn(c("!" = "{.arg model_output_data} contains 6 or more models,
-                      the plot will be reduced to show only one interval (the
-                      maximum interval value): {.val {intervals}}"))
-    }
+    intervals <- interval_validation(model_output_data, as.character(intervals),
+                                     list_intervals)
     ribbon <- list_intervals[as.character(sort(intervals, decreasing = TRUE))]
   } else {
     ribbon <- NULL
   }
-
   ### Median
   if (isTRUE(use_median_as_point)) {
     if (any(grepl("median", model_output_data$output_type))) {
@@ -198,94 +149,21 @@ plot_step_ahead_model_output <- function(
     plain_type <- NULL
   }
   exp_value <- c(plain_line, unlist(ribbon))
-  model_output_type_val <- unique(model_output_data$output_type_id)
-  if (!all(exp_value %in% model_output_type_val)) {
-    cli::cli_abort(c("x" = "{.arg model_output_type_val} did not have the
-                     expected output_type_id value {.val {exp_value}}"))
-  }
-  if (!class(exp_value) %in% class(model_output_type_val)) {
-    model_output_data$output_type_id <-
-      as.numeric(model_output_data$output_type_id)
-    cli::cli_warn(c("!" = "{.arg output_type_id} column must be a numeric.
-                    Class applied by default."))
-  }
-
-
+  model_output_data <- output_type_validation(model_output_data, exp_value)
   ### Ensemble specific color
-  if (is.null(ens_color) + is.null(ens_name) == 1) {
-    cli::cli_abort(c("x" = "Both {.arg ens_color} and {.arg ens_name} should
-                     be set to a non NULL value"))
-  }
+  ensemble_validation(ens_color, ens_name)
   ### Facet
-  if (!is.null(facet)) {
-    if ((length(facet) != 1) ||
-          !all(facet %in%
-                 setdiff(colnames(model_output_data),
-                         hubUtils::std_colnames[names(hubUtils::std_colnames) !=
-                                                  "model_id"]))) {
-      cli::cli_abort(c("x" = "if {.arg facet} is not NULL, the argument should
-                       be of length 1 and should match one of the task_id column
-                       of {.arg model_output_data}"))
-    }
-    facet_max <- length(unique(model_output_data[[facet]]))
-    if ((interactive) && !is.null(facet_nrow)) {
-      if (facet_nrow > facet_max) {
-        cli::cli_warn(c("!" = "{.arg facet_nrow} should be less or equal to the
-                    number of unique {.arg facet} value. By default, the
-                    parameter will be set to {.val {facet_max}}"))
-        facet_nrow <- facet_max
-      }
-    }
-  }
-  if (!is.null(facet_title)) {
-    facet_title_opt <- c("top right", "top left", "bottom right", "bottom left")
-    if (!facet_title %in% facet_title_opt) {
-      cli::cli_abort(c("x" = "{.arg facet_title} should correspond to one of
-                       these possible values: {.val {facet_title_opt}}"))
-    }
-  }
+  facet_nrow <- facet_validation(model_output_data, facet = facet,
+                                 interactive = interactive,
+                                 facet_nrow = facet_nrow,
+                                 facet_title = facet_title)
   #### Top layer
-  if (!any(top_layer %in% c("model_output", "target"))) {
-    cli::cli_abort(c("x" = "{.arg top_layer} should correspond to one of
-                       these possible values: {.val model_output},
-                     {.val target}"))
-  }
-
+  layer_validation(top_layer)
   #### Palette
-  fill_by_vect <- unique(model_output_data[[fill_by]])
-  if (!is.null(pal_color)) {
-    if (!pal_color %in% row.names(RColorBrewer::brewer.pal.info)) {
-      cli::cli_warn(c("!" = "{.arg pal_color} is not one of the accepted palette
-                       name, accepted values are:
-                      {.val {row.names(RColorBrewer::brewer.pal.info)}}.
-                      {.val Set2} used by default."))
-      pal_color <- "Set2"
-    }
-    if (length(fill_by_vect) < 3) {
-      n_pal <- 3
-    } else {
-      n_pal <- length(fill_by_vect)
-    }
-    pal_value <- RColorBrewer::brewer.pal(n_pal, pal_color)
-  } else {
-    if (!one_color %in% colors()) {
-      cli::cli_warn(c("!" = "{.arg one_color} is not one of the accepted color
-                       name, accepted values are: {.val {colors()}}.
-                      {.val blue} used by default."))
-      one_color <- "blue"
-    }
-    pal_color <- one_color
-    pal_value <- rep(pal_color, length(fill_by_vect))
-  }
-  names(pal_value) <- fill_by_vect
-  if (!is.null(ens_color) && !is.null(ens_name))
-    pal_value[ens_name] <- grDevices::rgb(grDevices::col2rgb(ens_color)[1],
-                                          grDevices::col2rgb(ens_color)[2],
-                                          grDevices::col2rgb(ens_color)[3])
-  if (plot_target) {
-    pal_value <- c(pal_value, "Target Dat" = "#6e6e6e")
-  }
-
+  palette <- make_palette(model_output_data, fill_by = fill_by,
+                          pal_color = pal_color, one_color = one_color,
+                          ens_color = ens_color, ens_name = ens_name,
+                          plot_target = plot_target)
 
   # Data process
   if (!is.null(ens_color) && !is.null(ens_name)) {
@@ -309,9 +187,9 @@ plot_step_ahead_model_output <- function(
   }
   plot_model <- output_plot(all_plot, all_ens, target_data,
                             plot_target = plot_target,
-                            intervals =  intervals, pal_color = pal_color,
+                            intervals =  intervals, pal_color = palette$color,
                             fill_transparency = fill_transparency,
-                            pal_value = pal_value, top_layer = top_layer,
+                            pal_value = palette$value, top_layer = top_layer,
                             ens_color = ens_color, ens_name = ens_name,
                             facet = facet, facet_scales = facet_scales,
                             facet_nrow = facet_nrow,  facet_title = facet_title,
