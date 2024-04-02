@@ -1,4 +1,30 @@
-
+#' Create palette associated with the data
+#'
+#' The function creates a palette with a color associated with each trace.
+#'
+#'@param model_output_data a `model_out_tbl` object, containing all the required
+#' columns including a column containing date information (`x_col_name`
+#' parameter) and a column `value`.
+#'@param fill_by name of a column for specifying colors and legend in plot.
+#' The `pal_color` parameter can be use to change the palette.
+#' Default to `model_id`.
+#'@param pal_color a `character` string for specifying the palette color in the
+#' plot. Please refer to [RColorBrewer::display.brewer.all()]. If `NULL`,
+#' only `one_color` parameter will be used for all models. Default to `"Set2"`
+#'@param one_color a `character` string for specifying the color in the
+#' plot if `pal_color` is set to `NULL`. Please refer
+#' to [colors()] for accepted color names. Default to `"blue"`
+#'@param ens_color a `character` string of a color name, if not NULL, will be
+#' use as color for the model name associated with the parameter `ens_name`
+#' (both parameter need to be provided)
+#'@param ens_name a `character` string of a model name, if not NULL, will be
+#' use to change the color for the model name, associated with the parameter
+#' `ens_color`(both parameter need to be provided)
+#'@param plot_target a `boolean` for showing the target data in the plot.
+#'  Default to TRUE. Data used in the plot comes from the parameter
+#'  `target_data`
+#'
+#'@noRd
 make_palette <- function(model_output_data, fill_by = "model_id",
                          pal_color = "Set2", one_color = "blue",
                          ens_color = NULL, ens_name = NULL,

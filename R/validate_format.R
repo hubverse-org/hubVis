@@ -1,5 +1,16 @@
-# Imput format validation
-
+#' Validate model output data format
+#'
+#' Validate model output data is a `model_out_tbl` data frame with the expected
+#' content (column names and output_type)
+#'
+#' @param model_output_data object to validate
+#' @param col_names character vector, if not set to NULL (default), will
+#'  validate all the value(s) are contained the column names of
+#'  `model_output_data`
+#' @param valid_type character vector, expected `output_type`.
+#' `model_output_data` should contain at least one of the input type.
+#'
+#' @noRd
 mdl_out_validation <- function(model_output_data, col_names = NULL,
                                valid_types = c("median", "quantile")) {
   if (!is.data.frame(model_output_data)) {
@@ -30,7 +41,17 @@ mdl_out_validation <- function(model_output_data, col_names = NULL,
   }
 }
 
-
+#' Validate target data format
+#'
+#' Validate target data is a data frame with the expected
+#' content (column names)
+#'
+#' @param target_data object to validate
+#' @param col_names character vector, if not set to NULL (default), will
+#'  validate all the value(s) are contained the column names of
+#'  `target_data`
+#'
+#' @noRd
 target_validation <- function(target_data, col_names = NULL) {
   if (!is.data.frame(target_data)) {
     cli::cli_abort(c("x" = "{.arg target_data} must be a `data.frame`."))
@@ -45,7 +66,22 @@ target_validation <- function(target_data, col_names = NULL) {
 
 }
 
-
+#' Validate parameter `intervals` format
+#'
+#' Validate the format and content of the `intervals` parameter,
+#' returns `intervals` in the expected format if necessary
+#'
+#' @param model_output_data a `model_out_tbl` object, containing all the
+#'  required columns including a column containing date information and a
+#'  column `value`.
+#' @param intervals a vector of `numeric` values indicating which central
+#'  prediction interval levels to plot. `NULL` means no interval levels.
+#' @param list_intervals named list of accepted intervals accepted
+#' @param max_model_model_id numeric, if model_output_data contains more than
+#'  this number of unique `"model_id"`, the intervals will be reduced to
+#'  only one value (the maximal)
+#'
+#' @noRd
 interval_validation <- function(model_output_data, intervals, list_intervals,
                                 max_model_id = 5) {
   if (any(!intervals %in% names(list_intervals))) {
@@ -62,13 +98,27 @@ interval_validation <- function(model_output_data, intervals, list_intervals,
   if (length(unique(model_output_data[["model_id"]])) > max_model_id &&
         length(intervals) > 1) {
     intervals <- max(intervals)[1]
-    cli::cli_warn(c("!" = "{.arg model_output_data} contains 6 or more models,
-                      the plot will be reduced to show only one interval (the
-                      maximum interval value): {.val {intervals}}"))
+    cli::cli_warn(c("!" = "{.arg model_output_data} contains more than
+                    {.val {max_model_id}} models, the plot will be reduced to
+                    show only one interval (the maximum interval value):
+                    {.val {intervals}}"))
   }
   return(intervals)
 }
 
+#' Validate `"ensembles"` parameters format
+#'
+#' Validate `ens_color`, `ens_name` format: both should be set to `NULL` or to
+#' a non `NULL` value.
+#'
+#'@param ens_color a `character` string of a color name, if not NULL, will be
+#' use as color for the model name associated with the parameter `ens_name`
+#' (both parameter need to be provided)
+#'@param ens_name a `character` string of a model name, if not NULL, will be
+#' use to change the color for the model name, associated with the parameter
+#' `ens_color`(both parameter need to be provided)
+#'
+#' @noRd
 ensemble_validation <- function(ens_color, ens_name) {
   if (is.null(ens_color) + is.null(ens_name) == 1) {
     cli::cli_abort(c("x" = "Both {.arg ens_color} and {.arg ens_name} should
@@ -76,7 +126,17 @@ ensemble_validation <- function(ens_color, ens_name) {
   }
 }
 
-
+#' Validate `"output_type_id"` values
+#'
+#' Validate model output data contains the expected `"output_type_id"` values
+#'
+#' @param model_output_data a `model_out_tbl` object, containing all the
+#'  required columns including a column containing date information and a
+#'  column `value`.
+#' @param exp_value expected value required in `model_output_data`
+#' `"output_type_id"` column
+#'
+#' @noRd
 output_type_validation <- function(model_output_data, exp_value) {
   model_output_type_val <- unique(model_output_data$output_type_id)
   if (!all(exp_value %in% model_output_type_val)) {
@@ -92,6 +152,30 @@ output_type_validation <- function(model_output_data, exp_value) {
   return(model_output_data)
 }
 
+#' Validate `"facet"` parameters format
+#'
+#' Validate `facet` is a column name of `model_output_data` (if not `NULL`) and
+#' `facet_title` is one of: "top right", "top left" (default), "bottom right",
+#' "bottom left" (if not `NULL`) .
+#' If `interactive`, validate that `facet_nrow` is not greater than the number
+#' of expected facet. If so a warning will be return a `facet_nrow` will be
+#' restricted to the maximum number of possible facets.
+#'
+#' @param model_output_data a `model_out_tbl` object, containing all the
+#'  required columns including a column containing date information and a
+#'  column `value`.
+#' @param facet a unique value corresponding as a task_id variable name
+#' (interpretable as facet option for ggplot)
+#' @param interactive a `boolean` to output an "interactive" version of the
+#'  plot (using Plotly) or a "static" plot (using ggplot2). By default, `TRUE`
+#'  (interactive plot)
+#' @param facet_nrow a numeric, number of rows in the layout.
+#' @param facet_title a `string`, position of each subplot tile (value
+#'  associated with the `facet` parameter). "top right", "top left" (default),
+#'  "bottom right", "bottom left" are the possible values, `NULL` to remove the
+#'  title. For interactive plot only.
+#'
+#' @noRd
 facet_validation <- function(model_output_data, facet = NULL,
                              interactive = TRUE, facet_nrow = NULL,
                              facet_title = "top left") {
@@ -125,7 +209,15 @@ facet_validation <- function(model_output_data, facet = NULL,
   return(facet_nrow)
 }
 
-
+#' Validate `"top_layer"` parameters format
+#'
+#' Validate `top_layer` is one of: "model_output", "target"
+#'
+#' @param top_layer character vector, where the first element indicates the top
+#'  layer of the resulting plot. Possible options are `"model_output"` (default)
+#'  and `"target"`
+#'
+#' @noRd
 layer_validation <- function(top_layer) {
   if (!any(top_layer %in% c("model_output", "target"))) {
     cli::cli_abort(c("x" = "{.arg top_layer} should correspond to one of

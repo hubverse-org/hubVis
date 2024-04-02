@@ -293,8 +293,7 @@ static_proj_data <- function(plot_model, df_point, df_ribbon,
 #' [HubDocs website](https://hubdocs.readthedocs.io/en/latest/format/tasks.html)
 #' .
 #'
-#' @param plot_model a plot_ly object to add lines and/or ribbons, if NULL will
-#'  create an empty object.
+#' @param plot_model a plot_ly object to add lines and/or ribbons.
 #' @param df_point a `data.frame` with a column containing date information
 #' (`x_col_name` parameter) and "value" columns, use to add lines on the plot.
 #' @param df_ribbon a `data.frame` with a column containing date information
@@ -316,7 +315,6 @@ static_proj_data <- function(plot_model, df_point, df_ribbon,
 #' @param interactive a `boolean` to output an "interactive" version of the
 #'  plot (using Plotly) or a "static" plot (using ggplot2). By default, `TRUE`
 #'  (interactive plot).
-#' @param ... additional Plotly parameters.
 #' @param fill_by name of a column for specifying colors and legend in plot.
 #' The `pal_color` parameter can be use to change the palette.
 #' Default to `model_id`.
@@ -330,6 +328,7 @@ static_proj_data <- function(plot_model, df_point, df_ribbon,
 #'  the the value in the column. Please refer to [ggplot2::aes_group_order] for
 #'  more information. By default, NULL (no partitioning).ONLY available for
 #'  "static" plot.
+#' @param ... additional Plotly parameters.
 #'
 #' @noRd
 #' @importFrom plotly plot_ly
