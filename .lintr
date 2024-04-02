@@ -1,5 +1,4 @@
 linters: linters_with_defaults(
     line_length_linter = line_length_linter(120L),
-    commented_code_linter = NULL,
-    cyclocomp_linter = cyclocomp_linter(complexity_limit = 50L)
+    commented_code_linter = NULL
   )
