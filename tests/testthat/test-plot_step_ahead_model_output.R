@@ -1,8 +1,7 @@
 # Data Preparation
-projection_path <- system.file("example_round1.csv", package = "hubVis")
-projection_data0 <- read.csv(projection_path, stringsAsFactors = FALSE)
+library(hubExamples)
 projection_data <-
-  dplyr::mutate(projection_data0,
+  dplyr::mutate(scenario_outputs,
                 target_date = as.Date(origin_date) + (horizon * 7) - 1)
 projection_data_a_us <- dplyr::filter(projection_data,
                                       scenario_id == "A-2021-03-05",
@@ -13,20 +12,18 @@ d_proj <- rbind(projection_data_a_us,
                               model_id = paste0(model_id, "_2")))
 d_proj <- hubUtils::as_model_out_tbl(d_proj)
 
-target_path <- system.file("target_data.csv", package = "hubVis")
-target_data <- read.csv(target_path, stringsAsFactors = FALSE)
 target_data_us <-
-  dplyr::filter(target_data, location == "US",
-                time_idx < min(projection_data$target_date) + 21,
-                time_idx > "2020-10-01")
+  dplyr::filter(scenario_target_ts, location == "US",
+                date < min(projection_data$target_date) + 21,
+                date > "2020-10-01")
 # Test input information
 test_that("Input parameters", {
 
   # model_output_data format
   expect_error(plot_step_ahead_model_output(as.list(projection_data_a_us),
                                             target_data_us))
-  expect_warning(plot_step_ahead_model_output(projection_data_a_us,
-                                              target_data_us))
+  df_test <- as.data.frame(projection_data_a_us)
+  expect_warning(plot_step_ahead_model_output(df_test, target_data_us))
   projection_data_a_us <- hubUtils::as_model_out_tbl(projection_data_a_us)
   projection_data_a_us_w <-
     dplyr::mutate(projection_data_a_us,
@@ -66,7 +63,7 @@ test_that("Input parameters", {
                                             as.list(target_data_us)))
   expect_error(plot_step_ahead_model_output(projection_data_a_us,
                                             target_data_us,
-                                            x_target_col_name = "date"))
+                                            x_target_col_name = "time_idx"))
 
   # Intervals & Median value
   expect_warning(plot_step_ahead_model_output(projection_data_a_us,
@@ -147,15 +144,15 @@ test_that("Output", {
                                  use_median_as_point = TRUE)
   expect_equal(plot_test$labels$title, "My Plot")
   expect_equal(names(plot_test$facet$params$facets), "scenario_id")
-  expect_equal(unique(tail(plot_test$layers, 1)[[1]]$data$output_type),
-               "median")
+  expect_equal(unique(tail(plot_test$layers, 1)[[1]]$data$output_type_id),
+               0.5)
 
   plot_test <-
     plot_step_ahead_model_output(projection_data, target_data_us,
                                  interactive = FALSE, facet = "scenario_id",
                                  top_layer = "target", facet_scales = "free_x")
   expect_in(names(tail(plot_test$layers, 1)[[1]]$data),
-            c("time_idx", "location", "value", "target"))
+            c("date", "location", "observation", "target"))
   expect_true(plot_test$facet$params$free$x)
   expect_false(plot_test$facet$params$free$y)
 

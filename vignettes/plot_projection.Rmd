@@ -50,27 +50,27 @@ by setting  the `interactive` parameter to FALSE. See end of the document for ex
 
 ## Load and Filter Data
 
-The package contains two datasets that will be used for the following examples:
+To demonstrate the functionality of the `plot_step_ahead_model_output()` function,
+we will use the examples data from the [hubExamples](https://github.com/Infectious-Disease-Modeling-Hubs/hubExamples) package. 
 
-- `example_round1.csv`: example of model output for a round associated with the
-origin date: "2021-03-07" (called "round 1"), target: "incident case", for the
-US national level, from the
-[example-complex-scenario-hub](https://github.com/Infectious-Disease-Modeling-Hubs/example-complex-scenario-hub). The data set also contains an ensemble calculated by applying the
-function: `hubEnsembles::simple_ensemble(df_round1, agg_fun = "median")`
+The package contains two "scenario" datasets that will be used for the 
+following examples:
 
-- `target_data.csv`: example of target data from the [example-complex-scenario-hub](https://github.com/Infectious-Disease-Modeling-Hubs/example-complex-scenario-hub). The data here comes from the `"target-data/US_inc_case.csv"` file.
+- `scenario_outputs`: example scenario projection data that represents
+model outputs and an ensemble (generated with `hubEnsemble`) from a scenario 
+hub with predictions for one target (`inc hosp`) in one location (`"US"`), 
+one round ("2021-03-07") and four scenarios.
+
+- `scenario_target_ts`: contains time series target data associated with the
+scenario projection data.
 
 ### Load data
 
 ```{r load_data}
-projection_path <- system.file("example_round1.csv", package = "hubVis")
-projection_data <- read.csv(projection_path, stringsAsFactors = FALSE)
-projection_data <- hubData::as_model_out_tbl(projection_data)
-head(projection_data)
+library(hubExamples)
 
-target_path <- system.file("target_data.csv", package = "hubVis")
-target_data <- read.csv(target_path, stringsAsFactors = FALSE)
-head(target_data)
+head(scenario_outputs)
+head(scenario_target_ts)
 ```
 
 ### Data Preparation
@@ -88,7 +88,7 @@ a different column using the `x_col_name` argument.
 In our example data, this column does not exist, so we add it below:
 
 ```{r data_prep}
-projection_data <- dplyr::mutate(projection_data,
+projection_data <- dplyr::mutate(scenario_outputs,
                                  target_date = as.Date(origin_date) +
                                    (horizon * 7) - 1)
 head(projection_data)
@@ -104,7 +104,7 @@ As all model_output in model_output_data will be plotted, any filtering needs to
 happen outside this function.
 
 - ` target_data`: a `data.frame` object containing the target data, including 
-the columns: `"time_idx"` and `"value"`.
+the columns: `"date"` and `"value"`.
 
 ### "Simple" plot
 
@@ -119,11 +119,11 @@ projection_data_a_us <- dplyr::filter(projection_data,
                                       scenario_id == "A-2021-03-05",
                                       location == "US")
 
-# Limit time_idx for layout reason
+# Limit date for layout reason
 target_data_us <-
-  dplyr::filter(target_data, location == "US",
-                time_idx < min(projection_data$target_date) + 21,
-                time_idx > "2020-10-01")
+  dplyr::filter(scenario_target_ts, location == "US",
+                date < min(projection_data$target_date) + 21,
+                date > "2020-10-01")
 ```
 
 ```{r plot_A_us}
@@ -166,11 +166,6 @@ A "facet" (or subplot) plot can also be created for each scenario
 # Pre-filtering
 projection_data_us <- dplyr::filter(projection_data,
                                     location == "US")
-# Limit time_idx for layout reason
-target_data_us <-
-  dplyr::filter(target_data, location == "US",
-                time_idx < min(projection_data$target_date) + 21,
-                time_idx > "2020-10-01")
 ```
 
 ```{r plot_us}
@@ -345,7 +340,7 @@ The input data frames can have different column names for the date information. 
 the two `x_col_name` and `x_target_col_name` parameters can be used to indicate the variables that
 should be mapped to the x-axis.
 ```{r col_names}
-names(target_data_us)[names(target_data_us) == "time_idx"] <- "time"
+names(target_data_us)[names(target_data_us) == "date"] <- "time"
 names(projection_data_a_us)[names(projection_data_a_us) == "target_date"] <-
   "date"
 plot_step_ahead_model_output(projection_data_a_us, target_data_us,

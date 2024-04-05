@@ -57,7 +57,7 @@ plotly_facet_data <- function(data, facet, facet_value,
 #'  required
 #' @param target_data a `data.frame` object containing the target data,
 #'  containing the columns: date information (`x_target_col_name` parameter) and
-#'  `value`. Ignored, if `plot_target = FALSE`.
+#'  `observation`. Ignored, if `plot_target = FALSE`.
 #' @param facet a unique value corresponding as a task_id variable name
 #' (interpretable as facet option for ggplot)
 #' @param facet_value a vector of one of the possible unique values in the
@@ -85,7 +85,7 @@ plotly_facet_data <- function(data, facet, facet_value,
 #'  By default, "target_date".
 #' @param x_target_col_name  column name containing the date information for
 #' `target_data` data frame, value will be map to the x-axis of the plot.
-#'  By default, "time_idx".
+#'  By default, "date".
 #' @param ens_color a `character` string of a color name, if not NULL, will be
 #' use as color for the model name associated with the parameter `ens_name`
 #'@param ens_name a `character` string of a model name, if not NULL, will be
@@ -99,7 +99,7 @@ plotly_facet_plot <- function(plot_model, all_plot, all_ens, target_data,
                               top_layer = "model_output",
                               fill_transparency = 0.25, fill_by = "model_id",
                               x_col_name = "target_date",
-                              x_target_col_name = "time_idx",
+                              x_target_col_name = "date",
                               ens_name = NULL, ens_color = NULL) {
   # Data
   all_plot_data <- plotly_facet_data(all_plot, facet, facet_value, intervals)
@@ -200,7 +200,7 @@ plotly_facet_layout <- function(plot_model, text, facet_title = "top left") {
 #'  associated column `facet`
 #' @param target_data a `data.frame` object containing the target data,
 #'  containing the columns: date information (`x_target_col_name` parameter) and
-#'  `value`. Ignored, if `plot_target = FALSE`.
+#'  `observation`. Ignored, if `plot_target = FALSE`.
 #' @param plot_target a `boolean` for showing the target data in the plot.
 #'  Default to TRUE. Data used in the plot comes from the parameter
 #'  `target_data`
@@ -226,7 +226,7 @@ plotly_facet_layout <- function(plot_model, text, facet_title = "top left") {
 #'  By default, "target_date".
 #' @param x_target_col_name  column name containing the date information for
 #' `target_data` data frame, value will be map to the x-axis of the plot.
-#'  By default, "time_idx".
+#'  By default, "date".
 #' @param ens_color a `character` string of a color name, if not NULL, will be
 #' use as color for the model name associated with the parameter `ens_name`
 #'@param ens_name a `character` string of a model name, if not NULL, will be
@@ -240,7 +240,7 @@ plotly_facet <- function(facet_value, plot_model, all_plot, all_ens, facet,
                          fill_transparency = 0.25,
                          top_layer = "model_output", facet_title = "top left",
                          fill_by = "model_id", x_col_name = "target_date",
-                         x_target_col_name = "time_idx", ens_name = NULL,
+                         x_target_col_name = "date", ens_name = NULL,
                          ens_color = NULL) {
   plot_model <-
     plotly_facet_plot(plot_model, all_plot, all_ens, target_data,
@@ -272,7 +272,7 @@ plotly_facet <- function(facet_value, plot_model, all_plot, all_ens, facet,
 #'  associated column `facet`
 #' @param target_data a `data.frame` object containing the target data,
 #'  containing the columns: date information (`x_target_col_name` parameter) and
-#'  `value`. Ignored, if `plot_target = FALSE`.
+#'  `observation`. Ignored, if `plot_target = FALSE`.
 #' @param plot_target a `boolean` for showing the target data in the plot.
 #'  Default to TRUE. Data used in the plot comes from the parameter
 #'  `target_data`
@@ -302,7 +302,7 @@ plotly_facet <- function(facet_value, plot_model, all_plot, all_ens, facet,
 #'  By default, "target_date".
 #' @param x_target_col_name  column name containing the date information for
 #' `target_data` data frame, value will be map to the x-axis of the plot.
-#'  By default, "time_idx".
+#'  By default, "date".
 #' @param ens_color a `character` string of a color name, if not NULL, will be
 #' use as color for the model name associated with the parameter `ens_name`
 #'@param ens_name a `character` string of a model name, if not NULL, will be
@@ -318,7 +318,7 @@ plotly_subplot <- function(plot_model, all_plot, all_ens, facet,
                            facet_nrow = NULL, fill_transparency = 0.25,
                            top_layer = "model_output", facet_title = "top left",
                            fill_by = "model_id", x_col_name = "target_date",
-                           x_target_col_name = "time_idx", ens_name = NULL,
+                           x_target_col_name = "date", ens_name = NULL,
                            ens_color = NULL, pal_value = NULL) {
   sharex <- FALSE
   sharey <- FALSE
@@ -369,7 +369,7 @@ plotly_subplot <- function(plot_model, all_plot, all_ens, facet,
 #'  required
 #' @param target_data a `data.frame` object containing the target data,
 #'  containing the columns: date information (`x_target_col_name` parameter) and
-#'  `value`. Ignored, if `plot_target = FALSE`.
+#'  `observation`. Ignored, if `plot_target = FALSE`.
 #' @param facet a unique value corresponding as a task_id variable name
 #'  (interpretable as facet option for ggplot). If set to `NULL` (default),
 #'  no facet
@@ -397,7 +397,7 @@ plotly_subplot <- function(plot_model, all_plot, all_ens, facet,
 #'  By default,`"target_date"`.
 #' @param x_target_col_name  column name containing the date information for
 #' `target_data` data frame, value will be map to the x-axis of the plot.
-#'  By default, `"time_idx"`.
+#'  By default, `"date"`.
 #' @param facet_scales argument for scales as in [ggplot2::facet_wrap] or
 #' equivalent to `shareX`, `shareY` in [plotly::subplot]. Default to "`fixed"`
 #' (x and y axes are shared).
@@ -416,7 +416,7 @@ simple_subplot <- function(plot_model, all_plot, all_ens, target_data,
                            plot_target = TRUE, interactive = TRUE,
                            fill_transparency = 0.25, top_layer = "model_output",
                            fill_by = "model_id", x_col_name = "target_date",
-                           x_target_col_name = "time_idx",
+                           x_target_col_name = "date",
                            facet_scales = "fixed",
                            facet_nrow = NULL, facet_ncol = NULL,
                            group = NULL, ens_color = NULL) {
@@ -461,7 +461,7 @@ simple_subplot <- function(plot_model, all_plot, all_ens, target_data,
 #'  required
 #' @param target_data a `data.frame` object containing the target data,
 #'  containing the columns: date information (`x_target_col_name` parameter) and
-#'  `value`. Ignored, if `plot_target = FALSE`.
+#'  `observation`. Ignored, if `plot_target = FALSE`.
 #' @param plot_target a `boolean` for showing the target data in the plot.
 #'  Default to TRUE. Data used in the plot comes from the parameter
 #'  `target_data`
@@ -509,7 +509,7 @@ simple_subplot <- function(plot_model, all_plot, all_ens, target_data,
 #' By default, "target_date".
 #' @param x_target_col_name  column name containing the date information for
 #' `target_data` data frame, value will be map to the x-axis of the plot.
-#' By default, "time_idx".
+#' By default, "date".
 #' @param group column name for partitioning the data in the data according
 #'  the the value in the column. Please refer to [ggplot2::aes_group_order] for
 #'  more information. By default, NULL (no partitioning).ONLY available for
@@ -525,7 +525,7 @@ output_plot <-  function(
     ens_name = NULL, facet = NULL, facet_scales = "fixed", facet_nrow = NULL,
     facet_ncol = NULL, facet_title = "top left", facet_value = NULL,
     interactive = TRUE, fill_by = "model_id", x_col_name = "target_date",
-    x_target_col_name = "time_idx", group = NULL) {
+    x_target_col_name = "date", group = NULL) {
 
   if (interactive) {
     plot_model <- plotly::plot_ly(colors =  pal_color)

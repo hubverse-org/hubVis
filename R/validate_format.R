@@ -60,7 +60,7 @@ target_validation <- function(target_data, col_names = NULL) {
     target_data_col <- colnames(target_data)
     if (!all(col_names %in% target_data_col)) {
       cli::cli_abort(c("x" = "{.arg target_data} did not have all required
-                     columns {.val {exp_td_col}}"))
+                     columns {.val {col_names}}"))
     }
   }
 

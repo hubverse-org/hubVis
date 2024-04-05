@@ -11,7 +11,7 @@ plot_step_ahead_model_output(
   show_plot = TRUE,
   plot_target = TRUE,
   x_col_name = "target_date",
-  x_target_col_name = "time_idx",
+  x_target_col_name = "date",
   show_legend = TRUE,
   facet = NULL,
   facet_scales = "fixed",
@@ -38,7 +38,7 @@ parameter) and a column \code{value}.}
 
 \item{target_data}{a \code{data.frame} object containing the target data,
 with a column containing date information (\code{x_target_col_name} parameter) and
-a column \code{value}. Ignored, if \code{plot_target = FALSE}.}
+a column \code{observation}. Ignored, if \code{plot_target = FALSE}.}
 
 \item{use_median_as_point}{a \code{Boolean} for using median quantile as point
 in plot. Default to FALSE. If TRUE, will select first any \code{median}
@@ -57,7 +57,7 @@ By default, "target_date".}
 
 \item{x_target_col_name}{column name containing the date information for
 \code{target_data} data frame, value will be map to the x-axis of the plot.
-By default, "time_idx".}
+By default, "date".}
 
 \item{show_legend}{a \code{boolean} for showing the legend in the plot.
 Default to TRUE.}
@@ -130,23 +130,20 @@ Create a simple Plotly time-series plot for model projection outputs.
 \examples{
 
 # Load and Prepare Data
-# The package contains example files, please consult the vignette for
-# more information. The vignette also contains more examples.
-projection_path <- system.file("example_round1.csv", package = "hubVis")
-projection_data <- read.csv(projection_path, stringsAsFactors = FALSE)
-
-projection_data <- dplyr::mutate(projection_data,
+# The package hubExmaple contains example files, please consult the
+# documentation associated with the package, for more information.
+library(hubExamples)
+head(scenario_outputs)
+head(scenario_target_ts)
+projection_data <- dplyr::mutate(scenario_outputs,
      target_date = as.Date(origin_date) + (horizon * 7) - 1)
 projection_data <- dplyr::filter(projection_data,
      scenario_id == "A-2021-03-05", location == "US")
 projection_data <- hubUtils::as_model_out_tbl(projection_data)
 
-target_path <- system.file("target_data.csv", package = "hubVis")
-target_data <- read.csv(target_path, stringsAsFactors = FALSE)
-target_data_us <- dplyr::filter(target_data, location == "US",
-     time_idx < min(projection_data$target_date) + 21,
-     time_idx > "2020-10-01")
-
+target_data_us <- dplyr::filter(scenario_target_ts, location == "US",
+                                date < min(projection_data$target_date) + 21,
+                                date > "2020-10-01")
 # Plot
 plot_step_ahead_model_output(projection_data, target_data_us)
 

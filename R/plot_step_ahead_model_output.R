@@ -7,7 +7,7 @@
 #' parameter) and a column `value`.
 #'@param target_data a `data.frame` object containing the target data,
 #' with a column containing date information (`x_target_col_name` parameter) and
-#' a column `value`. Ignored, if `plot_target = FALSE`.
+#' a column `observation`. Ignored, if `plot_target = FALSE`.
 #'@param use_median_as_point a `Boolean` for using median quantile as point
 #' in plot. Default to FALSE. If TRUE, will select first any `median`
 #' output type value and if no `median` value included in `model_output_data`;
@@ -65,7 +65,7 @@
 #' By default, "target_date".
 #'@param x_target_col_name  column name containing the date information for
 #' `target_data` data frame, value will be map to the x-axis of the plot.
-#' By default, "time_idx".
+#' By default, "date".
 #' @param group column name for partitioning the data in the data according
 #'  the the value in the column. Please refer to [ggplot2::aes_group_order] for
 #'  more information. By default, NULL (no partitioning).ONLY available for
@@ -83,30 +83,27 @@
 #' @examples
 #'
 #' # Load and Prepare Data
-#' # The package contains example files, please consult the vignette for
-#' # more information. The vignette also contains more examples.
-#' projection_path <- system.file("example_round1.csv", package = "hubVis")
-#' projection_data <- read.csv(projection_path, stringsAsFactors = FALSE)
-#'
-#' projection_data <- dplyr::mutate(projection_data,
+#' # The package hubExmaple contains example files, please consult the
+#' # documentation associated with the package, for more information.
+#' library(hubExamples)
+#' head(scenario_outputs)
+#' head(scenario_target_ts)
+#' projection_data <- dplyr::mutate(scenario_outputs,
 #'      target_date = as.Date(origin_date) + (horizon * 7) - 1)
 #' projection_data <- dplyr::filter(projection_data,
 #'      scenario_id == "A-2021-03-05", location == "US")
 #' projection_data <- hubUtils::as_model_out_tbl(projection_data)
 #'
-#' target_path <- system.file("target_data.csv", package = "hubVis")
-#' target_data <- read.csv(target_path, stringsAsFactors = FALSE)
-#' target_data_us <- dplyr::filter(target_data, location == "US",
-#'      time_idx < min(projection_data$target_date) + 21,
-#'      time_idx > "2020-10-01")
-#'
+#' target_data_us <- dplyr::filter(scenario_target_ts, location == "US",
+#'                                 date < min(projection_data$target_date) + 21,
+#'                                 date > "2020-10-01")
 #' # Plot
 #' plot_step_ahead_model_output(projection_data, target_data_us)
 #'
 plot_step_ahead_model_output <- function(
     model_output_data, target_data, use_median_as_point = FALSE,
     show_plot = TRUE, plot_target = TRUE, x_col_name = "target_date",
-    x_target_col_name = "time_idx", show_legend = TRUE, facet = NULL,
+    x_target_col_name = "date", show_legend = TRUE, facet = NULL,
     facet_scales = "fixed", facet_nrow = NULL, facet_ncol = NULL,
     facet_title = "top left", interactive = TRUE, fill_by = "model_id",
     pal_color = "Set2", one_color = "blue", fill_transparency = 0.25,
@@ -121,7 +118,7 @@ plot_step_ahead_model_output <- function(
 
   ## Target Data
   if (plot_target) {
-    exp_td_col <- c(x_target_col_name, "value")
+    exp_td_col <- c(x_target_col_name, "observation")
     target_validation(target_data, col_names = exp_td_col)
   }
   ## Parameters

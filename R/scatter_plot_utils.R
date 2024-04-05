@@ -64,7 +64,7 @@ plot_prep_data <- function(df, plain_line, plain_type, intervals,
 #' @param plot_model a plot_ly object to add lines and/or ribbons, if NULL will
 #'  create an empty object
 #' @param target_data a `data.frame` object containing the target data,
-#'  containing the columns: `time_idx` and `value`.
+#'  containing the columns: `date` and `observation`.
 #'  Ignored, if `plot_target = FALSE`
 #' @param plot_target a `boolean` for showing the target data in the plot.
 #'  Default to TRUE. Data used in the plot comes from the parameter
@@ -72,23 +72,23 @@ plot_prep_data <- function(df, plain_line, plain_type, intervals,
 #' @param show_legend a `boolean` for showing the legend in the plot.
 #' @param arguments list of others Plotly parameters.
 #' @param x_col_name column name containing the date information for the x-axis.
-#' By default, "time_idx".
+#' By default, "date".
 #'
 #' @noRd
 #' @importFrom plotly add_trace layout
 plotly_target_data <- function(plot_model, target_data, plot_target,
                                show_legend, arguments,
-                               x_col_name = "time_idx") {
+                               x_col_name = "date") {
   if (plot_target) {
     target_data[[x_col_name]] <- as.Date(target_data[[x_col_name]])
     arg_list <- list(p = plot_model, data = target_data,
-                     x = target_data[[x_col_name]], y = ~value,
+                     x = target_data[[x_col_name]], y = ~observation,
                      type = "scatter", mode = "lines+markers",
                      line = list(color = "#6e6e6e"), hoverinfo = "text",
                      name = "target", legendgroup = "target",
                      hovertext = paste("Date: ", target_data[[x_col_name]],
                                        "<br>target: ",
-                                       format(target_data$value,
+                                       format(target_data$observation,
                                               big.mark = ","), sep = ""),
                      marker = list(color = "#6e6e6e", size = 7),
                      showlegend = show_legend)
@@ -107,26 +107,26 @@ plotly_target_data <- function(plot_model, target_data, plot_target,
 #' @param plot_model a plot_ly object to add lines and/or ribbons, if NULL will
 #'  create an empty object
 #' @param target_data a `data.frame` object containing the target data,
-#'  containing the columns: `time_idx` and `value`.
+#'  containing the columns: `date` and `observation`.
 #'  Ignored, if `plot_target = FALSE`
 #' @param plot_target a `boolean` for showing the target data in the plot.
 #'  Default to TRUE. Data used in the plot comes from the parameter
 #'  `target_data`.
 #' @param x_col_name column name containing the date information for the x-axis.
-#'  By default, "time_idx".
+#'  By default, "date".
 #'
 #' @noRd
 #' @importFrom ggplot2 geom_line geom_point aes .data
 static_target_data <- function(plot_model, target_data, plot_target,
-                               x_col_name = "time_idx") {
+                               x_col_name = "date") {
   if (plot_target) {
     target_data[[x_col_name]] <- as.Date(target_data[[x_col_name]])
     plot_model <- plot_model  +
       geom_line(data = target_data,
-                aes(x = .data[[x_col_name]], y = .data$value),
+                aes(x = .data[[x_col_name]], y = .data$observation),
                 color = "#6e6e6e", inherit.aes = FALSE) +
       geom_point(data = target_data,
-                 aes(x = .data[[x_col_name]], y = .data$value),
+                 aes(x = .data[[x_col_name]], y = .data$observation),
                  color = "#6e6e6e", inherit.aes = FALSE)
   }
   return(plot_model)
@@ -304,7 +304,7 @@ static_proj_data <- function(plot_model, df_point, df_ribbon,
 #'  `target_data`
 #' @param target_data a `data.frame` object containing the target data,
 #'  containing the columns: date information (`x_target_col_name` parameter) and
-#'  `value`. Ignored, if `plot_target = FALSE`.
+#'  `observation`. Ignored, if `plot_target = FALSE`.
 #' @param opacity a `numeric`, opacity of the ribbons, default 0.25.
 #' @param line_color a `string`, specific color associated with plot.
 #' @param top_layer character vector, where the first element indicates the top
@@ -323,7 +323,7 @@ static_proj_data <- function(plot_model, df_point, df_ribbon,
 #' By default, "target_date".
 #' @param x_target_col_name  column name containing the date information for
 #' `target_data` data frame, value will be map to the x-axis of the plot.
-#' By default, "time_idx".
+#' By default, "date".
 #' @param group column name for partitioning the data in the data according
 #'  the the value in the column. Please refer to [ggplot2::aes_group_order] for
 #'  more information. By default, NULL (no partitioning).ONLY available for
@@ -336,7 +336,7 @@ simple_model_plot <- function(
     plot_model, df_point, df_ribbon, plot_target, target_data, opacity = 0.25,
     line_color = NULL, top_layer = "model_output", show_target_legend = TRUE,
     interactive = TRUE, fill_by = "model_id", x_col_name = "target_date",
-    x_target_col_name = "time_idx", group = NULL, ...) {
+    x_target_col_name = "date", group = NULL, ...) {
   # prerequisite
   arguments <- list(...)
 

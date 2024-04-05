@@ -25,10 +25,10 @@ Imports:
     scales,
     stats
 Remotes:
-    Infectious-Disease-Modeling-Hubs/hubUtils,
-    Infectious-Disease-Modeling-Hubs/hubData
+    Infectious-Disease-Modeling-Hubs/hubUtils
 Suggests:
     hubData,
+    hubExamples,
     rmarkdown,
     testthat (>= 3.0.0)
 Roxygen: list(markdown = TRUE)
