@@ -53,8 +53,7 @@ by setting  the `interactive` parameter to FALSE. See end of the document for ex
 To demonstrate the functionality of the `plot_step_ahead_model_output()` function,
 we will use the examples data from the [hubExamples](https://github.com/Infectious-Disease-Modeling-Hubs/hubExamples) package. 
 
-The package contains two "scenario" datasets that will be used for the 
-following examples:
+#### Scenario
 
 - `scenario_outputs`: example scenario projection data that represents
 model outputs and an ensemble (generated with `hubEnsemble`) from a scenario 
@@ -64,34 +63,51 @@ one round ("2021-03-07") and four scenarios.
 - `scenario_target_ts`: contains time series target data associated with the
 scenario projection data.
 
+#### Forecast
+
+- `forecast_outputs`: example forecast data that represents model outputs from 
+a forecast hub with predictions for three influenza-related targets (wk inc 
+flu hosp, wk flu hops rate category, and wk flu hosp rate) for two reference 
+dates in 2022.
+
+- `forecast_target_ts`: contains time series target data associated with the
+forecast projection data.
+
+
 ### Load data
 
 ```{r load_data}
 library(hubExamples)
 
+# Scenario examples
 head(scenario_outputs)
 head(scenario_target_ts)
+
+# Forecast examples
+head(forecast_outputs)
+head(forecast_target_ts)
 ```
 
 ### Data Preparation
 
-The model output data in the `projection_data` object follows the structure
-of [the `model_out_tbl` class](https://infectious-disease-modeling-hubs.github.io/hubUtils/articles/connect_hub.html#structure-of-hubverse-datasets).
-This dataset is converted to a `model_out_tbl` object after being read-in above.
-In addition to the standard requirements for this class, the `plot_step_ahead_model_output()` function
-in `hubVis` requires that the dataset have a column whose value corresponds
-to the variable that should be used for the x-axis of a "step ahead" plot.
-In general, this should be a date variable that corresponds to the date
-which is the "target" of a particular prediction. By default it will look for
-the `"target_date"` column, although this could be over-ridden by specifying
-a different column using the `x_col_name` argument.
-In our example data, this column does not exist, so we add it below:
+The forecast and scenario output should be a `model_out_tbl`.
+In addition to the standard requirements for this class, the 
+`plot_step_ahead_model_output()` function in `hubVis` has other requirement. 
+
+- a Date column used for the x-axis of a "step ahead" plot. By default, the 
+function expect a`"target_date"` column, although this could be over-ridden by 
+specifying a different column using the `x_col_name` argument.
+- `quantile` and `median` are the only accepted output type 
 
 ```{r data_prep}
+# Add a `target_date` column in the scenario example
 projection_data <- dplyr::mutate(scenario_outputs,
                                  target_date = as.Date(origin_date) +
                                    (horizon * 7) - 1)
 head(projection_data)
+# Filter only `quantile` output type in the forecast example
+forecast_quantile <- dplyr::filter(forecast_outputs, output_type == "quantile")
+head(forecast_quantile)
 ```
 
 ## Plot
@@ -104,12 +120,14 @@ As all model_output in model_output_data will be plotted, any filtering needs to
 happen outside this function.
 
 - ` target_data`: a `data.frame` object containing the target data, including 
-the columns: `"date"` and `"value"`.
+the columns: `"date"` and `"observation"`.
 
 ### "Simple" plot
 
 The `projection_data` and `target_data` contain information for multiple 
 locations, and scenarios.
+
+#### Scenario
 
 To plot the model projections for the US, Scenario A:
 
@@ -158,7 +176,41 @@ plot_step_ahead_model_output(projection_data_a_us, target_data_us,
                              interactive = FALSE)
 ```
 
+#### Forecast
+
+To plot the forecast projections for one reference dates (2022-11-19) for 
+Massachusetts (25).
+
+```{r f_p}
+# Pre-filtering
+forecast_quantile <- as_model_out_tbl(forecast_quantile)
+forecast_quantile <- dplyr::mutate(forecast_quantile,
+                                   output_type_id = as.numeric(output_type_id))
+forecast_quantile_1 <- dplyr::filter(forecast_quantile, 
+                                     reference_date == "2022-11-19",
+                                     location == 25)
+
+# Limit date for layout reason
+forecast_target_ma <- dplyr::filter(forecast_target_ts, location == 25,
+                                    date >= "2022-11-01",
+                                    date <= "2023-01-01")
+```
+
+As the forecast projections used the column `target_end_date` and contains the
+quantiles: `"0.05"`, `"0.1"`, `"0.25"`, `"0.5"`,  `"0.75"`, `"0.9"`, `"0.95"`,
+the parameters in the `plot_step_ahead_model_output()` need to be ajusted:
+
+```{r f_1}
+plot_step_ahead_model_output(forecast_quantile_1, forecast_target_ma,
+                             intervals = c(0.9, 0.5), 
+                             use_median_as_point = TRUE,
+                             x_col_name = "target_end_date")
+```
+
+
 ### Facet plot
+
+#### Scenario
 
 A "facet" (or subplot) plot can also be created for each scenario
 
@@ -206,6 +258,26 @@ plot_step_ahead_model_output(projection_data_a_us, target_data_us,
                              facet = "model_id", show_legend = FALSE)
 ```
 
+#### Forecast
+
+A "facet" (or subplot) plot can also be created for each location
+
+```{r f_p2}
+forecast_quantile_1 <- dplyr::filter(forecast_quantile, 
+                                     reference_date == "2022-11-19")
+forecast_target <- dplyr::filter(forecast_target_ts, date >= "2022-11-01",
+                                 date <= "2023-01-01", 
+                                 location %in% forecast_quantile_1$location)
+```
+
+```{r f_2}
+plot_step_ahead_model_output(forecast_quantile_1, forecast_target,
+                             intervals = c(0.9, 0.5), 
+                             use_median_as_point = TRUE,
+                             x_col_name = "target_end_date",
+                             facet = "location")
+```
+
 
 ### Intervals
 
@@ -214,7 +286,8 @@ to also plot the 90% intervals or a subset of these intervals.
 When plotting 6 or more  models, the plot will be reduced to show the widest
 intervals provided (95% by default).
 
-To illustrate this we will use the projections for only one model
+To illustrate this we will use the projections for only one model in the 
+scenario example
 
 ```{r us_modl}
 # Pre-filtering
@@ -266,6 +339,24 @@ plot_step_ahead_model_output(projection_data_us, target_data_us,
                              facet = "scenario_id", facet_nrow = 2,
                              ens_name = "hub-ensemble", ens_color = "black",
                              intervals = 0.8)
+```
+
+#### "Group" layout
+
+An optional parameter `group` in the `plot_step_ahead_model_output()` function 
+to allow to group or partition the input data in the plot according to a 
+specific column. This feature is currently only available for "static" plot. 
+Please refer to `ggplot2::aes_group_order` for more information.
+
+To illustrate this we will use the forecast example for both reference date:
+
+```{r f_3}
+plot_step_ahead_model_output(forecast_quantile, forecast_target,
+                             intervals = c(0.9, 0.5), 
+                             use_median_as_point = TRUE,
+                             x_col_name = "target_end_date",
+                             facet = "location", interactive = FALSE,
+                             group = "reference_date")
 ```
 
 #### Layout update
