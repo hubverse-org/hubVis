@@ -186,7 +186,7 @@ Massachusetts (25).
 forecast_quantile <- as_model_out_tbl(forecast_quantile)
 forecast_quantile <- dplyr::mutate(forecast_quantile,
                                    output_type_id = as.numeric(output_type_id))
-forecast_quantile_1 <- dplyr::filter(forecast_quantile, 
+forecast_quantile_1 <- dplyr::filter(forecast_quantile,
                                      reference_date == "2022-11-19",
                                      location == 25)
 
@@ -202,7 +202,7 @@ the parameters in the `plot_step_ahead_model_output()` need to be ajusted:
 
 ```{r f_1}
 plot_step_ahead_model_output(forecast_quantile_1, forecast_target_ma,
-                             intervals = c(0.9, 0.5), 
+                             intervals = c(0.9, 0.5),
                              use_median_as_point = TRUE,
                              x_col_name = "target_end_date")
 ```
@@ -263,16 +263,16 @@ plot_step_ahead_model_output(projection_data_a_us, target_data_us,
 A "facet" (or subplot) plot can also be created for each location
 
 ```{r f_p2}
-forecast_quantile_1 <- dplyr::filter(forecast_quantile, 
+forecast_quantile_1 <- dplyr::filter(forecast_quantile,
                                      reference_date == "2022-11-19")
 forecast_target <- dplyr::filter(forecast_target_ts, date >= "2022-11-01",
-                                 date <= "2023-01-01", 
+                                 date <= "2023-01-01",
                                  location %in% forecast_quantile_1$location)
 ```
 
 ```{r f_2}
 plot_step_ahead_model_output(forecast_quantile_1, forecast_target,
-                             intervals = c(0.9, 0.5), 
+                             intervals = c(0.9, 0.5),
                              use_median_as_point = TRUE,
                              x_col_name = "target_end_date",
                              facet = "location")
@@ -352,7 +352,7 @@ To illustrate this we will use the forecast example for both reference date:
 
 ```{r f_3}
 plot_step_ahead_model_output(forecast_quantile, forecast_target,
-                             intervals = c(0.9, 0.5), 
+                             intervals = c(0.9, 0.5),
                              use_median_as_point = TRUE,
                              x_col_name = "target_end_date",
                              facet = "location", interactive = FALSE,
