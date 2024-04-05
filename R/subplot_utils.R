@@ -564,8 +564,8 @@ output_plot <-  function(
 
   if (!interactive) {
     plot_model <- plot_model +
-      scale_color_manual(values = pal_value, name = "Legend") +
-      scale_fill_manual(values = pal_value, name = "Legend")
+      scale_color_manual(values = pal_value, name = "Legend",
+                         aesthetics = c("colour", "fill"))
   }
   return(plot_model)
 }
