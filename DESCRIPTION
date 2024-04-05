@@ -25,7 +25,9 @@ Imports:
     scales,
     stats
 Remotes:
-    Infectious-Disease-Modeling-Hubs/hubUtils
+    Infectious-Disease-Modeling-Hubs/hubUtils,
+    Infectious-Disease-Modeling-Hubs/hubData,
+    Infectious-Disease-Modeling-Hubs/hubExamples
 Suggests:
     hubData,
     hubExamples,
