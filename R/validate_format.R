@@ -27,7 +27,7 @@ mdl_out_validation <- function(model_output_data, col_names = NULL,
     model_output_col <- colnames(model_output_data)
     if (!all(col_names %in% model_output_col)) {
       cli::cli_abort(c("x" = "{.arg model_output_data} did not have all required
-                       columns {.val {exp_f_col}}"))
+                       columns {.val {col_names}}"))
     }
   }
 
@@ -138,16 +138,16 @@ ensemble_validation <- function(ens_color, ens_name) {
 #'
 #' @noRd
 output_type_validation <- function(model_output_data, exp_value) {
-  model_output_type_val <- unique(model_output_data$output_type_id)
-  if (!all(exp_value %in% model_output_type_val)) {
-    cli::cli_abort(c("x" = "{.arg model_output_type_val} did not have the
-                     expected output_type_id value {.val {exp_value}}"))
-  }
-  if (!class(exp_value) %in% class(model_output_type_val)) {
+  if (!class(exp_value) %in% class(model_output_data$output_type_id)) {
     model_output_data$output_type_id <-
       as.numeric(model_output_data$output_type_id)
     cli::cli_warn(c("!" = "{.arg output_type_id} column must be a numeric.
                     Class applied by default."))
+  }
+  model_output_type_val <- unique(model_output_data$output_type_id)
+  if (!all(exp_value %in% model_output_type_val)) {
+    cli::cli_abort(c("x" = "{.arg model_output_type_val} did not have the
+                     expected output_type_id value {.val {exp_value}}"))
   }
   return(model_output_data)
 }
