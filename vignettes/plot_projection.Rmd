@@ -183,7 +183,6 @@ Massachusetts (25).
 
 ```{r f_p}
 # Pre-filtering
-forecast_quantile <- as_model_out_tbl(forecast_quantile)
 forecast_quantile <- dplyr::mutate(forecast_quantile,
                                    output_type_id = as.numeric(output_type_id))
 forecast_quantile_1 <- dplyr::filter(forecast_quantile,
