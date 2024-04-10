@@ -30,7 +30,7 @@ Remotes:
     Infectious-Disease-Modeling-Hubs/hubExamples
 Suggests:
     hubData,
-    hubExamples (>= 0.0.9001),
+    hubExamples (>= 0.0.0.9001),
     rmarkdown,
     testthat (>= 3.0.0)
 Roxygen: list(markdown = TRUE)
