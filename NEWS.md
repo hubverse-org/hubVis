@@ -10,7 +10,7 @@ for the target data have been updated accordingly.
 It also contains a patch for `plot_step_ahead_model_output()` to return a
 warning instead of an error if the output plot is interactive and the `facet_nrow` 
 parameter is higher than the number of maximum facet expected (#19). A warning
-will also be generated if the input file contains empty columns. 
+will also be generated if the input model output data contains empty columns. 
 
 The package is also now upgraded to match the hubverse style and best practise
 (#25)
