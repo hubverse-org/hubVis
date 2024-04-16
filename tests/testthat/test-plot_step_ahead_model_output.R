@@ -60,7 +60,7 @@ test_that("Input parameters", {
   df_test$output_type_id <- NA
   df_test <- rbind(df_test, projection_data_a_us)
   expect_no_error(plot_step_ahead_model_output(df_test, target_data_us,
-                                               use_median_as_point = T))
+                                               use_median_as_point = TRUE))
   df_test <- dplyr::mutate(projection_data_a_us,
                            output_type = gsub("median", "mean", output_type))
   expect_no_error(plot_step_ahead_model_output(df_test, target_data_us))
