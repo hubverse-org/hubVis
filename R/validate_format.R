@@ -186,7 +186,7 @@ facet_validation <- function(model_output_data, facet = NULL,
                          hubUtils::std_colnames[names(hubUtils::std_colnames) !=
                                                   "model_id"]))) {
       cli::cli_abort(c("x" = "if {.arg facet} is not NULL, the argument should
-                       be of length 1 and should match one of the task_id column
+                       be of length 1 and should match one of the task_id columns
                        of {.arg model_output_data}"))
     }
     facet_max <- length(unique(model_output_data[[facet]]))
