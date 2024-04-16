@@ -1,7 +1,9 @@
-# hubVis
+# hubVis <a href="https://infectious-disease-modeling-hubs.github.io/hubVis/"><img src="man/figures/logo.png" align="right" height="131" alt="hubVis website" /></a>
+
 
 [![Lifecycle:experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 [![R-CMD-check](https://github.com/Infectious-Disease-Modeling-Hubs/hubVis/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/Infectious-Disease-Modeling-Hubs/hubVis/actions/workflows/R-CMD-check.yaml)
+[![Codecov test coverage](https://codecov.io/gh/Infectious-Disease-Modeling-Hubs/hubVis/branch/main/graph/badge.svg)](https://app.codecov.io/gh/Infectious-Disease-Modeling-Hubs/hubVis?branch=main)
 
 
 The goal of hubVis is to provide plotting methods for hub model outputs, 
@@ -31,14 +33,31 @@ The function can output 2 types of plots:
  - interactive (Plotly object)
  - static (ggplot2 object)
 
+```r
+library(hubVis)
+```
+```r
+library(hubExamples)
+head(scenario_outputs)
+head(scenario_target_ts)
+projection_data <- dplyr::mutate(scenario_outputs,
+     target_date = as.Date(origin_date) + (horizon * 7) - 1)
+projection_data <- dplyr::filter(projection_data,
+     scenario_id == "A-2021-03-05", location == "US")
 
-> Before plotting, the data might require some preparation (filtering, etc.). 
-> These step is skipped in this example, please consult the 
-> "Plot Model Projections Output" vignette contained in this package for complete
-> examples.
+target_data_us <- dplyr::filter(scenario_target_ts, location == "US",
+                                date < min(projection_data$target_date) + 21,
+                                date > "2020-10-01")
+# Plot
+plot_step_ahead_model_output(projection_data, target_data_us)
+```
+
 
 ```r
-plot_step_ahead_model_output(projection_data_us, truth_data_us)
+projection_data_us <- dplyr::filter(projection_data,
+                                    scenario_id == "A-2021-03-05",
+                                    location == "US")
+plot_step_ahead_model_output(projection_data_us, target_data_us)
 ```
 ![](./man/figures/simple_plotly.png)
 
@@ -46,9 +65,23 @@ plot_step_ahead_model_output(projection_data_us, truth_data_us)
  models, etc.
 
 ```r
-plot_step_ahead_model_output(projection_data_us, truth_data_us, 
+projection_data_us <- dplyr::filter(projection_data,
+                                    location == "US")
+plot_step_ahead_model_output(projection_data_us, target_data_us, 
                              use_median_as_point = TRUE,
                              facet = "scenario_id", facet_scales = "free_x", 
                              facet_nrow = 2, facet_title = "bottom left")
 ```
 ![](./man/figures/facet_plot.png)
+
+
+***
+
+## Code of Conduct
+
+Please note that the hubVis package is released with a [Contributor Code of Conduct](.github/CODE_OF_CONDUCT.md). By contributing to this project, you agree to abide by its terms.
+
+## Contributing
+
+Interested in contributing back to the open-source Hubverse project?
+Learn more about how to [get involved in the Hubverse Community](https://hubdocs.readthedocs.io/en/latest/overview/contribute.html) or [how to contribute to the hubVis package](.github/CONTRIBUTING.md).

@@ -6,12 +6,12 @@
 \usage{
 plot_step_ahead_model_output(
   model_output_data,
-  truth_data,
+  target_data,
   use_median_as_point = FALSE,
   show_plot = TRUE,
-  plot_truth = TRUE,
+  plot_target = TRUE,
   x_col_name = "target_date",
-  x_truth_col_name = "time_idx",
+  x_target_col_name = "date",
   show_legend = TRUE,
   facet = NULL,
   facet_scales = "fixed",
@@ -36,9 +36,9 @@ plot_step_ahead_model_output(
 columns including a column containing date information (\code{x_col_name}
 parameter) and a column \code{value}.}
 
-\item{truth_data}{a \code{data.frame} object containing the ground truth data,
-with a column containing date information (\code{x_truth_col_name} parameter) and
-a column \code{value}. Ignored, if \code{plot_truth = FALSE}.}
+\item{target_data}{a \code{data.frame} object containing the target data,
+with a column containing date information (\code{x_target_col_name} parameter) and
+a column \code{observation}. Ignored, if \code{plot_target = FALSE}.}
 
 \item{use_median_as_point}{a \code{Boolean} for using median quantile as point
 in plot. Default to FALSE. If TRUE, will select first any \code{median}
@@ -47,16 +47,17 @@ will select \code{quantile = 0.5} output type value.}
 
 \item{show_plot}{a \code{boolean} for showing the plot. Default to TRUE.}
 
-\item{plot_truth}{a \code{boolean} for showing the truth data in the plot.
-Default to TRUE. Data used in the plot comes from the parameter \code{truth_data}}
+\item{plot_target}{a \code{boolean} for showing the target data in the plot.
+Default to TRUE. Data used in the plot comes from the parameter
+\code{target_data}}
 
 \item{x_col_name}{column name containing the date information for \code{all_plot}
 and \code{all_ens} data frames, value will be map to the x-axis of the plot.
 By default, "target_date".}
 
-\item{x_truth_col_name}{column name containing the date information for
-\code{truth_data} data frame, value will be map to the x-axis of the plot.
-By default, "time_idx".}
+\item{x_target_col_name}{column name containing the date information for
+\code{target_data} data frame, value will be map to the x-axis of the plot.
+By default, "date".}
 
 \item{show_legend}{a \code{boolean} for showing the legend in the plot.
 Default to TRUE.}
@@ -105,7 +106,7 @@ interval only. Value possibles: \verb{0.5, 0.8, 0.9, 0.95}}
 
 \item{top_layer}{character vector, where the first element indicates the top
 layer of the resulting plot. Possible options are \code{"model_output"} (default)
-and \code{"truth"}}
+and \code{"target"}}
 
 \item{title}{a \code{character} string, if not NULL, will be added as title to the
 plot}
@@ -129,24 +130,21 @@ Create a simple Plotly time-series plot for model projection outputs.
 \examples{
 
 # Load and Prepare Data
-# The package contains example files, please consult the vignette for
-# more information. The vignette also contains more examples.
-projection_path <- system.file("example_round1.csv", package = "hubVis")
-projection_data <- read.csv(projection_path, stringsAsFactors = FALSE)
-
-projection_data <- dplyr::mutate(projection_data,
+# The package hubExmaple contains example files, please consult the
+# documentation associated with the package, for more information.
+library(hubExamples)
+head(scenario_outputs)
+head(scenario_target_ts)
+projection_data <- dplyr::mutate(scenario_outputs,
      target_date = as.Date(origin_date) + (horizon * 7) - 1)
 projection_data <- dplyr::filter(projection_data,
      scenario_id == "A-2021-03-05", location == "US")
 projection_data <- hubUtils::as_model_out_tbl(projection_data)
 
-truth_path <- system.file("truth_data.csv", package = "hubVis")
-truth_data <- read.csv(truth_path, stringsAsFactors = FALSE)
-truth_data_us <- dplyr::filter(truth_data, location == "US",
-     time_idx < min(projection_data$target_date) + 21,
-     time_idx > "2020-10-01")
-
+target_data_us <- dplyr::filter(scenario_target_ts, location == "US",
+                                date < min(projection_data$target_date) + 21,
+                                date > "2020-10-01")
 # Plot
-plot_step_ahead_model_output(projection_data, truth_data_us)
+plot_step_ahead_model_output(projection_data, target_data_us)
 
 }

@@ -7,3 +7,9 @@
 ^pkgdown$
 ^vignettes$
 
+^\.DS_Store$
+^\.Rhistory$
+^\.Rdata$
+^\.httr-oauth$
+^\.secrets$
+^\.lintr$
