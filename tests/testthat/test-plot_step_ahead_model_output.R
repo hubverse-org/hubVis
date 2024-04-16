@@ -259,6 +259,6 @@ test_that("Output", {
                                             facet = "model_id")
   expect_equal(strsplit(strsplit(tail(purrr::map(plot_test$x$attrs,
                                                  "hovertext"), 1)[[1]],
-                                 "<br>")[[1]][2], "Intervals")[[1]][1], "90%")
+                                 "<br>")[[1]][2], "Intervals")[[1]][1], "90% ")
 
 })
