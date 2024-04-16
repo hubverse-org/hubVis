@@ -189,7 +189,7 @@ plotly_proj_data <- function(plot_model, df_point, df_ribbon,
         hover_text <-
           paste("Date: ", df_rib[[x_col_name]], "<br>",
                 scales::percent(as.numeric(names(df_ribbon)[n_rib])),
-                "Intervals: ", format(round(df_rib$min, 2), big.mark = ","),
+                " Intervals: ", format(round(df_rib$min, 2), big.mark = ","),
                 " - ", format(round(df_rib$max, 2), big.mark = ","), sep = "")
         arg_list <-
           list(plot_model, data = df_rib, x = df_rib[[x_col_name]], ymin = ~min,
