@@ -128,13 +128,13 @@ ensemble_validation <- function(ens_color, ens_name) {
 
 #' Validate `"output_type_id"` values
 #'
-#' Validate model output data contains the expected `"output_type_id"` values
+#' Validate model output data contains the expected `"output_type_id"` values.
 #'
 #' @param model_output_data a `model_out_tbl` object, containing all the
 #'  required columns including a column containing date information and a
 #'  column `value`.
-#' @param exp_value expected value required in `model_output_data`
-#' `"output_type_id"` column
+#' @param exp_value numeric vector, expected value required in
+#' `model_output_data` in `"output_type_id"` column
 #'
 #' @noRd
 output_type_validation <- function(model_output_data, exp_value) {
