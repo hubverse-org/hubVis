@@ -30,6 +30,9 @@ test_that("Input parameters", {
                   output_type_id = as.character(output_type_id))
   expect_warning(plot_step_ahead_model_output(projection_data_a_us_w,
                                               target_data_us))
+  test_proj <- dplyr::mutate(projection_data_a_us,
+                             age_group = NA)
+  expect_warning(plot_step_ahead_model_output(test_proj, target_data_us))
 
   # Column
   expect_error(plot_step_ahead_model_output(projection_data_a_us,
@@ -45,13 +48,19 @@ test_that("Input parameters", {
   expect_error(plot_step_ahead_model_output(df_test, target_data_us))
 
   # Column format
-  df_test <- dplyr::mutate(projection_data_a_us,
-                           target_date = gsub("-", "_", target_date))
+  df_test <- dplyr::filter(projection_data_a_us, output_type_id == 0.5)
+
   expect_error(plot_step_ahead_model_output(df_test, target_data_us))
   df_test <- dplyr::mutate(projection_data_a_us, value = as.character(value))
   expect_error(plot_step_ahead_model_output(df_test, target_data_us))
 
   # Output type
+  df_test <- dplyr::filter(projection_data_a_us, output_type_id == 0.5)
+  df_test$output_type <- "median"
+  df_test$output_type_id <- NA
+  df_test <- rbind(df_test, projection_data_a_us)
+  expect_no_error(plot_step_ahead_model_output(df_test, target_data_us,
+                                               use_median_as_point = T))
   df_test <- dplyr::mutate(projection_data_a_us,
                            output_type = gsub("median", "mean", output_type))
   expect_no_error(plot_step_ahead_model_output(df_test, target_data_us))
