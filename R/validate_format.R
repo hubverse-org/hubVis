@@ -138,7 +138,7 @@ ensemble_validation <- function(ens_color, ens_name) {
 #'
 #' @noRd
 output_type_validation <- function(model_output_data, exp_value) {
-  if (!class(exp_value) %in% class(model_output_data$output_type_id)) {
+  if (!"numeric" %in% class(model_output_data$output_type_id)) {
     model_output_data$output_type_id <-
       as.numeric(model_output_data$output_type_id)
     cli::cli_warn(c("!" = "{.arg output_type_id} column must be a numeric.
