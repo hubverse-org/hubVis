@@ -193,7 +193,7 @@ facet_validation <- function(model_output_data, facet = NULL,
     if ((interactive) && !is.null(facet_nrow)) {
       if (facet_nrow > facet_max) {
         cli::cli_warn(c("!" = "{.arg facet_nrow} should be less or equal to the
-                    number of unique {.arg facet} value. By default, the
+                    number of unique {.arg facet} values. By default, the
                     parameter will be set to {.val {facet_max}}"))
         facet_nrow <- facet_max
       }
