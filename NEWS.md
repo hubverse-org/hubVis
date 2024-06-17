@@ -3,7 +3,7 @@
 This release contains an update to apply standardized hub vocabulary and use 
 "target data" rather than "truth data" in the hub (including in the functions 
 parameter and associated documentation) (#21), use examples from the 
-[hubExamples](https://github.com/Infectious-Disease-Modeling-Hubs/hubExamples)
+[hubExamples](https://github.com/hubverse-org/hubExamples)
 package (#27). The associated parameters in `plot_step_ahead_model_output()` 
 for the target data have been updated accordingly. 
 

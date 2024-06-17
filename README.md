@@ -1,9 +1,9 @@
-# hubVis <a href="https://infectious-disease-modeling-hubs.github.io/hubVis/"><img src="man/figures/logo.png" align="right" height="131" alt="hubVis website" /></a>
+# hubVis <a href="https://hubverse-org.github.io/hubVis/"><img src="man/figures/logo.png" align="right" height="131" alt="hubVis website" /></a>
 
 
 [![Lifecycle:experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
-[![R-CMD-check](https://github.com/Infectious-Disease-Modeling-Hubs/hubVis/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/Infectious-Disease-Modeling-Hubs/hubVis/actions/workflows/R-CMD-check.yaml)
-[![Codecov test coverage](https://codecov.io/gh/Infectious-Disease-Modeling-Hubs/hubVis/branch/main/graph/badge.svg)](https://app.codecov.io/gh/Infectious-Disease-Modeling-Hubs/hubVis?branch=main)
+[![R-CMD-check](https://github.com/hubverse-org/hubVis/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/hubverse-org/hubVis/actions/workflows/R-CMD-check.yaml)
+[![Codecov test coverage](https://codecov.io/gh/hubverse-org/hubVis/branch/main/graph/badge.svg)](https://app.codecov.io/gh/hubverse-org/hubVis?branch=main)
 
 
 The goal of hubVis is to provide plotting methods for hub model outputs, 
@@ -18,7 +18,7 @@ Modeling Hubs. For more information, please consult the
 You can install the development version of hubVis like so:
 
 ```r
-remotes::install_github("Infectious-Disease-Modeling-Hubs/hubVis")
+remotes::install_github("hubverse-org/hubVis")
 ```
 
 ## Usage

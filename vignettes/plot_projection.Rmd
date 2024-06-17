@@ -51,7 +51,7 @@ by setting  the `interactive` parameter to FALSE. See end of the document for ex
 ## Load and Filter Data
 
 To demonstrate the functionality of the `plot_step_ahead_model_output()` function,
-we will use the examples data from the [hubExamples](https://github.com/Infectious-Disease-Modeling-Hubs/hubExamples) package. 
+we will use the examples data from the [hubExamples](https://github.com/hubverse-org/hubExamples) package. 
 
 #### Scenario
 
@@ -114,7 +114,7 @@ head(forecast_quantile)
 
 The plotting function requires only 2 parameters:
 
-- `model_output_data`: [a `model_out_tbl` object](https://infectious-disease-modeling-hubs.github.io/hubUtils/articles/connect_hub.html#structure-of-hubverse-datasets) containing all the Hubverse
+- `model_output_data`: [a `model_out_tbl` object](https://hubverse-org.github.io/hubUtils/articles/connect_hub.html#structure-of-hubverse-datasets) containing all the Hubverse
 standard columns, including `"target_date"` and `"model_id"` columns.
 As all model_output in model_output_data will be plotted, any filtering needs to
 happen outside this function.
