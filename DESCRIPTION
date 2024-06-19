@@ -1,6 +1,6 @@
 Package: hubVis
 Title: Plotting methods for hub models output
-Version: 0.0.0.9100
+Version: 0.0.0.9200
 Authors@R: 
     c(person("Lucie", "Contamin", , "contamin@pitt.edu", role = c("aut", "cre"),
              comment = c(ORCID = "0000-0001-5797-1279")),
@@ -25,9 +25,9 @@ Imports:
     scales,
     stats
 Remotes:
-    Infectious-Disease-Modeling-Hubs/hubUtils,
-    Infectious-Disease-Modeling-Hubs/hubData,
-    Infectious-Disease-Modeling-Hubs/hubExamples
+    hubverse-org/hubUtils,
+    hubverse-org/hubData,
+    hubverse-org/hubExamples
 Suggests:
     hubData,
     hubExamples (>= 0.0.0.9001),
@@ -35,8 +35,8 @@ Suggests:
     testthat (>= 3.0.0)
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.1
-URL: https://github.com/Infectious-Disease-Modeling-Hubs/hubVis,
-    https://infectious-disease-modeling-hubs.github.io/hubVis/
-BugReports: https://github.com/Infectious-Disease-Modeling-Hubs/hubVis/issues
+URL: https://github.com/hubverse-org/hubVis,
+    https://hubverse-org.github.io/hubVis/
+BugReports: https://github.com/hubverse-org/hubVis/issues
 Config/testthat/edition: 3
-Config/Needs/website: Infectious-Disease-Modeling-Hubs/hubStyle
+Config/Needs/website: hubverse-org/hubStyle
