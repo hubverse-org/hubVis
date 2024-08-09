@@ -299,7 +299,7 @@ static_proj_data <- function(plot_model, df_point, df_ribbon,
 #' without target data.
 #' Simple projection model output are defined as projection associated with one
 #' particular set of "tasks_ids" value. For more information, please refer to
-#' [HubDocs website](https://hubverse.io/en/latest/format/tasks.html)
+#' [HubDocs website](https://hubverse.io/en/latest/user-guide/tasks.html)
 #' .
 #'
 #' @param plot_model a plot_ly object to add lines and/or ribbons.
