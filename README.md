@@ -14,7 +14,7 @@ Modeling Hubs. For more information, please consult the
 
 ### Latest
 
-You can install the [latest version of hubVis from the R-universe](https://hubverse-org.r-universe.dev/hubAdmin):
+You can install the [latest version of hubVis from the R-universe](https://hubverse-org.r-universe.dev/hubVis):
 
 ```r
 install.packages("hubVis", repos = c("https://hubverse-org.r-universe.dev", "https://cloud.r-project.org"))
