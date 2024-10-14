@@ -2,7 +2,7 @@
 #'
 #' Create a simple Plotly time-series plot for model projection outputs.
 #'
-#'@param model_output_data a `model_out_tbl` object, containing all the required
+#'@param model_out_tbl a `model_out_tbl` object, containing all the required
 #' columns including a column containing date information (`x_col_name`
 #' parameter) and a column `value`.
 #'@param target_data a `data.frame` object containing the target data,
@@ -10,7 +10,7 @@
 #' a column `observation`. Ignored, if `plot_target = FALSE`.
 #'@param use_median_as_point a `Boolean` for using median quantile as point
 #' in plot. Default to FALSE. If TRUE, will select first any `median`
-#' output type value and if no `median` value included in `model_output_data`;
+#' output type value and if no `median` value included in `model_out_tbl`;
 #' will select `quantile = 0.5` output type value.
 #'@param show_plot a `boolean` for showing the plot. Default to TRUE.
 #'@param plot_target a `boolean` for showing the target data in the plot.
@@ -101,7 +101,7 @@
 #' plot_step_ahead_model_output(projection_data, target_data_us)
 #'
 plot_step_ahead_model_output <- function(
-    model_output_data, target_data, use_median_as_point = FALSE,
+    model_out_tbl, target_data, use_median_as_point = FALSE,
     show_plot = TRUE, plot_target = TRUE, x_col_name = "target_date",
     x_target_col_name = "date", show_legend = TRUE, facet = NULL,
     facet_scales = "fixed", facet_nrow = NULL, facet_ncol = NULL,
@@ -114,7 +114,7 @@ plot_step_ahead_model_output <- function(
   ## Model Output data
   exp_f_col <- unique(c("model_id", "output_type_id", x_col_name, "value",
                         fill_by, group))
-  mdl_out_validation(model_output_data, col_names = exp_f_col)
+  mdl_out_validation(model_out_tbl, col_names = exp_f_col)
 
   ## Target Data
   if (plot_target) {
@@ -126,7 +126,7 @@ plot_step_ahead_model_output <- function(
   list_intervals <- list("0.95" = c(0.975, 0.025), "0.9" = c(0.95, 0.05),
                          "0.8" = c(0.9, 0.1), "0.5" = c(0.75, 0.25))
   if (!is.null(intervals)) {
-    intervals <- interval_validation(model_output_data, as.character(intervals),
+    intervals <- interval_validation(model_out_tbl, as.character(intervals),
                                      list_intervals)
     ribbon <- list_intervals[as.character(sort(intervals, decreasing = TRUE))]
   } else {
@@ -134,7 +134,7 @@ plot_step_ahead_model_output <- function(
   }
   ### Median
   if (isTRUE(use_median_as_point)) {
-    if (any(grepl("median", model_output_data$output_type))) {
+    if (any(grepl("median", model_out_tbl$output_type))) {
       plain_line <- NA
       plain_type <- "median"
     } else {
@@ -146,39 +146,38 @@ plot_step_ahead_model_output <- function(
     plain_type <- NULL
   }
   exp_value <- c(plain_line, unlist(ribbon))
-  model_output_data <- output_type_validation(model_output_data, exp_value)
+  model_out_tbl <- output_type_validation(model_out_tbl, exp_value)
   ### Ensemble specific color
   ensemble_validation(ens_color, ens_name)
   ### Facet
-  facet_nrow <- facet_validation(model_output_data, facet = facet,
+  facet_nrow <- facet_validation(model_out_tbl, facet = facet,
                                  interactive = interactive,
                                  facet_nrow = facet_nrow,
                                  facet_title = facet_title)
   #### Top layer
   layer_validation(top_layer)
   #### Palette
-  palette <- make_palette(model_output_data, fill_by = fill_by,
+  palette <- make_palette(model_out_tbl, fill_by = fill_by,
                           pal_color = pal_color, one_color = one_color,
                           ens_color = ens_color, ens_name = ens_name,
                           plot_target = plot_target)
 
   # Data process
   if (!is.null(ens_color) && !is.null(ens_name)) {
-    ens_df <- model_output_data[which(model_output_data$model_id == ens_name), ]
+    ens_df <- model_out_tbl[which(model_out_tbl$model_id == ens_name), ]
     all_ens <- plot_prep_data(ens_df, plain_line, plain_type, ribbon,
                               x_col_name = x_col_name)
-    plot_df <- model_output_data[which(model_output_data$model_id !=
-                                         ens_name), ]
+    plot_df <- model_out_tbl[which(model_out_tbl$model_id != ens_name), ]
   } else {
     all_ens <- NULL
-    plot_df <- model_output_data
+    plot_df <- model_out_tbl
   }
   all_plot <- plot_prep_data(plot_df, plain_line, plain_type, ribbon,
                              x_col_name = x_col_name)
 
   # Plot
   if (!is.null(facet)) {
-    facet_value <- sort(unique(model_output_data[[facet]]))
+    facet_value <- sort(unique(model_out_tbl[[facet]]))
   } else {
     facet_value <- NULL
   }

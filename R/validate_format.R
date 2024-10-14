@@ -3,38 +3,38 @@
 #' Validate model output data is a `model_out_tbl` data frame with the expected
 #' content (column names and output_type)
 #'
-#' @param model_output_data object to validate
+#' @param model_out_tbl object to validate
 #' @param col_names character vector, if not set to NULL (default), will
 #'  validate all the value(s) are contained the column names of
-#'  `model_output_data`
+#'  `model_out_tbl`
 #' @param valid_type character vector, expected `output_type`.
-#' `model_output_data` should contain at least one of the input type.
+#' `model_out_tbl` should contain at least one of the input type.
 #'
 #' @noRd
-mdl_out_validation <- function(model_output_data, col_names = NULL,
+mdl_out_validation <- function(model_out_tbl, col_names = NULL,
                                valid_types = c("median", "quantile")) {
-  if (!is.data.frame(model_output_data)) {
-    cli::cli_abort(c("x" = "{.arg model_output_data} must be a `data.frame`."))
+  if (!is.data.frame(model_out_tbl)) {
+    cli::cli_abort(c("x" = "{.arg model_out_tbl} must be a `data.frame`."))
   }
-  if (isFALSE("model_out_tbl" %in% class(model_output_data))) {
-    cli::cli_warn(c("!" = "{.arg model_output_data} must be a `model_out_tbl`.
+  if (isFALSE("model_out_tbl" %in% class(model_out_tbl))) {
+    cli::cli_warn(c("!" = "{.arg model_out_tbl} must be a `model_out_tbl`.
                     Class applied by default"))
-    model_output_data <- hubUtils::as_model_out_tbl(model_output_data,
-                                                    remove_empty = TRUE)
+    model_out_tbl <- hubUtils::as_model_out_tbl(model_out_tbl,
+                                                remove_empty = TRUE)
   }
 
   if (!is.null(col_names)) {
-    model_output_col <- colnames(model_output_data)
+    model_output_col <- colnames(model_out_tbl)
     if (!all(col_names %in% model_output_col)) {
-      cli::cli_abort(c("x" = "{.arg model_output_data} did not have all required
+      cli::cli_abort(c("x" = "{.arg model_out_tbl} did not have all required
                        columns {.val {col_names}}"))
     }
   }
 
-  model_output_type <- unique(model_output_data$output_type)
+  model_output_type <- unique(model_out_tbl$output_type)
   if (!any(valid_types %in% model_output_type)) {
     cli::cli_abort(c(
-      "x" = "{.arg model_output_data} should contain at least one supported
+      "x" = "{.arg model_out_tbl} should contain at least one supported
       output type.",
       "i" = "Supported output types: {.val {valid_types}}."
     ))
@@ -71,18 +71,18 @@ target_validation <- function(target_data, col_names = NULL) {
 #' Validate the format and content of the `intervals` parameter,
 #' returns `intervals` in the expected format if necessary
 #'
-#' @param model_output_data a `model_out_tbl` object, containing all the
+#' @param model_out_tbl a `model_out_tbl` object, containing all the
 #'  required columns including a column containing date information and a
 #'  column `value`.
 #' @param intervals a vector of `numeric` values indicating which central
 #'  prediction interval levels to plot. `NULL` means no interval levels.
 #' @param list_intervals named list of accepted intervals accepted
-#' @param max_model_model_id numeric, if model_output_data contains more than
+#' @param max_model_model_id numeric, if model_out_tbl contains more than
 #'  this number of unique `"model_id"`, the intervals will be reduced to
 #'  only one value (the maximal)
 #'
 #' @noRd
-interval_validation <- function(model_output_data, intervals, list_intervals,
+interval_validation <- function(model_out_tbl, intervals, list_intervals,
                                 max_model_id = 5) {
   if (any(!intervals %in% names(list_intervals))) {
     cli::cli_warn(c("!" = "{.arg intervals} should correspond to one or
@@ -95,10 +95,10 @@ interval_validation <- function(model_output_data, intervals, list_intervals,
       intervals <- as.character(c(.5, .8, .95))
     }
   }
-  if (length(unique(model_output_data[["model_id"]])) > max_model_id &&
+  if (length(unique(model_out_tbl[["model_id"]])) > max_model_id &&
         length(intervals) > 1) {
     intervals <- max(intervals)[1]
-    cli::cli_warn(c("!" = "{.arg model_output_data} contains more than
+    cli::cli_warn(c("!" = "{.arg model_out_tbl} contains more than
                     {.val {max_model_id}} models, the plot will be reduced to
                     show only one interval (the maximum interval value):
                     {.val {intervals}}"))
@@ -130,38 +130,38 @@ ensemble_validation <- function(ens_color, ens_name) {
 #'
 #' Validate model output data contains the expected `"output_type_id"` values.
 #'
-#' @param model_output_data a `model_out_tbl` object, containing all the
+#' @param model_out_tbl a `model_out_tbl` object, containing all the
 #'  required columns including a column containing date information and a
 #'  column `value`.
 #' @param exp_value numeric vector, expected value required in
-#' `model_output_data` in `"output_type_id"` column
+#' `model_out_tbl` in `"output_type_id"` column
 #'
 #' @noRd
-output_type_validation <- function(model_output_data, exp_value) {
-  if (!"numeric" %in% class(model_output_data$output_type_id)) {
-    model_output_data$output_type_id <-
-      as.numeric(model_output_data$output_type_id)
+output_type_validation <- function(model_out_tbl, exp_value) {
+  if (!"numeric" %in% class(model_out_tbl$output_type_id)) {
+    model_out_tbl$output_type_id <-
+      as.numeric(model_out_tbl$output_type_id)
     cli::cli_warn(c("!" = "{.arg output_type_id} column must be a numeric.
                     Class applied by default."))
   }
-  model_output_type_val <- unique(model_output_data$output_type_id)
+  model_output_type_val <- unique(model_out_tbl$output_type_id)
   if (!all(exp_value %in% model_output_type_val)) {
     cli::cli_abort(c("x" = "{.arg model_output_type_val} did not have the
                      expected output_type_id value {.val {exp_value}}"))
   }
-  return(model_output_data)
+  return(model_out_tbl)
 }
 
 #' Validate `"facet"` parameters format
 #'
-#' Validate `facet` is a column name of `model_output_data` (if not `NULL`) and
+#' Validate `facet` is a column name of `model_out_tbl` (if not `NULL`) and
 #' `facet_title` is one of: "top right", "top left" (default), "bottom right",
 #' "bottom left" (if not `NULL`) .
 #' If `interactive`, validate that `facet_nrow` is not greater than the number
 #' of expected facet. If so a warning will be return a `facet_nrow` will be
 #' restricted to the maximum number of possible facets.
 #'
-#' @param model_output_data a `model_out_tbl` object, containing all the
+#' @param model_out_tbl a `model_out_tbl` object, containing all the
 #'  required columns including a column containing date information and a
 #'  column `value`.
 #' @param facet a unique value corresponding as a task_id variable name
@@ -176,20 +176,20 @@ output_type_validation <- function(model_output_data, exp_value) {
 #'  title. For interactive plot only.
 #'
 #' @noRd
-facet_validation <- function(model_output_data, facet = NULL,
+facet_validation <- function(model_out_tbl, facet = NULL,
                              interactive = TRUE, facet_nrow = NULL,
                              facet_title = "top left") {
   if (!is.null(facet)) {
     if ((length(facet) != 1) ||
           !all(facet %in%
-                 setdiff(colnames(model_output_data),
+                 setdiff(colnames(model_out_tbl),
                          hubUtils::std_colnames[names(hubUtils::std_colnames) !=
                                                   "model_id"]))) {
       cli::cli_abort(c("x" = "if {.arg facet} is not NULL, the argument should
                        be of length 1 and should match one of the task_id columns
-                       of {.arg model_output_data}"))
+                       of {.arg model_out_tbl}"))
     }
-    facet_max <- length(unique(model_output_data[[facet]]))
+    facet_max <- length(unique(model_out_tbl[[facet]]))
     if ((interactive) && !is.null(facet_nrow)) {
       if (facet_nrow > facet_max) {
         cli::cli_warn(c("!" = "{.arg facet_nrow} should be less or equal to the
