@@ -1,4 +1,4 @@
-# hubVis 0.0.0.9101
+# hubVis 0.0.0.9201
 
 This release contains an update the standardized argument name for model 
 output tables in all hubverse packages to `model_out_tbl` (#35).
