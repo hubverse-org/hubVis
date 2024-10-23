@@ -142,7 +142,7 @@ output_type_validation <- function(model_output_data, exp_value) {
     model_output_data$output_type_id <-
       as.numeric(model_output_data$output_type_id)
     cli::cli_warn(c("!" = "{.arg output_type_id} column must be a numeric.
-                    Class applied by default."))
+                    Converting to numeric."))
   }
   model_output_type_val <- unique(model_output_data$output_type_id)
   if (!all(exp_value %in% model_output_type_val)) {
