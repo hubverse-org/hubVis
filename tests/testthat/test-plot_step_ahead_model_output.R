@@ -1,6 +1,5 @@
 # Data Preparation
 library(hubExamples)
-library(vdiffr)
 
 ## Model output - Scenario
 projection_data <-
