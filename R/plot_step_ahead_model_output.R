@@ -68,8 +68,7 @@
 #' By default, "date".
 #' @param group column name for partitioning the data in the data according
 #'  the the value in the column. Please refer to [ggplot2::aes_group_order] for
-#'  more information. By default, NULL (no partitioning).ONLY available for
-#'  "static" plot.
+#'  more information. By default, NULL (no partitioning).
 #'
 #' @importFrom cli cli_abort cli_warn
 #' @importFrom scales percent

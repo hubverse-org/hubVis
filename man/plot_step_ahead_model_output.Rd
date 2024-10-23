@@ -121,8 +121,7 @@ use to change the color for the model name, associated with the parameter
 
 \item{group}{column name for partitioning the data in the data according
 the the value in the column. Please refer to \link[ggplot2:aes_group_order]{ggplot2::aes_group_order} for
-more information. By default, NULL (no partitioning).ONLY available for
-"static" plot.}
+more information. By default, NULL (no partitioning).}
 }
 \description{
 Create a simple Plotly time-series plot for model projection outputs.
