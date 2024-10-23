@@ -3,7 +3,7 @@ pkgdown: 2.1.1
 pkgdown_sha: ~
 articles:
   plot_projection: plot_projection.html
-last_built: 2024-09-24T16:49Z
+last_built: 2024-10-23T18:17Z
 urls:
   reference: https://hubverse-org.github.io/hubVis/reference
   article: https://hubverse-org.github.io/hubVis/articles
