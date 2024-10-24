@@ -111,7 +111,7 @@ plot_step_ahead_model_output <- function(
     ens_color = NULL, ens_name = NULL, group = NULL) {
 
   # Test format input
-  ## Model Output data
+  ## Model Output Table
   exp_f_col <- unique(c("model_id", "output_type_id", x_col_name, "value",
                         fill_by, group))
   mdl_out_validation(model_out_tbl, col_names = exp_f_col)

@@ -1,6 +1,6 @@
-#' Validate model output data format
+#' Validate model output table format
 #'
-#' Validate model output data is a `model_out_tbl` data frame with the expected
+#' Validate model output table is a `model_out_tbl` data frame with the expected
 #' content (column names and output_type)
 #'
 #' @param model_out_tbl object to validate
@@ -128,7 +128,7 @@ ensemble_validation <- function(ens_color, ens_name) {
 
 #' Validate `"output_type_id"` values
 #'
-#' Validate model output data contains the expected `"output_type_id"` values.
+#' Validate model output table contains the expected `"output_type_id"` values.
 #'
 #' @param model_out_tbl a `model_out_tbl` object, containing all the
 #'  required columns including a column containing date information and a
