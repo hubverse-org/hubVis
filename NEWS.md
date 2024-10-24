@@ -1,3 +1,11 @@
+# hubVis 0.0.0.9201
+
+This release contains an update the standardized argument name for model 
+output tables in all hubverse packages to `model_out_tbl` (#35).
+
+Warning output message has also been updated for more clarification (#36).
+
+
 # hubVis 0.0.0.9100
 
 This release contains an update to apply standardized hub vocabulary and use 
@@ -10,7 +18,7 @@ for the target data have been updated accordingly.
 It also contains a patch for `plot_step_ahead_model_output()` to return a
 warning instead of an error if the output plot is interactive and the `facet_nrow` 
 parameter is higher than the number of maximum facet expected (#19). A warning
-will also be generated if the input model output data contains empty columns. 
+will also be generated if the input model output table contains empty columns. 
 
 The package is also now upgraded to match the hubverse style and best practise
 (#25)

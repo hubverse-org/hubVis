@@ -19,7 +19,7 @@ target_data_us <-
 # Test input information
 test_that("Input parameters", {
 
-  # model_output_data format
+  # model_out_tbl format
   expect_error(plot_step_ahead_model_output(as.list(projection_data_a_us),
                                             target_data_us))
   df_test <- as.data.frame(projection_data_a_us)

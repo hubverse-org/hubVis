@@ -24,7 +24,7 @@ plot_prep_data <- function(df, plain_line, plain_type, intervals,
   empty_cols <- sapply(df, function(k) all(is.na(k)))
   if (any(empty_cols)) {
     empty_colnames <- colnames(df)[sapply(df, function (k) all(is.na(k)))] # nolint
-    cli::cli_warn(c("!" = "{.arg model_output_data} contains some empty
+    cli::cli_warn(c("!" = "{.arg model_out_tbl} contains some empty
                     columns: {.value {empty_colnames}.}"))
     df <- df[!empty_cols]
   }

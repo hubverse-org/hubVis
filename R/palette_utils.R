@@ -2,7 +2,7 @@
 #'
 #' The function creates a palette with a color associated with each trace.
 #'
-#'@param model_output_data a `model_out_tbl` object, containing all the required
+#'@param model_out_tbl a `model_out_tbl` object, containing all the required
 #' columns including a column containing date information (`x_col_name`
 #' parameter) and a column `value`.
 #'@param fill_by name of a column for specifying colors and legend in plot.
@@ -25,11 +25,11 @@
 #'  `target_data`
 #'
 #'@noRd
-make_palette <- function(model_output_data, fill_by = "model_id",
+make_palette <- function(model_out_tbl, fill_by = "model_id",
                          pal_color = "Set2", one_color = "blue",
                          ens_color = NULL, ens_name = NULL,
                          plot_target = TRUE) {
-  fill_by_vect <- unique(model_output_data[[fill_by]])
+  fill_by_vect <- unique(model_out_tbl[[fill_by]])
   if (!is.null(pal_color)) {
     if (!pal_color %in% row.names(RColorBrewer::brewer.pal.info)) {
       cli::cli_warn(c("!" = "{.arg pal_color} is not one of the accepted palette
