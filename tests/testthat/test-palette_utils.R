@@ -21,15 +21,15 @@ test_that("Palette Input parameters", {
 
   ## Palette/Color input
   ### One color
-  expect_snapshot(plot_step_ahead_model_output(projection_data_a_us,
-                                               target_data_us,
-                                               show_plot = FALSE,
-                                               pal_color = NULL,
-                                               one_color = "set2"))
+  expect_warning(plot_step_ahead_model_output(projection_data_a_us,
+                                              target_data_us, show_plot = FALSE,
+                                              pal_color = NULL,
+                                              one_color = "set2"),
+                 "is not one of the accepted color name")
   ### Pal color
-  expect_snapshot(plot_step_ahead_model_output(projection_data_a_us,
-                                               target_data_us,
-                                               show_plot = FALSE,
-                                               pal_color = "blue"))
+  expect_warning(plot_step_ahead_model_output(projection_data_a_us,
+                                              target_data_us, show_plot = FALSE,
+                                              pal_color = "blue"),
+                 "is not one of the accepted palette name")
 
 })
