@@ -45,7 +45,7 @@ plotly_facet_data <- function(data, facet, facet_value,
 
 #' Facet plot for Plotly
 #'
-#' Use Plotly to plot model output data for one specific facet with or without
+#' Use Plotly to plot model output table for one specific facet with or without
 #' target data.
 #'
 #' @param plot_model a plot_ly object to add lines and/or ribbons
@@ -146,7 +146,7 @@ plotly_facet_plot <- function(plot_model, all_plot, all_ens, target_data,
 
 #' Facet plot Layout for Plotly
 #'
-#' Layout of a plot of model output data for one specific facet with or without
+#' Layout of a plot of model output table for one specific facet with or without
 #' target data.
 #'
 #' @param plot_model a plot_ly object to add lines and/or ribbons
@@ -185,7 +185,7 @@ plotly_facet_layout <- function(plot_model, text, facet_title = "top left") {
 
 #' Facet plot for Plotly
 #'
-#' Use Plotly to plot model output data for one specific facet with or without
+#' Use Plotly to plot model output table for one specific facet with or without
 #' target data and with specific layout (see parameters below).
 #'
 #' @param facet_value a vector of one of the possible unique values in the
@@ -264,7 +264,7 @@ plotly_facet <- function(facet_value, plot_model, all_plot, all_ens, facet,
 
 #' Multifaceted plot for Plotly
 #'
-#' Use Plotly to plot multifaceted plot of model output data
+#' Use Plotly to plot multifaceted plot of model output table
 #'
 #' @param plot_model a plot_ly object to add lines and/or ribbons
 #' @param all_plot a list with two data frame: one for plain lines,
@@ -367,7 +367,7 @@ plotly_subplot <- function(plot_model, all_plot, all_ens, facet,
 
 #' "Simple" output plot
 #'
-#' Plot model output data without facet or multifaceted ggplot object.
+#' Plot model output table without facet or multifaceted ggplot object.
 #'
 #' @param plot_model a plot_ly object to add lines and/or ribbons
 #' @param all_plot a list with two data frame: one for plain lines,

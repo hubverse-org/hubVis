@@ -5,7 +5,7 @@
 \title{Basic Plot for model outputs}
 \usage{
 plot_step_ahead_model_output(
-  model_output_data,
+  model_out_tbl,
   target_data,
   use_median_as_point = FALSE,
   show_plot = TRUE,
@@ -32,7 +32,7 @@ plot_step_ahead_model_output(
 )
 }
 \arguments{
-\item{model_output_data}{a \code{model_out_tbl} object, containing all the required
+\item{model_out_tbl}{a \code{model_out_tbl} object, containing all the required
 columns including a column containing date information (\code{x_col_name}
 parameter) and a column \code{value}.}
 
@@ -42,7 +42,7 @@ a column \code{observation}. Ignored, if \code{plot_target = FALSE}.}
 
 \item{use_median_as_point}{a \code{Boolean} for using median quantile as point
 in plot. Default to FALSE. If TRUE, will select first any \code{median}
-output type value and if no \code{median} value included in \code{model_output_data};
+output type value and if no \code{median} value included in \code{model_out_tbl};
 will select \code{quantile = 0.5} output type value.}
 
 \item{show_plot}{a \code{boolean} for showing the plot. Default to TRUE.}
