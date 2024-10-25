@@ -28,7 +28,7 @@ test_that("Input parameters", {
   ## List
   expect_error(plot_step_ahead_model_output(as.list(projection_data_a_us),
                                             target_data_us),
-               "`model_output_data` must be a `data.frame`.")
+               "`model_out_tbl` must be a `data.frame`.")
   ##  Data Frame
   df_test <- as.data.frame(projection_data_a_us)
   expect_warning(plot_step_ahead_model_output(df_test, target_data_us,
