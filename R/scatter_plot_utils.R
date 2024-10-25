@@ -24,7 +24,7 @@ plot_prep_data <- function(df, plain_line, plain_type, intervals,
   empty_cols <- sapply(df, function(k) all(is.na(k)))
   if (any(empty_cols)) {
     empty_colnames <- colnames(df)[sapply(df, function (k) all(is.na(k)))] # nolint
-    cli::cli_warn(c("!" = "{.arg model_output_data} contains some empty
+    cli::cli_warn(c("!" = "{.arg model_out_tbl} contains some empty
                     columns: {.value {empty_colnames}.}"))
     df <- df[!empty_cols]
   }
@@ -159,13 +159,20 @@ static_target_data <- function(plot_model, target_data, plot_target,
 #' Default to `model_id`.
 #' @param x_col_name column name containing the date information for the x-axis.
 #' By default, "target_date".
+#' @param group column name for partitioning the data in the data according
+#'  the the value in the column. Please refer to [ggplot2::aes_group_order] for
+#'  more information. By default, NULL (no partitioning).
 #'
 #' @noRd
 #' @importFrom plotly add_lines add_ribbons
+#' @importFrom dplyr group_by
 plotly_proj_data <- function(plot_model, df_point, df_ribbon,
                              line_color, opacity, arguments,
-                             fill_by = "model_id", x_col_name = "target_date") {
+                             fill_by = "model_id", x_col_name = "target_date",
+                             group = NULL) {
   if (nrow(df_point) > 0) {
+    if (!is.null(group))
+      df_point <- dplyr::group_by(df_point, .data[[group]])
     arg_list <-
       list(p = plot_model, data = df_point, x = df_point[[x_col_name]],
            y = ~value, legendgroup = df_point[[fill_by]],
@@ -200,6 +207,8 @@ plotly_proj_data <- function(plot_model, df_point, df_ribbon,
                 scales::percent(as.numeric(names(df_ribbon)[n_rib])),
                 " Intervals: ", format(round(df_rib$min, 2), big.mark = ","),
                 " - ", format(round(df_rib$max, 2), big.mark = ","), sep = "")
+        if (!is.null(group))
+          df_rib <- dplyr::group_by(df_rib, .data[[group]])
         arg_list <-
           list(plot_model, data = df_rib, x = df_rib[[x_col_name]], ymin = ~min,
                ymax = ~max, opacity = opacity, showlegend = show_legend,
@@ -243,8 +252,7 @@ plotly_proj_data <- function(plot_model, df_point, df_ribbon,
 #' By default, "target_date".
 #' @param group column name for partitioning the data in the data according
 #'  the the value in the column. Please refer to [ggplot2::aes_group_order] for
-#'  more information. By default, NULL (no partitioning).ONLY available for
-#'  "static" plot.
+#'  more information. By default, NULL (no partitioning)
 #'
 #' @noRd
 #' @importFrom ggplot2 geom_ribbon
@@ -335,8 +343,7 @@ static_proj_data <- function(plot_model, df_point, df_ribbon,
 #' By default, "date".
 #' @param group column name for partitioning the data in the data according
 #'  the the value in the column. Please refer to [ggplot2::aes_group_order] for
-#'  more information. By default, NULL (no partitioning).ONLY available for
-#'  "static" plot.
+#'  more information. By default, NULL (no partitioning)
 #' @param ... additional Plotly parameters.
 #'
 #' @noRd
@@ -358,7 +365,8 @@ simple_model_plot <- function(
       # Projection data
       plot_model <- plotly_proj_data(plot_model, df_point, df_ribbon,
                                      line_color, opacity, arguments,
-                                     fill_by = fill_by, x_col_name = x_col_name)
+                                     fill_by = fill_by, x_col_name = x_col_name,
+                                     group = group)
     } else {
       # Target Data
       plot_model <- static_target_data(plot_model, target_data, plot_target,
@@ -374,7 +382,8 @@ simple_model_plot <- function(
       # Projection data
       plot_model <- plotly_proj_data(plot_model, df_point, df_ribbon,
                                      line_color, opacity, arguments,
-                                     fill_by = fill_by, x_col_name = x_col_name)
+                                     fill_by = fill_by, x_col_name = x_col_name,
+                                     group = group)
       # Target Data
       plot_model <- plotly_target_data(plot_model, target_data, plot_target,
                                        show_target_legend, arguments,

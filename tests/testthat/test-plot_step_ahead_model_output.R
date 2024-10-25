@@ -78,6 +78,35 @@ test_that("Output", {
   expect_equal(tail(plot_test$layers, 1)[[1]]$geom$default_aes$colour, "black")
 
   # Layout (interactive)
+  ## Interactive plot with traces grouped by forecast date
+  plot_test <-
+    plot_step_ahead_model_output(static_proj, target_data_us,
+                                 group = "forecast_date")
+  attr_test <- purrr::map(c(3:length(plot_test$x$visdat)),
+                          function(x) attributes(plot_test$x$visdat[[x]]()))
+  attr_test <- purrr::map(attr_test, "groups")
+  expect_false(any(purrr::map_lgl(attr_test, is.null)))
+  expect_true(length(unique(attr_test)) == 1)
+  expect_equal(unique(attr_test)[[1]]$forecast_date,
+               c("2021-03-13", "2021-04-10"))
+
+  ## Interactive plot with Ensemble specific format, median, limited number of
+  ## model input and traces grouped by forecast date
+  plot_test <-
+    plot_step_ahead_model_output(dplyr::filter(static_proj,
+                                               model_id != "hubcomp_examp"),
+                                 target_data_us,
+                                 ens_color = "black", ens_name = "hub-ensemble",
+                                 use_median_as_point = TRUE,
+                                 group = "forecast_date")
+  attr_test <- purrr::map(c(3:length(plot_test$x$visdat)),
+                          function(x) attributes(plot_test$x$visdat[[x]]()))
+  attr_test <- purrr::map(attr_test, "groups")
+  expect_false(any(purrr::map_lgl(attr_test, is.null)))
+  expect_true(length(unique(attr_test)) == 1)
+  expect_equal(unique(attr_test)[[1]]$forecast_date,
+               c("2021-03-13", "2021-04-10"))
+
   ## Interactive plot with Ensemble specific format, facets, no ribbons, free
   ## x axis and a specific palette
   plot_test <-

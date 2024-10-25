@@ -45,7 +45,7 @@ plotly_facet_data <- function(data, facet, facet_value,
 
 #' Facet plot for Plotly
 #'
-#' Use Plotly to plot model output data for one specific facet with or without
+#' Use Plotly to plot model output table for one specific facet with or without
 #' target data.
 #'
 #' @param plot_model a plot_ly object to add lines and/or ribbons
@@ -86,6 +86,9 @@ plotly_facet_data <- function(data, facet, facet_value,
 #' @param x_target_col_name  column name containing the date information for
 #' `target_data` data frame, value will be map to the x-axis of the plot.
 #'  By default, "date".
+#' @param group column name for partitioning the data in the data according
+#'  the the value in the column. Please refer to [ggplot2::aes_group_order] for
+#'  more information. By default, NULL (no partitioning).
 #' @param ens_color a `character` string of a color name, if not NULL, will be
 #' use as color for the model name associated with the parameter `ens_name`
 #'@param ens_name a `character` string of a model name, if not NULL, will be
@@ -99,7 +102,7 @@ plotly_facet_plot <- function(plot_model, all_plot, all_ens, target_data,
                               top_layer = "model_output",
                               fill_transparency = 0.25, fill_by = "model_id",
                               x_col_name = "target_date",
-                              x_target_col_name = "date",
+                              x_target_col_name = "date", group = NULL,
                               ens_name = NULL, ens_color = NULL) {
   # Data
   all_plot_data <- plotly_facet_data(all_plot, facet, facet_value, intervals)
@@ -111,7 +114,7 @@ plotly_facet_plot <- function(plot_model, all_plot, all_ens, target_data,
     list(plot_model, all_plot_data$point,  all_plot_data$ribbon, plot_target,
          target_data, opacity = fill_transparency, top_layer = top_layer,
          interactive = TRUE, fill_by = fill_by, x_col_name = x_col_name,
-         x_target_col_name = x_target_col_name)
+         x_target_col_name = x_target_col_name, group = group)
   if (facet_value == all_facet_value[1]) {
     args <-  c(args, show_target_legend = TRUE)
   } else if (facet == fill_by) {
@@ -126,7 +129,8 @@ plotly_facet_plot <- function(plot_model, all_plot, all_ens, target_data,
       list(plot_model, ens_plot_data$point, ens_plot_data$ribbon, FALSE,
            target_data, opacity = fill_transparency, top_layer = top_layer,
            interactive = TRUE, fill_by = fill_by, x_col_name = x_col_name,
-           x_target_col_name = x_target_col_name, line_color = ens_color)
+           x_target_col_name = x_target_col_name, line_color = ens_color,
+           group = group)
     if (facet_value == all_facet_value[1]) {
       args <-  c(args, show_target_legend = TRUE)
     } else if (facet == fill_by) {
@@ -142,7 +146,7 @@ plotly_facet_plot <- function(plot_model, all_plot, all_ens, target_data,
 
 #' Facet plot Layout for Plotly
 #'
-#' Layout of a plot of model output data for one specific facet with or without
+#' Layout of a plot of model output table for one specific facet with or without
 #' target data.
 #'
 #' @param plot_model a plot_ly object to add lines and/or ribbons
@@ -181,7 +185,7 @@ plotly_facet_layout <- function(plot_model, text, facet_title = "top left") {
 
 #' Facet plot for Plotly
 #'
-#' Use Plotly to plot model output data for one specific facet with or without
+#' Use Plotly to plot model output table for one specific facet with or without
 #' target data and with specific layout (see parameters below).
 #'
 #' @param facet_value a vector of one of the possible unique values in the
@@ -232,6 +236,9 @@ plotly_facet_layout <- function(plot_model, text, facet_title = "top left") {
 #'@param ens_name a `character` string of a model name, if not NULL, will be
 #' use to change the color for the model name, associated with the parameter
 #' `ens_color`(both parameter need to be provided)
+#' @param group column name for partitioning the data in the data according
+#'  the the value in the column. Please refer to [ggplot2::aes_group_order] for
+#'  more information. By default, NULL (no partitioning).
 #'
 #' @noRd
 plotly_facet <- function(facet_value, plot_model, all_plot, all_ens, facet,
@@ -241,14 +248,14 @@ plotly_facet <- function(facet_value, plot_model, all_plot, all_ens, facet,
                          top_layer = "model_output", facet_title = "top left",
                          fill_by = "model_id", x_col_name = "target_date",
                          x_target_col_name = "date", ens_name = NULL,
-                         ens_color = NULL) {
+                         ens_color = NULL, group = NULL) {
   plot_model <-
     plotly_facet_plot(plot_model, all_plot, all_ens, target_data,
                       facet, facet_value, all_facet_value,
                       plot_target = plot_target, intervals = intervals,
                       top_layer = top_layer, fill_by = fill_by,
                       fill_transparency = fill_transparency,
-                      x_col_name = x_col_name,
+                      x_col_name = x_col_name, group = group,
                       x_target_col_name = x_target_col_name,
                       ens_name = ens_name, ens_color = ens_color)
   plot_model <- plotly_facet_layout(plot_model, facet_value, facet_title)
@@ -257,7 +264,7 @@ plotly_facet <- function(facet_value, plot_model, all_plot, all_ens, facet,
 
 #' Multifaceted plot for Plotly
 #'
-#' Use Plotly to plot multifaceted plot of model output data
+#' Use Plotly to plot multifaceted plot of model output table
 #'
 #' @param plot_model a plot_ly object to add lines and/or ribbons
 #' @param all_plot a list with two data frame: one for plain lines,
@@ -310,6 +317,9 @@ plotly_facet <- function(facet_value, plot_model, all_plot, all_ens, facet,
 #' `ens_color`(both parameter need to be provided)
 #' @param pal_value  a `named vector` containing the `model_id` (names) and
 #'  associated color. Default `NULL`, used only for static plot (ggplot2)
+#' @param group column name for partitioning the data in the data according
+#'  the the value in the column. Please refer to [ggplot2::aes_group_order] for
+#'  more information. By default, NULL (no partitioning).
 #'
 #' @noRd
 plotly_subplot <- function(plot_model, all_plot, all_ens, facet,
@@ -319,7 +329,7 @@ plotly_subplot <- function(plot_model, all_plot, all_ens, facet,
                            top_layer = "model_output", facet_title = "top left",
                            fill_by = "model_id", x_col_name = "target_date",
                            x_target_col_name = "date", ens_name = NULL,
-                           ens_color = NULL, pal_value = NULL) {
+                           ens_color = NULL, pal_value = NULL, group = NULL) {
   sharex <- FALSE
   sharey <- FALSE
   if (facet_scales == "fixed") {
@@ -340,8 +350,7 @@ plotly_subplot <- function(plot_model, all_plot, all_ens, facet,
                     top_layer = top_layer, facet_title = facet_title,
                     fill_by = fill_by, x_col_name = x_col_name,
                     x_target_col_name = x_target_col_name,
-                    ens_name = ens_name,
-                    ens_color = ens_color)
+                    ens_name = ens_name, group = group, ens_color = ens_color)
   plot_model <- plotly::subplot(subplot, nrows = facet_nrow, shareX = sharex,
                                 shareY = sharey)
   if (facet == fill_by) {
@@ -358,7 +367,7 @@ plotly_subplot <- function(plot_model, all_plot, all_ens, facet,
 
 #' "Simple" output plot
 #'
-#' Plot model output data without facet or multifaceted ggplot object.
+#' Plot model output table without facet or multifaceted ggplot object.
 #'
 #' @param plot_model a plot_ly object to add lines and/or ribbons
 #' @param all_plot a list with two data frame: one for plain lines,
@@ -407,8 +416,7 @@ plotly_subplot <- function(plot_model, all_plot, all_ens, facet,
 #' use as color for the model name associated with the parameter `ens_name`
 #' @param group column name for partitioning the data in the data according
 #'  the the value in the column. Please refer to [ggplot2::aes_group_order] for
-#'  more information. By default, NULL (no partitioning).ONLY available for
-#'  "static" plot.
+#'  more information. By default, NULL (no partitioning)
 #'
 #' @noRd
 simple_subplot <- function(plot_model, all_plot, all_ens, target_data,
@@ -512,8 +520,7 @@ simple_subplot <- function(plot_model, all_plot, all_ens, target_data,
 #' By default, "date".
 #' @param group column name for partitioning the data in the data according
 #'  the the value in the column. Please refer to [ggplot2::aes_group_order] for
-#'  more information. By default, NULL (no partitioning).ONLY available for
-#'  "static" plot.
+#'  more information.
 #'
 #' @noRd
 #' @importFrom plotly plot_ly layout subplot
@@ -546,7 +553,7 @@ output_plot <-  function(
                                  fill_by = fill_by, x_col_name = x_col_name,
                                  x_target_col_name = x_target_col_name,
                                  ens_name = ens_name, ens_color = ens_color,
-                                 pal_value = pal_value)
+                                 pal_value = pal_value, group = group)
   } else {
     plot_model <- simple_subplot(plot_model, all_plot, all_ens, target_data,
                                  intervals = intervals, facet = facet,
