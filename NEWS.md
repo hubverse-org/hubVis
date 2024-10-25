@@ -1,10 +1,18 @@
+# hubVis 0.1.0
+
+Release stable 0.1.0 version
+
+This release contains an update to the parameter `group` in the 
+`plot_step_ahead_model_output()` function, now available for "static" and 
+"interactive" plot. (#16). Snapshots tests of graphical output (#13) has been 
+added too.
+
 # hubVis 0.0.0.9201
 
 This release contains an update the standardized argument name for model 
 output tables in all hubverse packages to `model_out_tbl` (#35).
 
 Warning output message has also been updated for more clarification (#36).
-
 
 # hubVis 0.0.0.9100
 
