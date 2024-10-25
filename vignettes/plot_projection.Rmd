@@ -344,7 +344,7 @@ plot_step_ahead_model_output(projection_data_us, target_data_us,
 
 An optional parameter `group` in the `plot_step_ahead_model_output()` function 
 to allow to group or partition the input data in the plot according to a 
-specific column. This feature is currently only available for "static" plot. 
+specific column. 
 Please refer to `ggplot2::aes_group_order` for more information.
 
 To illustrate this we will use the forecast example for both reference date:
@@ -354,7 +354,7 @@ plot_step_ahead_model_output(forecast_quantile, forecast_target,
                              intervals = c(0.9, 0.5),
                              use_median_as_point = TRUE,
                              x_col_name = "target_end_date",
-                             facet = "location", interactive = FALSE,
+                             facet = "location",
                              group = "reference_date")
 ```
 
