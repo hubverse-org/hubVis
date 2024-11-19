@@ -350,12 +350,12 @@ plotly_subplot <- function(plot_model, all_plot, all_ens, facet,
   exp_legend <- unlist(unique(purrr::map(purrr::map(all_plot, fill_by),
                                          levels)))
   if (plot_target) exp_legend <- c("target", exp_legend)
-    for (i in seq_along(exp_legend)) {
-      vis_leg_sel <- grep(TRUE,
-                          purrr::map(purrr::map(plot_model$x$data, "name"),
-                                     as.character) ==exp_legend[i])[1]
-      plot_model$x$data[[vis_leg_sel]]$showlegend <- TRUE
-    }
+  for (i in seq_along(exp_legend)) {
+    vis_leg_sel <- grep(TRUE,
+                        purrr::map(purrr::map(plot_model$x$data, "name"),
+                                   as.character) ==exp_legend[i])[1]
+    plot_model$x$data[[vis_leg_sel]]$showlegend <- TRUE
+  }
   if (facet == fill_by) {
     for (i in seq_along(plot_model$x$data)) {
       if (purrr::map(plot_model$x$data, "name")[[i]] %in% all_facet_value) {

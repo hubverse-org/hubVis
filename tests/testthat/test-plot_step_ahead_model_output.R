@@ -188,11 +188,11 @@ test_that("Output", {
                                  facet = "scenario_id")
   test_value <-
     purrr::map(plot_test$x$data[purrr::map(purrr::map(plot_test$x$data,
-                                           "name"), levels) %in%
+                                                      "name"), levels) %in%
                                   "hub-ensemble"], "line")
   expect_equal(unique(unlist(test_value)["color"]), "black")
   test_value <-
-    purrr::map(plot_test$x$data[purrr::map(purrr::map(plot_test$x$data,"name"),
+    purrr::map(plot_test$x$data[purrr::map(purrr::map(plot_test$x$data, "name"),
                                            as.character) == "HUBuni-simexamp"],
                "line")
   test_value <- unique(unlist(test_value)["color"])
@@ -224,7 +224,7 @@ test_that("Output", {
                                                 "name")[leg_sel],
                                      as.character)))
   expect_equal(legend,
-               c("target" ,"hub-ensemble", "hubcomp_examp", "HUBuni-simexamp"))
+               c("target", "hub-ensemble", "hubcomp_examp", "HUBuni-simexamp"))
 
   test_data <- dplyr::filter(projection_data,
                              !(model_id == "HUBuni-simexamp" &
@@ -245,7 +245,7 @@ test_that("Output", {
                                                 "name")[leg_sel],
                                      as.character)))
   expect_equal(legend,
-               c("target" ,"hub-ensemble", "hubcomp_examp", "HUBuni-simexamp"))
+               c("target", "hub-ensemble", "hubcomp_examp", "HUBuni-simexamp"))
 
 })
 
