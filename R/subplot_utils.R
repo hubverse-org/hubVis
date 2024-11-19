@@ -114,14 +114,8 @@ plotly_facet_plot <- function(plot_model, all_plot, all_ens, target_data,
     list(plot_model, all_plot_data$point,  all_plot_data$ribbon, plot_target,
          target_data, opacity = fill_transparency, top_layer = top_layer,
          interactive = TRUE, fill_by = fill_by, x_col_name = x_col_name,
-         x_target_col_name = x_target_col_name, group = group)
-  if (facet_value == all_facet_value[1]) {
-    args <-  c(args, show_target_legend = TRUE)
-  } else if (facet == fill_by) {
-    args <- c(args, show_target_legend = FALSE)
-  } else {
-    args <- c(args, show_target_legend = FALSE, showlegend = FALSE)
-  }
+         x_target_col_name = x_target_col_name, group = group,
+         show_target_legend = FALSE, showlegend = FALSE)
   plot_model <- do.call(simple_model_plot, args)
   if (!is.null(all_ens)) {
     ens_plot_data <- plotly_facet_data(all_ens, facet, facet_value, intervals)
@@ -353,6 +347,15 @@ plotly_subplot <- function(plot_model, all_plot, all_ens, facet,
                     ens_name = ens_name, group = group, ens_color = ens_color)
   plot_model <- plotly::subplot(subplot, nrows = facet_nrow, shareX = sharex,
                                 shareY = sharey)
+  exp_legend <- unlist(unique(purrr::map(purrr::map(all_plot, fill_by),
+                                         levels)))
+  if (plot_target) exp_legend <- c("target", exp_legend)
+    for (i in seq_along(exp_legend)) {
+      vis_leg_sel <- grep(TRUE,
+                          purrr::map(purrr::map(plot_model$x$data, "name"),
+                                     as.character) ==exp_legend[i])[1]
+      plot_model$x$data[[vis_leg_sel]]$showlegend <- TRUE
+    }
   if (facet == fill_by) {
     for (i in seq_along(plot_model$x$data)) {
       if (purrr::map(plot_model$x$data, "name")[[i]] %in% all_facet_value) {

@@ -208,6 +208,45 @@ test_that("Output", {
   expect_equal(strsplit(strsplit(tail(purrr::map(plot_test$x$attrs,
                                                  "hovertext"), 1)[[1]],
                                  "<br>")[[1]][2], "Intervals")[[1]][1], "90% ")
+
+  ## Interactive plot with 3 model, 1 model did not submit one scenario
+  test_data <- dplyr::filter(projection_data,
+                             !(model_id == "HUBuni-simexamp" &
+                                 scenario_id == "A-2021-03-05"))
+  plot_test <-
+    plot_step_ahead_model_output(test_data,
+                                 target_data_us,
+                                 use_median_as_point = TRUE,
+                                 facet = "scenario_id")
+  leg_sel <- !unlist(purrr::map(purrr::map(plot_test$x$data, "showlegend"),
+                                isFALSE))
+  legend <- unique(unlist(purrr::map(purrr::map(plot_test$x$data,
+                                                "name")[leg_sel],
+                                     as.character)))
+  expect_equal(legend,
+               c("target" ,"hub-ensemble", "hubcomp_examp", "HUBuni-simexamp"))
+
+  test_data <- dplyr::filter(projection_data,
+                             !(model_id == "HUBuni-simexamp" &
+                                 scenario_id %in% c("A-2021-03-05",
+                                                    "B-2021-03-05")),
+                             !(model_id == "hubcomp_examp" &
+                                 scenario_id %in% c("A-2021-03-05",
+                                                    "C-2021-03-05",
+                                                    "D-2021-03-05")))
+  plot_test <-
+    plot_step_ahead_model_output(test_data,
+                                 target_data_us,
+                                 use_median_as_point = TRUE,
+                                 facet = "scenario_id")
+  leg_sel <- !unlist(purrr::map(purrr::map(plot_test$x$data, "showlegend"),
+                                isFALSE))
+  legend <- unique(unlist(purrr::map(purrr::map(plot_test$x$data,
+                                                "name")[leg_sel],
+                                     as.character)))
+  expect_equal(legend,
+               c("target" ,"hub-ensemble", "hubcomp_examp", "HUBuni-simexamp"))
+
 })
 
 test_that("ggplot output file", {
@@ -246,4 +285,17 @@ test_that("ggplot output file", {
                                             facet = "model_id",
                                             interactive = FALSE)
   vdiffr::expect_doppelganger("Ensemble Model Facet Static", plot_test)
+
+
+  ## Static plot with 3 model, 1 model did not submit one scenario
+  test_data <- dplyr::filter(projection_data,
+                             !(model_id == "HUBuni-simexamp" &
+                                 scenario_id == "A-2021-03-05"))
+  plot_test <-
+    plot_step_ahead_model_output(test_data,
+                                 target_data_us,
+                                 use_median_as_point = TRUE,
+                                 interactive = FALSE, facet = "scenario_id")
+  vdiffr::expect_doppelganger("Missing Value Facet Static", plot_test)
+
 })
