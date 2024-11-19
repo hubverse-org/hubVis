@@ -1,3 +1,12 @@
+# hubVis 0.1.1
+
+This release contains an update to fix issue #46:
+
+- create legend after plot generated to add all expected trace in the legend
+- transform the fill_by column as a factor (internally) to unsure the palette 
+is assigned properly
+
+
 # hubVis 0.1.0
 
 Release stable 0.1.0 version
