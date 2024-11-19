@@ -353,7 +353,7 @@ plotly_subplot <- function(plot_model, all_plot, all_ens, facet,
   for (i in seq_along(exp_legend)) {
     vis_leg_sel <- grep(TRUE,
                         purrr::map(purrr::map(plot_model$x$data, "name"),
-                                   as.character) ==exp_legend[i])[1]
+                                   as.character) == exp_legend[i])[1]
     plot_model$x$data[[vis_leg_sel]]$showlegend <- TRUE
   }
   if (facet == fill_by) {
