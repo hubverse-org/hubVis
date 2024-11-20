@@ -3,7 +3,7 @@
 This release contains an update to fix issue #46:
 
 - create legend after plot generated to add all expected trace in the legend
-- transform the fill_by column as a factor (internally) to unsure the palette 
+- transform the fill_by column as a factor (internally) to ensure the palette 
 is assigned properly
 
 
