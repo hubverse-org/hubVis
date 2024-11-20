@@ -350,7 +350,8 @@ plotly_subplot <- function(plot_model, all_plot, all_ens, facet,
   exp_legend <- unlist(unique(purrr::map(all_plot, \(x) levels(x[[fill_by]]))))
   if (plot_target) exp_legend <- c("target", exp_legend)
   for (i in seq_along(exp_legend)) {
-    # find the first matching element and make sure that element is shown in the legend
+    # find the first matching element and make sure that element is shown in
+    # the legend
     vis_leg_sel <- grep(TRUE,
                         purrr::map(purrr::map(plot_model$x$data, "name"),
                                    as.character) == exp_legend[i])[1]
