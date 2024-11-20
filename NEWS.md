@@ -6,7 +6,6 @@ This release contains an update to fix issue #46:
 - transform the fill_by column as a factor (internally) to ensure the palette 
 is assigned properly
 
-
 # hubVis 0.1.0
 
 Release stable 0.1.0 version
