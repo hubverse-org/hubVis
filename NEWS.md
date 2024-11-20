@@ -1,3 +1,5 @@
+# hubVis (development version)
+
 # hubVis 0.1.1
 
 This release contains an update to fix issue #46:
