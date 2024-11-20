@@ -172,7 +172,7 @@ plot_step_ahead_model_output <- function(
     plot_df <- model_out_tbl
   }
   all_plot <- plot_prep_data(plot_df, plain_line, plain_type, ribbon,
-                             x_col_name = x_col_name)
+                             x_col_name = x_col_name, fill_by = fill_by)
 
   # Plot
   if (!is.null(facet)) {

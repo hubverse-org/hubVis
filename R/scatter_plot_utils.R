@@ -19,7 +19,7 @@
 #' @importFrom dplyr near
 #' @importFrom stats reshape setNames
 plot_prep_data <- function(df, plain_line, plain_type, intervals,
-                           x_col_name = "target_date") {
+                           x_col_name = "target_date", fill_by = "model_id") {
   # Remove empty column to avoid issue
   empty_cols <- sapply(df, function(k) all(is.na(k)))
   if (any(empty_cols)) {
@@ -28,6 +28,8 @@ plot_prep_data <- function(df, plain_line, plain_type, intervals,
                     columns: {.value {empty_colnames}.}"))
     df <- df[!empty_cols]
   }
+  # Factorize the fill_by column
+  df[[fill_by]] <- as.factor(df[[fill_by]])
 
   # Median
   if (is.null(plain_line)) {

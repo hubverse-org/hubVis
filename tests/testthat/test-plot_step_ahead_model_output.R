@@ -119,8 +119,9 @@ test_that("Output", {
                 length(unique(proj_data_q$model_id)) *
                   length(unique(proj_data_q$scenario_id)))
   test_value <-
-    purrr::map(plot_test$x$data[purrr::map(plot_test$x$data,
-                                           "name") == "hub-ensemble"], "line")
+    purrr::map(plot_test$x$data[as.character(unlist(purrr::map(plot_test$x$data,
+                                                               "name"))) ==
+                                  "hub-ensemble"], "line")
   expect_equal(unique(unlist(test_value)["color"]), "black")
   expect_true(plot_test$x$subplot)
   expect_gt(length(unique(purrr::map(plot_test$x$data, "xaxis"))), 1)
@@ -156,7 +157,8 @@ test_that("Output", {
                                         "yanchor"))), "bottom")
   expect_in(unlist(purrr::map(plot_test$x$layout$annotations, "text")),
             unique(proj_data_q$model_id))
-  expect_in(unique(unlist(purrr::map(plot_test$x$attrs, "color"))),
+  expect_in(unique(unlist(purrr::map(purrr::map(plot_test$x$attrs, "color"),
+                                     levels))),
             unique(proj_data_q$scenario_id))
   ## Interactive plot with facets (only target data available for facet A),
   ## median line, tile, free y axis, limit number of row, and a specific
@@ -172,7 +174,8 @@ test_that("Output", {
   expect_equal(plot_test$x$layoutAttrs[[2]]$title, "My Plot")
   expect_in(unlist(purrr::map(plot_test$x$layout$annotations, "text")),
             unique(proj_data_q$model_id))
-  expect_in(unique(unlist(purrr::map(plot_test$x$attrs, "color"))),
+  expect_in(unique(unlist(purrr::map(purrr::map(plot_test$x$attrs, "color"),
+                                     levels))),
             unique(proj_data_q$model_id))
   expect_equal(tail(plot_test$x$data, 1)[[1]]$opacity, 0.75)
   ## Interactive plot with facets, no ribbons, ensemble specific format,
@@ -184,12 +187,13 @@ test_that("Output", {
                                  intervals = NULL, use_median_as_point = TRUE,
                                  facet = "scenario_id")
   test_value <-
-    purrr::map(plot_test$x$data[purrr::map(plot_test$x$data,
-                                           "name") == "hub-ensemble"], "line")
+    purrr::map(plot_test$x$data[purrr::map(purrr::map(plot_test$x$data,
+                                                      "name"), levels) %in%
+                                  "hub-ensemble"], "line")
   expect_equal(unique(unlist(test_value)["color"]), "black")
   test_value <-
-    purrr::map(plot_test$x$data[purrr::map(plot_test$x$data,
-                                           "name") == "HUBuni-simexamp"],
+    purrr::map(plot_test$x$data[purrr::map(purrr::map(plot_test$x$data, "name"),
+                                           as.character) == "HUBuni-simexamp"],
                "line")
   test_value <- unique(unlist(test_value)["color"])
   expect_equal(test_value, "rgba(255,165,0,1)")
@@ -204,6 +208,39 @@ test_that("Output", {
   expect_equal(strsplit(strsplit(tail(purrr::map(plot_test$x$attrs,
                                                  "hovertext"), 1)[[1]],
                                  "<br>")[[1]][2], "Intervals")[[1]][1], "90% ")
+
+  ## Interactive plot with 3 model, 1 model did not submit one scenario
+  test_data <- dplyr::filter(projection_data,
+                             !(model_id == "HUBuni-simexamp" &
+                                 scenario_id == "A-2021-03-05"))
+  plot_test <-
+    plot_step_ahead_model_output(test_data,
+                                 target_data_us,
+                                 use_median_as_point = TRUE,
+                                 facet = "scenario_id")
+  leg_sel <- purrr::map_lgl(plot_test$x$data, "showlegend")
+  legend <- purrr::map_chr(plot_test$x$data, \(x) as.character(x$name))[leg_sel]
+  expect_equal(legend,
+               c("target", "hub-ensemble", "hubcomp_examp", "HUBuni-simexamp"))
+
+  test_data <- dplyr::filter(projection_data,
+                             !(model_id == "HUBuni-simexamp" &
+                                 scenario_id %in% c("A-2021-03-05",
+                                                    "B-2021-03-05")),
+                             !(model_id == "hubcomp_examp" &
+                                 scenario_id %in% c("A-2021-03-05",
+                                                    "C-2021-03-05",
+                                                    "D-2021-03-05")))
+  plot_test <-
+    plot_step_ahead_model_output(test_data,
+                                 target_data_us,
+                                 use_median_as_point = TRUE,
+                                 facet = "scenario_id")
+  leg_sel <- purrr::map_lgl(plot_test$x$data, "showlegend")
+  legend <- purrr::map_chr(plot_test$x$data, \(x) as.character(x$name))[leg_sel]
+  expect_equal(legend,
+               c("target", "hub-ensemble", "hubcomp_examp", "HUBuni-simexamp"))
+
 })
 
 test_that("ggplot output file", {
@@ -242,4 +279,17 @@ test_that("ggplot output file", {
                                             facet = "model_id",
                                             interactive = FALSE)
   vdiffr::expect_doppelganger("Ensemble Model Facet Static", plot_test)
+
+
+  ## Static plot with 3 model, 1 model did not submit one scenario
+  test_data <- dplyr::filter(projection_data,
+                             !(model_id == "HUBuni-simexamp" &
+                                 scenario_id == "A-2021-03-05"))
+  plot_test <-
+    plot_step_ahead_model_output(test_data,
+                                 target_data_us,
+                                 use_median_as_point = TRUE,
+                                 interactive = FALSE, facet = "scenario_id")
+  vdiffr::expect_doppelganger("Missing Value Facet Static", plot_test)
+
 })
