@@ -347,8 +347,7 @@ plotly_subplot <- function(plot_model, all_plot, all_ens, facet,
                     ens_name = ens_name, group = group, ens_color = ens_color)
   plot_model <- plotly::subplot(subplot, nrows = facet_nrow, shareX = sharex,
                                 shareY = sharey)
-  exp_legend <- unlist(unique(purrr::map(purrr::map(all_plot, fill_by),
-                                         levels)))
+  exp_legend <- unlist(unique(purrr::map(all_plot, \(x) levels(x[[fill_by]]))))
   if (plot_target) exp_legend <- c("target", exp_legend)
   for (i in seq_along(exp_legend)) {
     # find the first matching element and make sure that element is shown in the legend

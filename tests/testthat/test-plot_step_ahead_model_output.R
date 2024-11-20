@@ -218,11 +218,8 @@ test_that("Output", {
                                  target_data_us,
                                  use_median_as_point = TRUE,
                                  facet = "scenario_id")
-  leg_sel <- !unlist(purrr::map(purrr::map(plot_test$x$data, "showlegend"),
-                                isFALSE))
-  legend <- unique(unlist(purrr::map(purrr::map(plot_test$x$data,
-                                                "name")[leg_sel],
-                                     as.character)))
+  leg_sel <- purrr::map_lgl(plot_test$x$data, "showlegend")
+  legend <- purrr::map_chr(plot_test$x$data, \(x) as.character(x$name))[leg_sel]
   expect_equal(legend,
                c("target", "hub-ensemble", "hubcomp_examp", "HUBuni-simexamp"))
 
@@ -239,11 +236,8 @@ test_that("Output", {
                                  target_data_us,
                                  use_median_as_point = TRUE,
                                  facet = "scenario_id")
-  leg_sel <- !unlist(purrr::map(purrr::map(plot_test$x$data, "showlegend"),
-                                isFALSE))
-  legend <- unique(unlist(purrr::map(purrr::map(plot_test$x$data,
-                                                "name")[leg_sel],
-                                     as.character)))
+  leg_sel <- purrr::map_lgl(plot_test$x$data, "showlegend")
+  legend <- purrr::map_chr(plot_test$x$data, \(x) as.character(x$name))[leg_sel]
   expect_equal(legend,
                c("target", "hub-ensemble", "hubcomp_examp", "HUBuni-simexamp"))
 
