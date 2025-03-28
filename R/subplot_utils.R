@@ -14,7 +14,7 @@ prep_facet_data <- function(df, facet, facet_value) {
   list_df <- stats::setNames(lapply(df, function(df_rib) {
     df_rib[which(df_rib[[facet]] == facet_value), ]
   }), names(df))
-  return(list_df)
+  list_df
 }
 
 #' Reformat Data for "facet" plotting function

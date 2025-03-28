@@ -60,7 +60,7 @@ plot_prep_data <- function(df, plain_line, plain_type, intervals,
                            direction = "wide", idvar = id_col)
       ribbon_df[[x_col_name]] <- as.Date(ribbon_df[[x_col_name]])
       colnames(ribbon_df) <- gsub("^value\\.", "", colnames(ribbon_df))
-      return(ribbon_df)
+      ribbon_df
     })
     ribbon_list <- stats::setNames(ribbon_list, names(intervals))
   }
@@ -108,7 +108,6 @@ plotly_target_data <- function(plot_model, target_data, plot_target,
   }
   plot_model <- plotly::layout(plot_model, xaxis = list(title = "Date"),
                                yaxis = list(title = "Value"))
-  return(plot_model)
 }
 
 #' Plot Target data with GGplot
