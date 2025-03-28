@@ -149,7 +149,7 @@ output_type_validation <- function(model_out_tbl, exp_value) {
     cli::cli_abort(c("x" = "{.arg model_output_type_val} did not have the
                      expected output_type_id value {.val {exp_value}}"))
   }
-  return(model_out_tbl)
+  model_out_tbl
 }
 
 #' Validate `"facet"` parameters format
