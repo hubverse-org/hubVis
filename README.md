@@ -8,7 +8,7 @@ The goal of hubVis is to provide plotting methods for hub model outputs,
 following the hubverse format. The hubverse is a collection of open-source
 software and data tools, developed by the Consortium of Infectious Disease
 Modeling Hubs. For more information, please consult the
-[hubDocs](https://hubverse.io/en/latest/) website
+[hubDocs](https://docs.hubverse.io/en/latest/) website
 
 ## Installation
 
@@ -87,6 +87,6 @@ Please note that the hubVis package is released with a [Contributor Code of Cond
 ## Contributing
 
 Interested in contributing back to the open-source Hubverse project?
-Learn more about how to [get involved in the Hubverse Community](https://hubverse.io/en/latest/overview/contribute.html) or [how to contribute to the hubVis package](.github/CONTRIBUTING.md).
+Learn more about how to [get involved in the Hubverse Community](https://docs.hubverse.io/en/latest/overview/contribute.html) or [how to contribute to the hubVis package](.github/CONTRIBUTING.md).
 
 
