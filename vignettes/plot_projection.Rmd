@@ -30,7 +30,7 @@ Currently, the function can plot only quantile data, with the possibility to
 add "median" information from the model projections.
 
 For more information about the Hubverse standard format, please refer to the
-[HubDocs website](https://hubverse.io/en/latest/user-guide/tasks.html).
+[HubDocs website](https://docs.hubverse.io/en/latest/user-guide/tasks.html).
 
 The following vignette describes the principal usage of the
 `plot_step_ahead_model_output()` function.
