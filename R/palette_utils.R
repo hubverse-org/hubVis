@@ -58,7 +58,8 @@ make_palette <- function(model_out_tbl, fill_by = "model_id",
   if (!is.null(ens_color) && !is.null(ens_name))
     pal_value[ens_name] <- grDevices::rgb(grDevices::col2rgb(ens_color)[1],
                                           grDevices::col2rgb(ens_color)[2],
-                                          grDevices::col2rgb(ens_color)[3])
+                                          grDevices::col2rgb(ens_color)[3],
+                                          maxColorValue = 255)
   if (plot_target) {
     pal_value <- c(pal_value, "Target Data" = "#6e6e6e")
   }

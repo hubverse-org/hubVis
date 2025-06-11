@@ -1,5 +1,10 @@
 # hubVis (development version)
 
+# hubVis 0.1.2
+
+This release contains a fix to the issue #56: fix palette creation for `*_color`
+parameters
+
 # hubVis 0.1.1
 
 This release contains an update to fix issue #46:
