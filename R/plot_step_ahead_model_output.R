@@ -204,9 +204,14 @@ plot_step_ahead_model_output <- function(
                             group = group)
 
   # Layout
+  if (log_scale) {
+    y_axis_name = "log(Value)"
+  } else {
+    y_axis_name = "Value"
+  }
   if (interactive) {
     plot_model <- plotly::layout(plot_model, xaxis = list(title = "Date"),
-                                 yaxis = list(title = "Value"),
+                                 yaxis = list(title =  y_axis_name),
                                  showlegend = show_legend)
     if (!is.null(title)) {
       plot_model <- plotly::layout(plot_model, title = title)
@@ -215,7 +220,7 @@ plot_step_ahead_model_output <- function(
       plot_model <- plotly::layout(plot_model, yaxis = list(type = "log"))
     }
   } else {
-    plot_model <- plot_model + labs(x =  "Date", y = "Value")
+    plot_model <- plot_model + labs(x =  "Date", y =  y_axis_name)
     if (!is.null(title)) {
       plot_model <- plot_model + labs(title = title)
     }
