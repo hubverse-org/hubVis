@@ -120,11 +120,15 @@ test_that("Output", {
                          log10(target_data_us$observation))
   attr_test <-
     purrr::map(c(3:length(plot_test$x$visdat)),
-               function(x) dplyr::select(plot_test$x$visdat[[x]]() |>
-                                           dplyr::ungroup(),
-                                         dplyr::any_of(c("value", "max",
-                                                         "observation"))) |>
-                 dplyr::summarise_all(max) |> unlist()) |> unlist()
+               function(x) {
+                 dplyr::select(plot_test$x$visdat[[x]]() |>
+                                 dplyr::ungroup(),
+                               dplyr::any_of(c("value", "max",
+                                               "observation"))) |>
+                   dplyr::summarise_all(max) |>
+                   unlist()
+               }) |>
+    unlist()
   expect_gt(min(attr_test), 5)
   expect_lt(min(attr_test), 6)
 

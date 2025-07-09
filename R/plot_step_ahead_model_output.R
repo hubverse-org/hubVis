@@ -205,9 +205,9 @@ plot_step_ahead_model_output <- function(
 
   # Layout
   if (log_scale) {
-    y_axis_name = "log(Value)"
+    y_axis_name <- "log(Value)"
   } else {
-    y_axis_name = "Value"
+    y_axis_name <- "Value"
   }
   if (interactive) {
     plot_model <- plotly::layout(plot_model, xaxis = list(title = "Date"),
