@@ -107,6 +107,37 @@ test_that("Output", {
   expect_equal(unique(attr_test)[[1]]$forecast_date,
                c("2021-03-13", "2021-04-10"))
 
+  ## Log Scale
+  ### Interactive
+  plot_test <-
+    plot_step_ahead_model_output(static_proj,
+                                 target_data_us, log_scale = TRUE,
+                                 ens_color = "black", ens_name = "hub-ensemble",
+                                 use_median_as_point = TRUE,
+                                 group = "forecast_date")
+  attr_test <- plot_test$x$visdat[[2]]()
+  testthat::expect_equal(attr_test$observation,
+                         log10(target_data_us$observation))
+  attr_test <-
+    purrr::map(c(3:length(plot_test$x$visdat)),
+               function(x) dplyr::select(plot_test$x$visdat[[x]]() |>
+                                           dplyr::ungroup(),
+                                         dplyr::any_of(c("value", "max",
+                                                         "observation"))) |>
+                 dplyr::summarise_all(max) |> unlist()) |> unlist()
+  expect_gt(min(attr_test), 5)
+  expect_lt(min(attr_test), 6)
+
+  ### Static
+  plot_test <-
+    plot_step_ahead_model_output(static_proj,
+                                 target_data_us, log_scale = TRUE,
+                                 ens_color = "black", ens_name = "hub-ensemble",
+                                 use_median_as_point = TRUE,
+                                 group = "forecast_date", interactive = FALSE)
+  expect_equal(plot_test$labels$y, "log(Value)")
+
+
   ## Interactive plot with Ensemble specific format, facets, no ribbons, free
   ## x axis and a specific palette
   plot_test <-
@@ -279,6 +310,14 @@ test_that("ggplot output file", {
                                             facet = "model_id",
                                             interactive = FALSE)
   vdiffr::expect_doppelganger("Ensemble Model Facet Static", plot_test)
+
+  plot_test <-
+    plot_step_ahead_model_output(static_proj,
+                                 target_data_us, interactive = FALSE,
+                                 ens_color = "black", ens_name = "hub-ensemble",
+                                 use_median_as_point = TRUE, log_scale = TRUE,
+                                 show_legend = FALSE, group = "forecast_date")
+  vdiffr::expect_doppelganger("Log Scale Group Static", plot_test)
 
 
   ## Static plot with 3 model, 1 model did not submit one scenario
