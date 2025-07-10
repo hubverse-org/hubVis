@@ -106,8 +106,7 @@ plotly_target_data <- function(plot_model, target_data, plot_target,
     arg_list <- c(arg_list, arguments)
     plot_model <- do.call(plotly::add_trace, arg_list)
   }
-  plot_model <- plotly::layout(plot_model, xaxis = list(title = "Date"),
-                               yaxis = list(title = "Value"))
+  plot_model <- plotly::layout(plot_model, xaxis = list(title = "Date"))
 }
 
 #' Plot Target data with GGplot
@@ -184,13 +183,11 @@ plotly_proj_data <- function(plot_model, df_point, df_ribbon,
     if (is.null(line_color)) {
       arg_list <- c(arg_list, list(color =  df_point[[fill_by]]), arguments)
       plot_model <- do.call(plotly::add_lines, arg_list)
-      plot_model <- plotly::layout(plot_model, xaxis = list(title = "Date"),
-                                   yaxis = list(title = "Value"))
+      plot_model <- plotly::layout(plot_model, xaxis = list(title = "Date"))
     } else {
       arg_list <- c(arg_list, list(line = list(color = line_color)), arguments)
       plot_model <- do.call(plotly::add_lines, arg_list)
-      plot_model <- plotly::layout(plot_model, xaxis = list(title = "Date"),
-                                   yaxis = list(title = "Value"))
+      plot_model <- plotly::layout(plot_model, xaxis = list(title = "Date"))
     }
     show_legend <- FALSE
   } else {
@@ -225,8 +222,7 @@ plotly_proj_data <- function(plot_model, df_point, df_ribbon,
                                                    color = line_color)),
                         arguments)
           plot_model <- do.call(plotly::add_ribbons, arg_list)
-          plot_model <- plotly::layout(plot_model, xaxis = list(title = "Date"),
-                                       yaxis = list(title = "Value"))
+          plot_model <- plotly::layout(plot_model, xaxis = list(title = "Date"))
         }
       }
     }
