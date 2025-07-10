@@ -1,5 +1,8 @@
 # hubVis (development version)
 
+- add `log_scale` parameter in the `plot_step_ahead_model_output()` function to
+allow log scale on the y-axis
+
 # hubVis 0.1.2
 
 This release contains a fix to the issue #56: fix palette creation for `*_color`
