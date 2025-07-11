@@ -115,10 +115,9 @@ test_that("Output", {
                                  fill_by = "scenario_id", log_scale = TRUE,
                                  facet_title = "bottom right")
   attr_test <- as.vector(plot_test$x$data[[length(plot_test$x$data)]]$y)
-  expect_equal(attr_test, log10(target_data_us$observation))
-  attr_test <- purrr::map(plot_test$x$data, "y") |> unlist() |> unique()
-  expect_gt(min(attr_test), 2.5)
-  expect_lt(min(attr_test), 6.5)
+  expect_equal(attr_test, target_data_us$observation)
+  expect_equal(plot_test$x$layoutAttrs[[2]]$yaxis$type, "log")
+
 
   plot_test <-
     plot_step_ahead_model_output(static_proj,
@@ -127,21 +126,11 @@ test_that("Output", {
                                  use_median_as_point = TRUE,
                                  group = "forecast_date")
   attr_test <- plot_test$x$visdat[[2]]()
-  testthat::expect_equal(attr_test$observation,
-                         log10(target_data_us$observation))
-  attr_test <-
-    purrr::map(c(3:length(plot_test$x$visdat)),
-               function(x) {
-                 dplyr::select(plot_test$x$visdat[[x]]() |>
-                                 dplyr::ungroup(),
-                               dplyr::any_of(c("value", "max",
-                                               "observation"))) |>
-                   dplyr::summarise_all(max) |>
-                   unlist()
-               }) |>
-    unlist()
-  expect_gt(min(attr_test), 5)
-  expect_lt(min(attr_test), 6)
+  expect_equal(attr_test$observation, target_data_us$observation)
+  expect_equal(purrr::map(purrr::map(plot_test$x$layoutAttrs, "yaxis"),
+                          "type") |>
+                 unlist() |>
+                 unique(), "log")
 
   ### Static
   plot_test <-
@@ -150,8 +139,7 @@ test_that("Output", {
                                  ens_color = "black", ens_name = "hub-ensemble",
                                  use_median_as_point = TRUE,
                                  group = "forecast_date", interactive = FALSE)
-  expect_equal(plot_test$labels$y, "log(Value)")
-
+  expect_s3_class(plot_test, "ggplot")
 
   ## Interactive plot with Ensemble specific format, facets, no ribbons, free
   ## x axis and a specific palette
@@ -333,7 +321,6 @@ test_that("ggplot output file", {
                                  use_median_as_point = TRUE, log_scale = TRUE,
                                  show_legend = FALSE, group = "forecast_date")
   vdiffr::expect_doppelganger("Log Scale Group Static", plot_test)
-
 
   ## Static plot with 3 model, 1 model did not submit one scenario
   test_data <- dplyr::filter(projection_data,

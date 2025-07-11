@@ -121,9 +121,6 @@ plot_step_ahead_model_output <- function(
   if (plot_target) {
     exp_td_col <- c(x_target_col_name, "observation")
     target_validation(target_data, col_names = exp_td_col)
-    if (log_scale) {
-      target_data[["observation"]] <- log10(target_data[["observation"]])
-    }
   }
   ## Parameters
   ### Intervals
@@ -167,9 +164,6 @@ plot_step_ahead_model_output <- function(
                           plot_target = plot_target)
 
   # Data process
-  if (log_scale) {
-    model_out_tbl[["value"]] <- log10(model_out_tbl[["value"]])
-  }
   if (!is.null(ens_color) && !is.null(ens_name)) {
     ens_df <- model_out_tbl[which(model_out_tbl$model_id == ens_name), ]
     all_ens <- plot_prep_data(ens_df, plain_line, plain_type, ribbon,
@@ -204,11 +198,6 @@ plot_step_ahead_model_output <- function(
                             group = group)
 
   # Layout
-  if (log_scale) {
-    y_axis_name <- "log(Value)"
-  } else {
-    y_axis_name <- "Value"
-  }
   if (interactive) {
     plot_model <- plotly::layout(plot_model, xaxis = list(title = "Date"),
                                  showlegend = show_legend)
@@ -220,7 +209,7 @@ plot_step_ahead_model_output <- function(
         purrr::map(plot_model$x$layout, function(x) {
           if (any(grepl("title", names(x)))) {
             if (grepl("x", x$anchor)) {
-              x$title <- y_axis_name
+              x$title <- "Value"
             }
           }
           x
@@ -234,14 +223,14 @@ plot_step_ahead_model_output <- function(
       }
     } else {
       plot_model <- plotly::layout(plot_model,
-                                   yaxis = list(title = y_axis_name))
+                                   yaxis = list(title = "Value"))
       if (log_scale) {
         plot_model <- plotly::layout(plot_model,
                                      yaxis = list(type = "log"))
       }
     }
   } else {
-    plot_model <- plot_model + labs(x =  "Date", y =  y_axis_name)
+    plot_model <- plot_model + labs(x =  "Date", y =  "Value")
     if (!is.null(title)) {
       plot_model <- plot_model + labs(title = title)
     }
