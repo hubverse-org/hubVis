@@ -110,6 +110,17 @@ test_that("Output", {
   ## Log Scale
   ### Interactive
   plot_test <-
+    plot_step_ahead_model_output(proj_data_q, target_data_us,
+                                 top_layer = "target", facet = "model_id",
+                                 fill_by = "scenario_id", log_scale = TRUE,
+                                 facet_title = "bottom right")
+  attr_test <- as.vector(plot_test$x$data[[length(plot_test$x$data)]]$y)
+  expect_equal(attr_test, log10(target_data_us$observation))
+  attr_test <- purrr::map(plot_test$x$data, "y") |> unlist() |> unique()
+  expect_gt(min(attr_test), 2.5)
+  expect_lt(min(attr_test), 6.5)
+
+  plot_test <-
     plot_step_ahead_model_output(static_proj,
                                  target_data_us, log_scale = TRUE,
                                  ens_color = "black", ens_name = "hub-ensemble",
