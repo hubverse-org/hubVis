@@ -215,28 +215,30 @@ plot_step_ahead_model_output <- function(
     if (!is.null(title)) {
       plot_model <- plotly::layout(plot_model, title = title)
     }
-    if (log_scale) {
-      if (!is.null(facet)) {
-        plot_model$x$layout <-
-          purrr::map(plot_model$x$layout, function(x) {
-            if (any(grepl("title", names(x)))) {
-              if (grepl("x", x$anchor)) {
-                x$title <- y_axis_name
-              }
+    if (!is.null(facet)) {
+      plot_model$x$layout <-
+        purrr::map(plot_model$x$layout, function(x) {
+          if (any(grepl("title", names(x)))) {
+            if (grepl("x", x$anchor)) {
+              x$title <- y_axis_name
             }
-            x
-          })
+          }
+          x
+        })
+      if (log_scale) {
         plot_model$x$layoutAttrs <-
           c(plot_model$x$layoutAttrs,
             purrr::map(sort(grep("yaxis", names(plot_model$x$layout),
                                  value = TRUE)),
                        function(x) setNames(list(list(type = "log")), x)))
-      } else {
-        plot_model <- plotly::layout(plot_model,
-                                     yaxis = list(type = "log",
-                                                  title = y_axis_name))
       }
-
+    } else {
+      plot_model <- plotly::layout(plot_model,
+                                   yaxis = list(title = y_axis_name))
+      if (log_scale) {
+        plot_model <- plotly::layout(plot_model,
+                                     yaxis = list(type = "log"))
+      }
     }
   } else {
     plot_model <- plot_model + labs(x =  "Date", y =  y_axis_name)
