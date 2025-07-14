@@ -398,3 +398,14 @@ simple_model_plot <- function(
 
   return(plot_model)
 }
+
+
+# Layout attributes updates
+plot_model_layout_attr <- function(plot_model, name_attribute, attributes) {
+  plot_model$x$layoutAttrs <-
+    c(plot_model$x$layoutAttrs,
+      purrr::map(sort(grep(name_attribute, names(plot_model$x$layout),
+                           value = TRUE)),
+                 function(x) setNames(list(attributes), x)))
+  return(plot_model)
+}

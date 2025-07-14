@@ -215,12 +215,18 @@ plot_step_ahead_model_output <- function(
           x
         })
       if (log_scale) {
-        plot_model$x$layoutAttrs <-
-          c(plot_model$x$layoutAttrs,
-            purrr::map(sort(grep("yaxis", names(plot_model$x$layout),
-                                 value = TRUE)),
-                       function(x) setNames(list(list(type = "log")), x)))
+        plot_model <- plot_model_layout_attr(plot_model, "yaxis",
+                                             list(type = "log"))
       }
+      if (facet_scales == "fixed" ||  facet_scales == "free_y") {
+        plot_model <- plot_model_layout_attr(plot_model, "xaxis",
+                                             list(matches = "x"))
+      }
+      if (facet_scales == "fixed" || facet_scales == "free_x") {
+        plot_model <- plot_model_layout_attr(plot_model, "yaxis",
+                                             list(matches = "y"))
+      }
+
     } else {
       plot_model <- plotly::layout(plot_model,
                                    yaxis = list(title = "Value"))
@@ -242,6 +248,7 @@ plot_step_ahead_model_output <- function(
     }
   }
 
+  # Output
   if (isTRUE(show_plot)) {
     if (interactive) show(plot_model)
     return(plot_model)
