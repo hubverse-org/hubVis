@@ -107,6 +107,40 @@ test_that("Output", {
   expect_equal(unique(attr_test)[[1]]$forecast_date,
                c("2021-03-13", "2021-04-10"))
 
+  ## Log Scale
+  ### Interactive
+  plot_test <-
+    plot_step_ahead_model_output(proj_data_q, target_data_us,
+                                 top_layer = "target", facet = "model_id",
+                                 fill_by = "scenario_id", log_scale = TRUE,
+                                 facet_title = "bottom right")
+  attr_test <- as.vector(plot_test$x$data[[length(plot_test$x$data)]]$y)
+  expect_equal(attr_test, target_data_us$observation)
+  expect_equal(plot_test$x$layoutAttrs[[2]]$yaxis$type, "log")
+
+
+  plot_test <-
+    plot_step_ahead_model_output(static_proj,
+                                 target_data_us, log_scale = TRUE,
+                                 ens_color = "black", ens_name = "hub-ensemble",
+                                 use_median_as_point = TRUE,
+                                 group = "forecast_date")
+  attr_test <- plot_test$x$visdat[[2]]()
+  expect_equal(attr_test$observation, target_data_us$observation)
+  expect_equal(purrr::map(purrr::map(plot_test$x$layoutAttrs, "yaxis"),
+                          "type") |>
+                 unlist() |>
+                 unique(), "log")
+
+  ### Static
+  plot_test <-
+    plot_step_ahead_model_output(static_proj,
+                                 target_data_us, log_scale = TRUE,
+                                 ens_color = "black", ens_name = "hub-ensemble",
+                                 use_median_as_point = TRUE,
+                                 group = "forecast_date", interactive = FALSE)
+  expect_s3_class(plot_test, "ggplot")
+
   ## Interactive plot with Ensemble specific format, facets, no ribbons, free
   ## x axis and a specific palette
   plot_test <-
@@ -280,6 +314,13 @@ test_that("ggplot output file", {
                                             interactive = FALSE)
   vdiffr::expect_doppelganger("Ensemble Model Facet Static", plot_test)
 
+  plot_test <-
+    plot_step_ahead_model_output(static_proj,
+                                 target_data_us, interactive = FALSE,
+                                 ens_color = "black", ens_name = "hub-ensemble",
+                                 use_median_as_point = TRUE, log_scale = TRUE,
+                                 show_legend = FALSE, group = "forecast_date")
+  vdiffr::expect_doppelganger("Log Scale Group Static", plot_test)
 
   ## Static plot with 3 model, 1 model did not submit one scenario
   test_data <- dplyr::filter(projection_data,
