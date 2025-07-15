@@ -20,7 +20,7 @@
 #'  `target_data`
 #'@param show_legend a `boolean` for showing the legend in the plot.
 #'  Default to TRUE.
-#'@param facet a unique value corresponding as a task_id variable name
+#'@param facet a unique value corresponding to a task_id variable name
 #' (interpretable as facet option for ggplot)
 #'@param facet_scales argument for scales as in [ggplot2::facet_wrap] or
 #' equivalent to `shareX`, `shareY` in [plotly::subplot]. Default to "fixed"

@@ -164,7 +164,7 @@ output_type_validation <- function(model_out_tbl, exp_value) {
 #' @param model_out_tbl a `model_out_tbl` object, containing all the
 #'  required columns including a column containing date information and a
 #'  column `value`.
-#' @param facet a unique value corresponding as a task_id variable name
+#' @param facet a unique value corresponding to a task_id variable name
 #' (interpretable as facet option for ggplot)
 #' @param interactive a `boolean` to output an "interactive" version of the
 #'  plot (using Plotly) or a "static" plot (using ggplot2). By default, `TRUE`

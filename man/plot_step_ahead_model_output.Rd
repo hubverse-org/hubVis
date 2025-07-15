@@ -66,7 +66,7 @@ By default, "date".}
 \item{show_legend}{a \code{boolean} for showing the legend in the plot.
 Default to TRUE.}
 
-\item{facet}{a unique value corresponding as a task_id variable name
+\item{facet}{a unique value corresponding to a task_id variable name
 (interpretable as facet option for ggplot)}
 
 \item{facet_scales}{argument for scales as in \link[ggplot2:facet_wrap]{ggplot2::facet_wrap} or

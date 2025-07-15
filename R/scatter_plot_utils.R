@@ -436,7 +436,7 @@ plot_model_layout_attr <- function(plot_model, attribute_name, attributes) {
 #'  Default to TRUE.
 #' @param title a `character` string, if not NULL, will be added as title to the
 #'  plot
-#' @param facet a unique value corresponding as a task_id variable name
+#' @param facet a unique value corresponding to a task_id variable name
 #'  (interpretable as facet option for ggplot)
 #' @param facet_scales argument for scales as in
 #'  [ggplot2::facet_wrap] or equivalent to `shareX`, `shareY` in
