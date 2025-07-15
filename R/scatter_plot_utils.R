@@ -405,17 +405,19 @@ simple_model_plot <- function(
 #'
 #'
 #' @param plot_model a plot_ly or ggplot object
-#' @param name_attribute string, name or regex of the attribute(s) to update
-#' @param attributes list, attributes to change
+#' @param attribute_name string, name or regex of the name of attribute(s) to
+#' update, extracted from the layout of the plot.
+#' @param attributes list, new attributes to add in the `layoutAttrs` of the
+#' plot (for example, `list(type = "log")` to transform axis to log scale)
 #'
 #' @noRd
 #' @importFrom purrr map
-plot_model_layout_attr <- function(plot_model, name_attribute, attributes) {
-  plot_model$x$layoutAttrs <-
-    c(plot_model$x$layoutAttrs,
-      purrr::map(sort(grep(name_attribute, names(plot_model$x$layout),
-                           value = TRUE)),
-                 function(x) setNames(list(attributes), x)))
+plot_model_layout_attr <- function(plot_model, attribute_name, attributes) {
+  attr_name <- sort(grep(attribute_name, names(plot_model$x$layout),
+                         value = TRUE))
+  attr_update <- purrr::map(attr_name,
+                            function(x) setNames(list(attributes), x))
+  plot_model$x$layoutAttrs <- c(plot_model$x$layoutAttrs, attr_update)
   plot_model
 }
 
