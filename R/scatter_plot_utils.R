@@ -17,6 +17,7 @@
 #'
 #' @noRd
 #' @importFrom dplyr near
+#' @importFrom cli cli_warn
 #' @importFrom stats reshape setNames
 plot_prep_data <- function(df, plain_line, plain_type, intervals,
                            x_col_name = "target_date", fill_by = "model_id") {
@@ -396,5 +397,116 @@ simple_model_plot <- function(
     }
   }
 
+  return(plot_model)
+}
+
+
+#' Layout attributes updates
+#'
+#' Update plotly layout attributes information by appending a named list of
+#' attributes to the existing plotly layout attributes.
+#' The name of each element is extracted from the layout information in the
+#' plot by using the regex or name inputted in `attribute_name`, for example
+#' `xaxis`.
+#' If multiple names are extracted from the layout information, each names
+#' will be assign the new `attributes`, for example:
+#' `list(type = "log", matches = "x")`.
+#'
+#'
+#' @param plot_model a plot_ly or ggplot object
+#' @param attribute_name string, name or regex of the name of attribute(s) to
+#' update, extracted from the layout of the plot.
+#' @param attributes a list, new attributes to add in the `layoutAttrs` of the
+#' plot in a list (for example, `list(type = "log")` to transform axis to log
+#' scale)
+#'
+#' @noRd
+#' @importFrom purrr map
+plot_model_layout_attr <- function(plot_model, attribute_name, attributes) {
+  attr_name <- grep(attribute_name, names(plot_model$x$layout), value = TRUE)
+  attr_update <- purrr::map(attr_name,
+                            function(x) setNames(list(attributes), x))
+  plot_model$x$layoutAttrs <- c(plot_model$x$layoutAttrs, attr_update)
+  plot_model
+}
+
+#' Output plot layout
+#'
+#' Function to modify the plot layout: add title, transform the y-axis into a
+#' log scale, etc.
+#'
+#' @param plot_model a plot_ly or ggplot object
+#' @param interactive a `boolean` to output an "interactive" version of the
+#'  plot (using Plotly) or a "static" plot (using ggplot2). By default, `TRUE`
+#'  (interactive plot)
+#' @param log_scale a `boolean` to plot y-axis output on a log scale. Default to
+#'  FALSE
+#' @param show_legend a `boolean` for showing the legend in the plot.
+#'  Default to TRUE.
+#' @param title a `character` string, if not NULL, will be added as title to the
+#'  plot
+#' @param facet a unique value corresponding to a task_id variable name
+#'  (interpretable as facet option for ggplot)
+#' @param facet_scales argument for scales as in
+#'  [ggplot2::facet_wrap] or equivalent to `shareX`, `shareY` in
+#'  [plotly::subplot]. Default to "fixed" (x and y axes are shared).le as facet
+#'  option for ggplot)
+#'
+#' @noRd
+#' @importFrom plotly layout
+#' @importFrom purrr map
+#' @importFrom ggplot2 scale_y_log10 labs guides
+plot_layout <- function(plot_model, interactive = TRUE, log_scale = FALSE,
+                        show_legend = TRUE, title = NULL, facet = NULL,
+                        facet_scales = "fixed") {
+  if (interactive) {
+    plot_model <- plotly::layout(plot_model, xaxis = list(title = "Date"),
+                                 showlegend = show_legend)
+    if (!is.null(title)) {
+      plot_model <- plotly::layout(plot_model, title = title)
+    }
+    if (!is.null(facet)) {
+      plot_model$x$layout <-
+        purrr::map(plot_model$x$layout, function(x) {
+          if (any(grepl("title", names(x)))) {
+            if (grepl("x", x$anchor)) {
+              x$title <- "Value"
+            }
+          }
+          x
+        })
+      if (log_scale) {
+        plot_model <- plot_model_layout_attr(plot_model, "yaxis",
+                                             list(type = "log"))
+      }
+      if (facet_scales == "fixed" ||  facet_scales == "free_y") {
+        plot_model <- plot_model_layout_attr(plot_model, "xaxis",
+                                             list(matches = "x"))
+      }
+      if (facet_scales == "fixed" || facet_scales == "free_x") {
+        plot_model <- plot_model_layout_attr(plot_model, "yaxis",
+                                             list(matches = "y"))
+      }
+
+    } else {
+      plot_model <- plotly::layout(plot_model,
+                                   yaxis = list(title = "Value"))
+      if (log_scale) {
+        plot_model <- plotly::layout(plot_model,
+                                     yaxis = list(type = "log"))
+      }
+    }
+  } else {
+    plot_model <- plot_model + labs(x =  "Date", y =  "Value")
+    if (!is.null(title)) {
+      plot_model <- plot_model + labs(title = title)
+    }
+    if (isFALSE(show_legend)) {
+      plot_model <- plot_model + guides(fill = "none", color = "none")
+    }
+    if (log_scale) {
+      plot_model <- plot_model + scale_y_log10()
+    }
+  }
   return(plot_model)
 }

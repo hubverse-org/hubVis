@@ -20,7 +20,7 @@
 #'  `target_data`
 #'@param show_legend a `boolean` for showing the legend in the plot.
 #'  Default to TRUE.
-#'@param facet a unique value corresponding as a task_id variable name
+#'@param facet a unique value corresponding to a task_id variable name
 #' (interpretable as facet option for ggplot)
 #'@param facet_scales argument for scales as in [ggplot2::facet_wrap] or
 #' equivalent to `shareX`, `shareY` in [plotly::subplot]. Default to "fixed"
@@ -176,7 +176,6 @@ plot_step_ahead_model_output <- function(
   all_plot <- plot_prep_data(plot_df, plain_line, plain_type, ribbon,
                              x_col_name = x_col_name, fill_by = fill_by)
 
-
   # Plot
   if (!is.null(facet)) {
     facet_value <- sort(unique(model_out_tbl[[facet]]))
@@ -198,50 +197,12 @@ plot_step_ahead_model_output <- function(
                             group = group)
 
   # Layout
-  if (interactive) {
-    plot_model <- plotly::layout(plot_model, xaxis = list(title = "Date"),
-                                 showlegend = show_legend)
-    if (!is.null(title)) {
-      plot_model <- plotly::layout(plot_model, title = title)
-    }
-    if (!is.null(facet)) {
-      plot_model$x$layout <-
-        purrr::map(plot_model$x$layout, function(x) {
-          if (any(grepl("title", names(x)))) {
-            if (grepl("x", x$anchor)) {
-              x$title <- "Value"
-            }
-          }
-          x
-        })
-      if (log_scale) {
-        plot_model$x$layoutAttrs <-
-          c(plot_model$x$layoutAttrs,
-            purrr::map(sort(grep("yaxis", names(plot_model$x$layout),
-                                 value = TRUE)),
-                       function(x) setNames(list(list(type = "log")), x)))
-      }
-    } else {
-      plot_model <- plotly::layout(plot_model,
-                                   yaxis = list(title = "Value"))
-      if (log_scale) {
-        plot_model <- plotly::layout(plot_model,
-                                     yaxis = list(type = "log"))
-      }
-    }
-  } else {
-    plot_model <- plot_model + labs(x =  "Date", y =  "Value")
-    if (!is.null(title)) {
-      plot_model <- plot_model + labs(title = title)
-    }
-    if (isFALSE(show_legend)) {
-      plot_model <- plot_model + guides(fill = "none", color = "none")
-    }
-    if (log_scale) {
-      plot_model <- plot_model + scale_y_log10()
-    }
-  }
+  plot_model <- plot_layout(plot_model, interactive = interactive,
+                            log_scale = log_scale, show_legend = show_legend,
+                            title = title, facet = facet,
+                            facet_scales = facet_scales)
 
+  # Output
   if (isTRUE(show_plot)) {
     if (interactive) show(plot_model)
     return(plot_model)

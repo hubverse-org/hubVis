@@ -4,7 +4,7 @@
 #'
 #'@param df a `data.frame` object containing the column expressed in the
 #' facet parameter
-#'@param facet a unique value corresponding as a task_id variable name
+#'@param facet a unique value corresponding to a task_id variable name
 #' (interpretable as facet option for ggplot)
 #'@param facet_value a vector of one of the possible unique values in the
 #'  associated column `facet`
@@ -24,7 +24,7 @@ prep_facet_data <- function(df, facet, facet_value) {
 #'
 #'@param df a `data.frame` object containing the column expressed in the
 #'  facet paramter
-#'@param facet a unique value corresponding as a task_id variable name
+#'@param facet a unique value corresponding to a task_id variable name
 #' (interpretable as facet option for ggplot)
 #'@param facet_value a vector of one of the possible unique values in the
 #'  associated column `facet`
@@ -58,7 +58,7 @@ plotly_facet_data <- function(data, facet, facet_value,
 #' @param target_data a `data.frame` object containing the target data,
 #'  containing the columns: date information (`x_target_col_name` parameter) and
 #'  `observation`. Ignored, if `plot_target = FALSE`.
-#' @param facet a unique value corresponding as a task_id variable name
+#' @param facet a unique value corresponding to a task_id variable name
 #' (interpretable as facet option for ggplot)
 #' @param facet_value a vector of one of the possible unique values in the
 #'  associated column `facet` (use to create one specific facet)
@@ -192,7 +192,7 @@ plotly_facet_layout <- function(plot_model, text, facet_title = "top left") {
 #'  one for ribbons plotting (in a wide format) for a unique `model_id` value
 #'  associated with specific color (`ens_color`). NULL is no specific layout
 #'  required
-#' @param facet a unique value corresponding as a task_id variable name
+#' @param facet a unique value corresponding to a task_id variable name
 #'  (interpretable as facet option for ggplot)
 #' @param all_facet_value a vector of oall the possible unique values in the
 #'  associated column `facet`
@@ -267,7 +267,7 @@ plotly_facet <- function(facet_value, plot_model, all_plot, all_ens, facet,
 #'  one for ribbons plotting (in a wide format) for a unique `model_id` value
 #'  associated with specific color (`ens_color`). NULL is no specific layout
 #'  required
-#' @param facet a unique value corresponding as a task_id variable name
+#' @param facet a unique value corresponding to a task_id variable name
 #'  (interpretable as facet option for ggplot)
 #' @param all_facet_value a vector of all the possible unique values in the
 #'  associated column `facet`
@@ -383,7 +383,7 @@ plotly_subplot <- function(plot_model, all_plot, all_ens, facet,
 #' @param target_data a `data.frame` object containing the target data,
 #'  containing the columns: date information (`x_target_col_name` parameter) and
 #'  `observation`. Ignored, if `plot_target = FALSE`.
-#' @param facet a unique value corresponding as a task_id variable name
+#' @param facet a unique value corresponding to a task_id variable name
 #'  (interpretable as facet option for ggplot). If set to `NULL` (default),
 #'  no facet
 #' @param intervals a vector of `numeric` values indicating which central
@@ -497,7 +497,7 @@ simple_subplot <- function(plot_model, all_plot, all_ens, target_data,
 #'@param ens_name a `character` string of a model name, if not NULL, will be
 #' use to change the color for the model name, associated with the parameter
 #' `ens_color`(both parameter need to be provided)
-#' @param facet a unique value corresponding as a task_id variable name
+#' @param facet a unique value corresponding to a task_id variable name
 #' (interpretable as facet option for ggplot)
 #' @param facet_scales argument for scales as in [ggplot2::facet_wrap] or
 #'  equivalent to `shareX`, `shareY` in [plotly::subplot]. Default to "fixed"

@@ -141,6 +141,30 @@ test_that("Output", {
                                  group = "forecast_date", interactive = FALSE)
   expect_s3_class(plot_test, "ggplot")
 
+  ## Shared Scales
+  plot_test <-
+    plot_step_ahead_model_output(proj_data_q, target_data_us, facet_nrow = 2,
+                                 facet = "model_id", fill_by = "scenario_id")
+  attr_test <- purrr::map(purrr::flatten(plot_test$x$layoutAttrs), "matches")
+  expect_equal(unique(c(attr_test$xaxis, attr_test$xaxis2)), "x")
+  expect_equal(unique(c(attr_test$yaxis, attr_test$yaxis2)), "y")
+
+  plot_test <-
+    plot_step_ahead_model_output(proj_data_q, target_data_us, facet_nrow = 2,
+                                 facet = "model_id", fill_by = "scenario_id",
+                                 facet_scales = "free_x")
+  attr_test <- purrr::map(purrr::flatten(plot_test$x$layoutAttrs), "matches")
+  expect_equal(unique(c(attr_test$xaxis, attr_test$xaxis2)), NULL)
+  expect_equal(unique(c(attr_test$yaxis, attr_test$yaxis2)), "y")
+
+  plot_test <-
+    plot_step_ahead_model_output(proj_data_q, target_data_us, facet_nrow = 2,
+                                 facet = "model_id", fill_by = "scenario_id",
+                                 facet_scales = "free_y")
+  attr_test <- purrr::map(purrr::flatten(plot_test$x$layoutAttrs), "matches")
+  expect_equal(unique(c(attr_test$xaxis, attr_test$xaxis2)), "x")
+  expect_equal(unique(c(attr_test$yaxis, attr_test$yaxis2)), NULL)
+
   ## Interactive plot with Ensemble specific format, facets, no ribbons, free
   ## x axis and a specific palette
   plot_test <-
