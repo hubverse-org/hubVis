@@ -403,18 +403,27 @@ simple_model_plot <- function(
 
 #' Layout attributes updates
 #'
+#' Update plotly layout attributes information by appending a named list of
+#' attributes to the existing plotly layout attributes.
+#' The name of each element is extracted from the layout information in the
+#' plot by using the regex or name inputted in `attribute_name`, for example
+#' `xaxis`.
+#' If multiple names are extracted from the layout information, each names
+#' will be assign the new `attributes`, for example:
+#' `list(type = "log", matches = "x")`.
+#'
 #'
 #' @param plot_model a plot_ly or ggplot object
 #' @param attribute_name string, name or regex of the name of attribute(s) to
 #' update, extracted from the layout of the plot.
-#' @param attributes list, new attributes to add in the `layoutAttrs` of the
-#' plot (for example, `list(type = "log")` to transform axis to log scale)
+#' @param attributes a list, new attributes to add in the `layoutAttrs` of the
+#' plot in a list (for example, `list(type = "log")` to transform axis to log
+#' scale)
 #'
 #' @noRd
 #' @importFrom purrr map
 plot_model_layout_attr <- function(plot_model, attribute_name, attributes) {
-  attr_name <- sort(grep(attribute_name, names(plot_model$x$layout),
-                         value = TRUE))
+  attr_name <- grep(attribute_name, names(plot_model$x$layout), value = TRUE)
   attr_update <- purrr::map(attr_name,
                             function(x) setNames(list(attributes), x))
   plot_model$x$layoutAttrs <- c(plot_model$x$layoutAttrs, attr_update)
