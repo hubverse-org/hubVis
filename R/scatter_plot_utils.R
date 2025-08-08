@@ -65,8 +65,15 @@ plot_prep_data <- function(df, plain_line, plain_type, intervals,
     })
     ribbon_list <- stats::setNames(ribbon_list, names(intervals))
   }
+  # Sample
+  if ("sample" %in% df[["output_type"]]) {
+    sample_df <- dplyr::filter(df, .data[["output_type"]] == "sample")
+  } else {
+    sample_df <- NULL
+  }
   # List output
-  return(c(list("median" = plain_df), ribbon_list))
+  return(c(list("median" = plain_df), ribbon_list,
+           list("sample" = sample_df)))
 }
 
 #' Plot Target data with Plotly
@@ -167,16 +174,22 @@ static_target_data <- function(plot_model, target_data, plot_target,
 #' @noRd
 #' @importFrom plotly add_lines add_ribbons
 #' @importFrom dplyr group_by
-plotly_proj_data <- function(plot_model, df_point, df_ribbon,
+plotly_proj_data <- function(plot_model, df_point, df_ribbon, df_sample,
                              line_color, opacity, arguments,
                              fill_by = "model_id", x_col_name = "target_date",
                              group = NULL) {
   if (nrow(df_point) > 0) {
     if (!is.null(group))
       df_point <- dplyr::group_by(df_point, .data[[group]])
+    if (!is.null(df_sample)) {
+      line_width <- 4
+    } else {
+      line_width <- 2
+    }
     arg_list <-
       list(p = plot_model, data = df_point, x = df_point[[x_col_name]],
            y = ~value, legendgroup = df_point[[fill_by]],
+           line = list(width = line_width),
            name = df_point[[fill_by]], hoverinfo = "text",
            hovertext = paste("Date: ", df_point[[x_col_name]], "<br>",
                              "Median: ", format(round(df_point$value, 2),
@@ -194,6 +207,35 @@ plotly_proj_data <- function(plot_model, df_point, df_ribbon,
   } else {
     show_legend <- arguments$showlegend
     if (is.null(show_legend)) show_legend <- TRUE
+  }
+
+  if (!is.null(df_sample)) {
+    for (j in unique(df_sample[[fill_by]])) {
+      show_leg <- show_legend
+      for (i in unique(df_sample[["output_type_id"]])) {
+        df_sample_id <- dplyr::filter(df_sample,
+                                      .data[["output_type_id"]] == i,
+                                      .data[[fill_by]] == j)
+        if (!is.null(group))
+          df_sample_id  <- dplyr::group_by(df_sample_id, .data[[group]])
+        arg_list <-
+          list(p = plot_model, data = df_sample_id,
+               x = df_sample_id[[x_col_name]], y = df_sample_id[["value"]],
+               type = "scatter", mode = "lines", showlegend = show_leg,
+               opacity = opacity, name = df_sample_id[[fill_by]],
+               legendgroup = df_sample_id[[fill_by]])
+        if (is.null(line_color)) {
+          arg_list <- c(arg_list, list(color =  df_point[[fill_by]]), arguments)
+        } else {
+          arg_list <- c(arg_list, list(line = list(color = line_color)),
+                        arguments)
+        }
+        plot_model <- do.call(plotly::add_traces, arg_list)
+        plot_model <- plotly::layout(plot_model, xaxis = list(title = "Date"))
+        show_leg <- FALSE
+      }
+    }
+    show_legend <- FALSE
   }
 
   if (!is.null(df_ribbon)) {
@@ -225,9 +267,11 @@ plotly_proj_data <- function(plot_model, df_point, df_ribbon,
           plot_model <- do.call(plotly::add_ribbons, arg_list)
           plot_model <- plotly::layout(plot_model, xaxis = list(title = "Date"))
         }
+        #show_legend <- FALSE
       }
     }
   }
+
   return(plot_model)
 }
 
@@ -255,10 +299,9 @@ plotly_proj_data <- function(plot_model, df_point, df_ribbon,
 #' @noRd
 #' @importFrom ggplot2 geom_ribbon
 #' @importFrom purrr map
-static_proj_data <- function(plot_model, df_point, df_ribbon,
+static_proj_data <- function(plot_model, df_point, df_ribbon, df_sample,
                              line_color, opacity, fill_by = "model_id",
                              x_col_name = "target_date", group = NULL) {
-
   if (!is.null(df_ribbon)) {
     for (fill in unique(unlist(purrr::map(df_ribbon, fill_by)))) {
       for (n_rib in seq_along(df_ribbon)) {
@@ -281,7 +324,27 @@ static_proj_data <- function(plot_model, df_point, df_ribbon,
     }
   }
 
+  if (!is.null(df_sample)) {
+    for (fill in unique(df_sample[[fill_by]])) {
+      for (i in unique(df_sample[["output_type_id"]])) {
+        df_sample_id <- dplyr::filter(df_sample,
+                                      .data[["output_type_id"]] == i,
+                                      .data[[fill_by]] == fill)
+        plot_model <- plot_model +
+          geom_line(data = df_sample_id,
+                    aes(x = .data[[x_col_name]], y = .data$value,
+                        color = .data[[fill_by]], group = .data[[group]]),
+                    alpha = opacity)
+      }
+    }
+  }
+
   if (nrow(df_point) > 0) {
+    if (!is.null(df_sample)) {
+      line_width <- 1.3
+    } else {
+      line_width <- 1
+    }
     if (is.null(group)) {
       plot_aes <- aes(x = .data[[x_col_name]], y = .data$value,
                       color = .data[[fill_by]])
@@ -292,7 +355,8 @@ static_proj_data <- function(plot_model, df_point, df_ribbon,
                       color = .data[[fill_by]], group = .data[["group"]])
     }
     plot_model <- plot_model  +
-      geom_line(data = df_point, plot_aes, inherit.aes = FALSE, linewidth = 1)
+      geom_line(data = df_point, plot_aes, inherit.aes = FALSE,
+                linewidth = line_width)
   }
 
   return(plot_model)
@@ -347,10 +411,10 @@ static_proj_data <- function(plot_model, df_point, df_ribbon,
 #' @noRd
 #' @importFrom plotly plot_ly
 simple_model_plot <- function(
-    plot_model, df_point, df_ribbon, plot_target, target_data, opacity = 0.25,
-    line_color = NULL, top_layer = "model_output", show_target_legend = TRUE,
-    interactive = TRUE, fill_by = "model_id", x_col_name = "target_date",
-    x_target_col_name = "date", group = NULL, ...) {
+    plot_model, df_point, df_ribbon, df_sample, plot_target, target_data,
+    opacity = 0.25, line_color = NULL, top_layer = "model_output",
+    show_target_legend = TRUE, interactive = TRUE, fill_by = "model_id",
+    x_col_name = "target_date", x_target_col_name = "date", group = NULL, ...) {
   # prerequisite
   arguments <- list(...)
 
@@ -361,7 +425,7 @@ simple_model_plot <- function(
                                        show_target_legend, arguments,
                                        x_col_name = x_target_col_name)
       # Projection data
-      plot_model <- plotly_proj_data(plot_model, df_point, df_ribbon,
+      plot_model <- plotly_proj_data(plot_model, df_point, df_ribbon, df_sample,
                                      line_color, opacity, arguments,
                                      fill_by = fill_by, x_col_name = x_col_name,
                                      group = group)
@@ -370,7 +434,7 @@ simple_model_plot <- function(
       plot_model <- static_target_data(plot_model, target_data, plot_target,
                                        x_col_name = x_target_col_name)
       # Projection data
-      plot_model <- static_proj_data(plot_model, df_point, df_ribbon,
+      plot_model <- static_proj_data(plot_model, df_point, df_ribbon, df_sample,
                                      line_color, opacity, fill_by = fill_by,
                                      x_col_name = x_col_name, group = group)
     }
@@ -378,7 +442,7 @@ simple_model_plot <- function(
   } else if (top_layer == "target") {
     if (interactive) {
       # Projection data
-      plot_model <- plotly_proj_data(plot_model, df_point, df_ribbon,
+      plot_model <- plotly_proj_data(plot_model, df_point, df_ribbon, df_sample,
                                      line_color, opacity, arguments,
                                      fill_by = fill_by, x_col_name = x_col_name,
                                      group = group)
@@ -388,7 +452,7 @@ simple_model_plot <- function(
                                        x_col_name = x_target_col_name)
     } else {
       # Projection data
-      plot_model <- static_proj_data(plot_model, df_point, df_ribbon,
+      plot_model <- static_proj_data(plot_model, df_point, df_ribbon, df_sample,
                                      line_color, opacity, group = group,
                                      fill_by = fill_by, x_col_name = x_col_name)
       # Target Data

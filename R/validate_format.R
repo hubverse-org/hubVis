@@ -12,7 +12,8 @@
 #'
 #' @noRd
 mdl_out_validation <- function(model_out_tbl, col_names = NULL,
-                               valid_types = c("median", "quantile")) {
+                               valid_types = c("median", "quantile",
+                                               "sample")) {
   if (!is.data.frame(model_out_tbl)) {
     cli::cli_abort(c("x" = "{.arg model_out_tbl} must be a `data.frame`."))
   }
