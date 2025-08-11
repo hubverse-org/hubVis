@@ -7,7 +7,7 @@ projection_data <-
                 target_date = as.Date(origin_date) + (horizon * 7) - 1)
 projection_data_a_us <-
   dplyr::filter(projection_data, scenario_id == "A-2021-03-05",
-                location == "US")
+                location == "US", output_type == "quantile")
 projection_data <- hubUtils::as_model_out_tbl(projection_data)
 projection_data_a_us <- hubUtils::as_model_out_tbl(projection_data_a_us)
 

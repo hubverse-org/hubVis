@@ -4,7 +4,8 @@ library(hubExamples)
 ## Model output - Scenario
 projection_data <-
   dplyr::mutate(scenario_outputs,
-                target_date = as.Date(origin_date) + (horizon * 7) - 1)
+                target_date = as.Date(origin_date) + (horizon * 7) - 1,
+                output_type == "quantile")
 projection_data_a_us <-
   dplyr::filter(projection_data, scenario_id == "A-2021-03-05",
                 location == "US")
