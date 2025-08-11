@@ -135,7 +135,6 @@ plotly_facet_plot <- function(plot_model, all_plot, all_ens, target_data,
     } else {
       args <- c(args, show_target_legend = FALSE, showlegend = FALSE)
     }
-    browser()
     plot_model <- do.call(simple_model_plot, args)
   }
   return(plot_model)
@@ -453,7 +452,9 @@ simple_subplot <- function(plot_model, all_plot, all_ens, target_data,
     args$plot_target <- FALSE
     args$df_point <- all_ens$median
     args$df_ribbon <- all_ens[names(all_ens) %in% intervals]
-    args$df_sample <- all_ens$sample
+    if (!(is.null(df_sample) && is.null(all_ens$sample))) {
+      args$df_sample <- all_ens$sample
+    }
     args <- c(args, line_color = ens_color)
     plot_model <- do.call(simple_model_plot, args)
   }

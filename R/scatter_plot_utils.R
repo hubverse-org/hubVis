@@ -199,7 +199,8 @@ plotly_proj_data <- function(plot_model, df_point, df_ribbon, df_sample,
       plot_model <- do.call(plotly::add_lines, arg_list)
       plot_model <- plotly::layout(plot_model, xaxis = list(title = "Date"))
     } else {
-      arg_list <- c(arg_list, list(line = list(color = line_color)), arguments)
+      arg_list$line <-  list(width = line_width, color = line_color)
+      arg_list <- c(arg_list, arguments)
       plot_model <- do.call(plotly::add_lines, arg_list)
       plot_model <- plotly::layout(plot_model, xaxis = list(title = "Date"))
     }
@@ -230,7 +231,7 @@ plotly_proj_data <- function(plot_model, df_point, df_ribbon, df_sample,
           arg_list <- c(arg_list, list(line = list(color = line_color)),
                         arguments)
         }
-        plot_model <- do.call(plotly::add_traces, arg_list)
+        plot_model <- do.call(plotly::add_trace, arg_list)
         plot_model <- plotly::layout(plot_model, xaxis = list(title = "Date"))
         show_leg <- FALSE
       }
@@ -345,6 +346,7 @@ static_proj_data <- function(plot_model, df_point, df_ribbon, df_sample,
     } else {
       line_width <- 1
     }
+
     if (is.null(group)) {
       plot_aes <- aes(x = .data[[x_col_name]], y = .data$value,
                       color = .data[[fill_by]])
