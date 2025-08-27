@@ -139,17 +139,35 @@ ensemble_validation <- function(ens_color, ens_name) {
 #'
 #' @noRd
 output_type_validation <- function(model_out_tbl, exp_value) {
-  if (!"numeric" %in% class(model_out_tbl$output_type_id)) {
-    model_out_tbl$output_type_id <-
-      as.numeric(model_out_tbl$output_type_id)
-    cli::cli_warn(c("!" = "{.arg output_type_id} column must be a numeric.
+
+  if (is.null(exp_value) && !any("sample" %in% model_out_tbl$output_type)) {
+    cli::cli_abort(c("x" = "{.arg model_out_tbl} did not have the
+                     expected output_type {.val sample}."))
+  }
+
+  if (!is.null(exp_value) && !all(is.na(exp_value)) &&
+        "quantile" %in% model_out_tbl$output_type) {
+    if (!"numeric" %in% class(model_out_tbl$output_type_id)) {
+      model_out_tbl$output_type_id <-
+        as.numeric(model_out_tbl$output_type_id)
+      cli::cli_warn(c("!" = "{.arg output_type_id} column must be a numeric.
                     Converting to numeric."))
-  }
-  model_output_type_val <- unique(model_out_tbl$output_type_id)
-  if (!all(exp_value %in% model_output_type_val)) {
-    cli::cli_abort(c("x" = "{.arg model_output_type_val} did not have the
+    }
+    model_output_type_val <- unique(model_out_tbl$output_type_id)
+    if (!all(exp_value %in% model_output_type_val)) {
+      cli::cli_abort(c("x" = "{.arg model_output_type_val} did not have the
                      expected output_type_id value {.val {exp_value}}"))
+    }
   }
+
+  if (!is.null(exp_value) && !all(is.na(exp_value)) &&
+        !any("quantile" %in% model_out_tbl$output_type)) {
+    if (!any("sample" %in% model_out_tbl$output_type)) {
+      cli::cli_abort(c("x" = "{.arg model_out_tbl} did not have the
+                     expected output_type {.val sample} or {.val quantile}."))
+    }
+  }
+
   model_out_tbl
 }
 

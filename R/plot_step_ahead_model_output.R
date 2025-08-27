@@ -1,6 +1,7 @@
 #' Basic Plot for model outputs
 #'
-#' Create a simple Plotly time-series plot for model projection outputs.
+#' Create a simple time-series plot for model projection outputs. Plot either
+#' quantiles or samples output type, see Details for more information.
 #'
 #'@param model_out_tbl a `model_out_tbl` object, containing all the required
 #' columns including a column containing date information (`x_col_name`
@@ -12,6 +13,13 @@
 #' in plot. Default to FALSE. If TRUE, will select first any `median`
 #' output type value and if no `median` value included in `model_out_tbl`;
 #' will select `quantile = 0.5` output type value.
+#'@param intervals a vector of `numeric` values indicating which central
+#' prediction interval levels to plot.Value possibles:
+#' `NULL, 0.5, 0.8, 0.9, 0.95`. `NULL` means no interval levels, if the
+#' `model_out_tbl` table contains `"sample"` output type, the samples will be
+#' plotted. If not provided, it will default to `c(.5, .8, .95)`.
+#' When plotting 6 models or more, the plot will be reduced to show `.95`
+#' interval only (if the parameter is not set to `NULL`).
 #'@param log_scale a `boolean` to plot y-axis output on a log scale. Default to
 #' FALSE
 #'@param show_plot a `boolean` for showing the plot. Default to TRUE.
@@ -46,11 +54,6 @@
 #' to [colors()] for accepted color names. Default to `"blue"`
 #'@param fill_transparency numeric value used to set transparency of intervals.
 #' 0 means fully transparent, 1 means opaque. Default to `0.25`
-#'@param intervals a vector of `numeric` values indicating which central
-#' prediction interval levels to plot. `NULL` means no interval levels.
-#' If not provided, it will default to `c(.5, .8, .95)`.
-#' When plotting 6 models or more, the plot will be reduced to show `.95`
-#' interval only. Value possibles: `0.5, 0.8, 0.9, 0.95`
 #'@param top_layer character vector, where the first element indicates the top
 #'  layer of the resulting plot. Possible options are `"model_output"` (default)
 #'  and `"target"`
@@ -79,6 +82,21 @@
 #' @importFrom grDevices col2rgb rgb colors
 #' @importFrom ggplot2 labs guides scale_y_log10
 #'
+#' @details
+#' The function can generate a plot with:
+#' - ribbons for quantiles output type OR
+#' - spaghetti plot for samples output type
+#'
+#' depending on the parameters `model_out_tbl` and `intervals`:
+#'
+#' - if `intervals` is set to `NULL` and the `model_out_tbl` contains `"sample"`
+#' output type, a spaghetti plot will be generated
+#' - if `intervals` set set one or multiples of the possible values:
+#' `0.5, 0.8, 0.9, 0.95`  and the `model_out_tbl` contains `"quantile"` output
+#' type, the quantiles will be used, if only `"sample"` output type is available
+#' in the `model_out_tbl`, the `"sample"` will be used to calculate the
+#' necessary quantiles.
+#'
 #' @export
 #'
 #' @examples
@@ -102,19 +120,19 @@
 #' plot_step_ahead_model_output(projection_data, target_data_us)
 #'
 plot_step_ahead_model_output <- function(
-    model_out_tbl, target_data, use_median_as_point = FALSE, log_scale = FALSE,
-    show_plot = TRUE, plot_target = TRUE, x_col_name = "target_date",
-    x_target_col_name = "date", show_legend = TRUE, facet = NULL,
-    facet_scales = "fixed", facet_nrow = NULL, facet_ncol = NULL,
-    facet_title = "top left", interactive = TRUE, fill_by = "model_id",
-    pal_color = "Set2", one_color = "blue", fill_transparency = 0.25,
-    intervals = c(.5, .8, .95), top_layer = "model_output", title = NULL,
+    model_out_tbl, target_data, use_median_as_point = FALSE,
+    intervals = c(.5, .8, .95), log_scale = FALSE, show_plot = TRUE,
+    plot_target = TRUE, x_col_name = "target_date", x_target_col_name = "date",
+    show_legend = TRUE, facet = NULL, facet_scales = "fixed", facet_nrow = NULL,
+    facet_ncol = NULL, facet_title = "top left", interactive = TRUE,
+    fill_by = "model_id", pal_color = "Set2", one_color = "blue",
+    fill_transparency = 0.25, top_layer = "model_output", title = NULL,
     ens_color = NULL, ens_name = NULL, group = NULL) {
 
   # Test format input
   ## Model Output Table
-  exp_f_col <- unique(c("model_id", "output_type_id", x_col_name, "value",
-                        fill_by, group))
+  exp_f_col <- unique(c("model_id", "output_type", "output_type_id", x_col_name,
+                        "value", fill_by, group))
   mdl_out_validation(model_out_tbl, col_names = exp_f_col)
 
   ## Target Data

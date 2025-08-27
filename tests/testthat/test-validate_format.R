@@ -5,7 +5,7 @@ library(hubExamples)
 projection_data <-
   dplyr::mutate(scenario_outputs,
                 target_date = as.Date(origin_date) + (horizon * 7) - 1,
-                output_type == "quantile")
+                output_type = "quantile")
 projection_data_a_us <-
   dplyr::filter(projection_data, scenario_id == "A-2021-03-05",
                 location == "US")
@@ -15,6 +15,10 @@ target_data_us <-
   dplyr::filter(scenario_target_ts, location == "US",
                 date < min(projection_data$target_date) + 21,
                 date > "2020-10-01")
+
+## Model output - Forecast
+forecast_data <- dplyr::filter(forecast_outputs, location == "48")
+target_data_48 <- dplyr::filter(forecast_target_ts, location == "48")
 
 
 # Test input information
@@ -38,6 +42,35 @@ test_that("Input parameters", {
 
   # Model output format - model_out_tbl
   projection_data_a_us <- hubUtils::as_model_out_tbl(projection_data_a_us)
+
+  # Model output type
+  forecast_quantile <-
+    dplyr::filter(forecast_data, output_type == "quantile") |>
+    dplyr::mutate(output_type_id = as.numeric(output_type_id))
+  err_mess <- paste0("did not have the expected output_type_id value 0.975, ",
+                     "0.025, 0.9, 0.1, 0.75, and 0.25")
+  expect_error(plot_step_ahead_model_output(forecast_quantile, target_data_us,
+                                            x_col_name = "target_end_date"),
+               err_mess)
+
+  expect_error(plot_step_ahead_model_output(forecast_quantile, target_data_us,
+                                            x_col_name = "target_end_date",
+                                            intervals = NULL),
+               '`model_out_tbl` did not have the expected output_type "sample"')
+  expect_no_error(plot_step_ahead_model_output(forecast_quantile, target_data_us,
+                                               x_col_name = "target_end_date",
+                                               intervals = NULL,
+                                               use_median_as_point = TRUE))
+
+  forecast_median <- dplyr::filter(forecast_data, output_type == "median")
+  expect_error(plot_step_ahead_model_output(forecast_median, target_data_us,
+                                            x_col_name = "target_end_date",
+                                            intervals = NULL),
+               '`model_out_tbl` did not have the expected output_type "sample"')
+  expect_error(plot_step_ahead_model_output(forecast_median, target_data_us,
+                                            x_col_name = "target_end_date",
+                                            intervals = 0.9),
+               '`model_out_tbl` did not have the expected output_type "sample"')
 
   # Output type format - character
   df_test <- dplyr::mutate(projection_data_a_us,
