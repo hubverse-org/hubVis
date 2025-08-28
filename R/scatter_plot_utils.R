@@ -19,6 +19,7 @@
 #' @importFrom dplyr near
 #' @importFrom cli cli_warn
 #' @importFrom stats reshape setNames
+#' @importFrom hubUtils convert_output_type
 plot_prep_data <- function(df, plain_line, plain_type, intervals,
                            x_col_name = "target_date", fill_by = "model_id") {
   # Remove empty column to avoid issue
@@ -32,10 +33,21 @@ plot_prep_data <- function(df, plain_line, plain_type, intervals,
   # Factorize the fill_by column
   df[[fill_by]] <- as.factor(df[[fill_by]])
 
+  # Create quantiles if necessary
+  quant <- c(na.omit(plain_line), unlist(intervals))
+  if (!is.null(quant) && !("quantile" %in% df$output_type) &&
+        ("sample" %in% df$output_type)) {
+    df_sample <- dplyr::filter(df, .data[["output_type"]] == "sample")
+    quant_df <- hubUtils::convert_output_type(df_sample,
+                                              to = list("quantile" = quant))
+    df <- rbind(df, quant_df)
+  }
+
   # Median
   if (is.null(plain_line)) {
-    plain_df <- df[which(df$output_type_id == plain_line &
-                           df$output_type == plain_type), ]
+    plain_df <- data.frame(matrix(nrow = 0, ncol = length(colnames(df)))) |>
+      setNames(colnames(df)) |>
+      dplyr::as_tibble()
   } else if (!is.na(plain_line)) {
     plain_df <- df[which(df$output_type_id == plain_line &
                            df$output_type == plain_type), ]
@@ -44,12 +56,15 @@ plot_prep_data <- function(df, plain_line, plain_type, intervals,
                            df$output_type == plain_type), ]
   }
   plain_df[[x_col_name]] <- as.Date(plain_df[[x_col_name]])
-  # Intervals
+
+  # Intervals & samples
   if (is.null(intervals)) {
     ribbon_list <- NULL
+    sample_df <- dplyr::filter(df, .data[["output_type"]] == "sample")
   } else {
     ribbon_list <- lapply(intervals, function(ribbon) {
-      ribbon_df <- df[which(df$output_type_id %in% ribbon), ]
+      ribbon_df <- df[which(df$output_type_id %in% ribbon), ] |>
+        dplyr::mutate(output_type_id = as.numeric(.data[["output_type_id"]]))
       ribbon_df <-
         transform(ribbon_df,
                   output_type_id = ifelse(dplyr::near(ribbon_df$output_type_id,
@@ -64,16 +79,11 @@ plot_prep_data <- function(df, plain_line, plain_type, intervals,
       ribbon_df
     })
     ribbon_list <- stats::setNames(ribbon_list, names(intervals))
-  }
-  # Sample
-  if ("sample" %in% df[["output_type"]]) {
-    sample_df <- dplyr::filter(df, .data[["output_type"]] == "sample")
-  } else {
     sample_df <- NULL
   }
+
   # List output
-  return(c(list("median" = plain_df), ribbon_list,
-           list("sample" = sample_df)))
+  return(c(list("median" = plain_df), ribbon_list, list("sample" = sample_df)))
 }
 
 #' Plot Target data with Plotly
@@ -226,7 +236,8 @@ plotly_proj_data <- function(plot_model, df_point, df_ribbon, df_sample,
                opacity = opacity, name = df_sample_id[[fill_by]],
                legendgroup = df_sample_id[[fill_by]])
         if (is.null(line_color)) {
-          arg_list <- c(arg_list, list(color =  df_point[[fill_by]]), arguments)
+          arg_list <- c(arg_list, list(color =  df_sample_id[[fill_by]]),
+                        arguments)
         } else {
           arg_list <- c(arg_list, list(line = list(color = line_color)),
                         arguments)
