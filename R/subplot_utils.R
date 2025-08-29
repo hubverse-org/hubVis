@@ -113,10 +113,11 @@ plotly_facet_plot <- function(plot_model, all_plot, all_ens, target_data,
   # plot
   args <-
     list(plot_model, all_plot_data$point,  all_plot_data$ribbon,
-         all_plot$sample, plot_target, target_data, opacity = fill_transparency,
-         top_layer = top_layer, interactive = TRUE, fill_by = fill_by,
-         x_col_name = x_col_name, x_target_col_name = x_target_col_name,
-         group = group, show_target_legend = FALSE, showlegend = FALSE)
+         all_plot_data$sample, plot_target, target_data,
+         opacity = fill_transparency, top_layer = top_layer, interactive = TRUE,
+         fill_by = fill_by, x_col_name = x_col_name,
+         x_target_col_name = x_target_col_name, group = group,
+         show_target_legend = FALSE, showlegend = FALSE)
   plot_model <- do.call(simple_model_plot, args)
   if (!is.null(all_ens)) {
     ens_plot_data <- plotly_facet_data(all_ens, facet, facet_value, intervals)
