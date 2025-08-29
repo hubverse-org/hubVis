@@ -18,7 +18,7 @@
 #' @noRd
 #' @importFrom dplyr near
 #' @importFrom cli cli_warn
-#' @importFrom stats reshape setNames
+#' @importFrom stats reshape setNames na.omit
 #' @importFrom hubUtils convert_output_type
 plot_prep_data <- function(df, plain_line, plain_type, intervals,
                            x_col_name = "target_date", fill_by = "model_id") {
@@ -26,7 +26,7 @@ plot_prep_data <- function(df, plain_line, plain_type, intervals,
   df[[fill_by]] <- as.factor(df[[fill_by]])
 
   # Create quantiles if necessary
-  quant <- c(na.omit(plain_line), unlist(intervals))
+  quant <- c(stats::na.omit(plain_line), unlist(intervals))
   if (!is.null(quant) && !("quantile" %in% df$output_type) &&
         ("sample" %in% df$output_type)) {
     df_sample <- dplyr::filter(df, .data[["output_type"]] == "sample")
