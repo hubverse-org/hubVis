@@ -22,14 +22,6 @@
 #' @importFrom hubUtils convert_output_type
 plot_prep_data <- function(df, plain_line, plain_type, intervals,
                            x_col_name = "target_date", fill_by = "model_id") {
-  # Remove empty column to avoid issue
-  empty_cols <- sapply(df, function(k) all(is.na(k)))
-  if (any(empty_cols)) {
-    empty_colnames <- colnames(df)[sapply(df, function (k) all(is.na(k)))] # nolint
-    cli::cli_warn(c("!" = "{.arg model_out_tbl} contains some empty
-                    columns: {.value {empty_colnames}.}"))
-    df <- df[!empty_cols]
-  }
   # Factorize the fill_by column
   df[[fill_by]] <- as.factor(df[[fill_by]])
 
@@ -56,6 +48,15 @@ plot_prep_data <- function(df, plain_line, plain_type, intervals,
                            df$output_type == plain_type), ]
   }
   plain_df[[x_col_name]] <- as.Date(plain_df[[x_col_name]])
+
+  # Remove empty column to avoid issue
+  empty_cols <- sapply(df, function(k) all(is.na(k)))
+  if (any(empty_cols)) {
+    empty_colnames <- colnames(df)[sapply(df, function (k) all(is.na(k)))] # nolint
+    cli::cli_warn(c("!" = "{.arg model_out_tbl} contains some empty
+                    columns: {.value {empty_colnames}.}"))
+    df <- df[!empty_cols]
+  }
 
   # Intervals & samples
   if (is.null(intervals)) {
