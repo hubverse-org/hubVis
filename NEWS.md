@@ -4,6 +4,11 @@
 allow log scale on the y-axis
 - fix shared axis on interactive plot version
 
+# hubVis 0.1.3
+
+This release contains a fix to the issue #64: update to code to be compatible
+with ggplot2 v4.0.0 and previous version.
+
 # hubVis 0.1.2
 
 This release contains a fix to the issue #56: fix palette creation for `*_color`

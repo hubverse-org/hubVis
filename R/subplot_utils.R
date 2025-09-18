@@ -365,7 +365,7 @@ plotly_subplot <- function(plot_model, all_plot, all_ens, facet,
       if (purrr::map(plot_model$x$data, "name")[[i]] %in% all_facet_value) {
         plot_model$x$data[[i]]$fillcolor <-
           plot_model$x$data[[i]]$line$color <-
-          pal_value[purrr::map(plot_model$x$data, "name")[[i]]]
+          pal_value[as.vector(purrr::map(plot_model$x$data, "name")[[i]])]
       }
     }
   }
@@ -548,7 +548,7 @@ output_plot <-  function(
   if (interactive) {
     plot_model <- plotly::plot_ly(colors =  pal_color)
   } else {
-    plot_model <- ggplot2::ggplot(colors =  pal_color)
+    plot_model <- ggplot2::ggplot()
   }
 
   if (!is.null(facet) && interactive) {

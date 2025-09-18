@@ -75,7 +75,6 @@ test_that("Output", {
                                  group = "forecast_date")
   expect_equal(plot_test$guides$guides$fill, "none")
   expect_equal(plot_test$guides$guides$colour, "none")
-  expect_equal(tail(plot_test$layers, 1)[[1]]$geom$default_aes$colour, "black")
 
   # Layout (interactive)
   ## Interactive plot with traces grouped by forecast date
