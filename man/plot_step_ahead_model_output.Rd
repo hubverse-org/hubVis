@@ -8,6 +8,7 @@ plot_step_ahead_model_output(
   model_out_tbl,
   target_data,
   use_median_as_point = FALSE,
+  log_scale = FALSE,
   show_plot = TRUE,
   plot_target = TRUE,
   x_col_name = "target_date",
@@ -45,6 +46,9 @@ in plot. Default to FALSE. If TRUE, will select first any \code{median}
 output type value and if no \code{median} value included in \code{model_out_tbl};
 will select \code{quantile = 0.5} output type value.}
 
+\item{log_scale}{a \code{boolean} to plot y-axis output on a log scale. Default to
+FALSE}
+
 \item{show_plot}{a \code{boolean} for showing the plot. Default to TRUE.}
 
 \item{plot_target}{a \code{boolean} for showing the target data in the plot.
@@ -62,7 +66,7 @@ By default, "date".}
 \item{show_legend}{a \code{boolean} for showing the legend in the plot.
 Default to TRUE.}
 
-\item{facet}{a unique value corresponding as a task_id variable name
+\item{facet}{a unique value corresponding to a task_id variable name
 (interpretable as facet option for ggplot)}
 
 \item{facet_scales}{argument for scales as in \link[ggplot2:facet_wrap]{ggplot2::facet_wrap} or

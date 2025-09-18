@@ -12,13 +12,15 @@
 #' in plot. Default to FALSE. If TRUE, will select first any `median`
 #' output type value and if no `median` value included in `model_out_tbl`;
 #' will select `quantile = 0.5` output type value.
+#'@param log_scale a `boolean` to plot y-axis output on a log scale. Default to
+#' FALSE
 #'@param show_plot a `boolean` for showing the plot. Default to TRUE.
 #'@param plot_target a `boolean` for showing the target data in the plot.
 #'  Default to TRUE. Data used in the plot comes from the parameter
 #'  `target_data`
 #'@param show_legend a `boolean` for showing the legend in the plot.
 #'  Default to TRUE.
-#'@param facet a unique value corresponding as a task_id variable name
+#'@param facet a unique value corresponding to a task_id variable name
 #' (interpretable as facet option for ggplot)
 #'@param facet_scales argument for scales as in [ggplot2::facet_wrap] or
 #' equivalent to `shareX`, `shareY` in [plotly::subplot]. Default to "fixed"
@@ -75,7 +77,7 @@
 #' @importFrom methods show
 #' @importFrom RColorBrewer brewer.pal
 #' @importFrom grDevices col2rgb rgb colors
-#' @importFrom ggplot2 labs guides
+#' @importFrom ggplot2 labs guides scale_y_log10
 #'
 #' @export
 #'
@@ -100,7 +102,7 @@
 #' plot_step_ahead_model_output(projection_data, target_data_us)
 #'
 plot_step_ahead_model_output <- function(
-    model_out_tbl, target_data, use_median_as_point = FALSE,
+    model_out_tbl, target_data, use_median_as_point = FALSE, log_scale = FALSE,
     show_plot = TRUE, plot_target = TRUE, x_col_name = "target_date",
     x_target_col_name = "date", show_legend = TRUE, facet = NULL,
     facet_scales = "fixed", facet_nrow = NULL, facet_ncol = NULL,
@@ -195,23 +197,12 @@ plot_step_ahead_model_output <- function(
                             group = group)
 
   # Layout
-  if (interactive) {
-    plot_model <- plotly::layout(plot_model, xaxis = list(title = "Date"),
-                                 yaxis = list(title = "Value"),
-                                 showlegend = show_legend)
-    if (!is.null(title)) {
-      plot_model <- plotly::layout(plot_model, title = title)
-    }
-  } else {
-    plot_model <- plot_model + labs(x =  "Date", y = "Value")
-    if (!is.null(title)) {
-      plot_model <- plot_model + labs(title = title)
-    }
-    if (isFALSE(show_legend)) {
-      plot_model <- plot_model + guides(fill = "none", color = "none")
-    }
-  }
+  plot_model <- plot_layout(plot_model, interactive = interactive,
+                            log_scale = log_scale, show_legend = show_legend,
+                            title = title, facet = facet,
+                            facet_scales = facet_scales)
 
+  # Output
   if (isTRUE(show_plot)) {
     if (interactive) show(plot_model)
     return(plot_model)

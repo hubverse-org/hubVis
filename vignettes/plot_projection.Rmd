@@ -358,6 +358,19 @@ plot_step_ahead_model_output(forecast_quantile, forecast_target,
                              group = "reference_date")
 ```
 
+#### Log scale
+
+An optional Boolean parameter `log_scale` is available in the 
+`plot_step_ahead_model_output()` function to plot the y-values of all inputs 
+(model output and target data) on a log scale.
+
+```{r log}
+plot_step_ahead_model_output(projection_data_us, target_data_us,
+                             facet = "scenario_id", facet_nrow = 2,
+                             use_median_as_point = TRUE, log_scale = TRUE)
+```
+
+
 #### Layout update
 
 Multiple layout update are possible:
