@@ -191,8 +191,8 @@ forecast_quantile_1 <- dplyr::filter(forecast_quantile,
 
 # Limit date for layout reason
 forecast_target_ma <- dplyr::filter(forecast_target_ts, location == 25,
-                                    date >= "2022-11-01",
-                                    date <= "2023-01-01")
+                                    target_end_date >= "2022-11-01",
+                                    target_end_date <= "2023-01-01")
 ```
 
 As the forecast projections used the column `target_end_date` and contains the
@@ -203,7 +203,8 @@ the parameters in the `plot_step_ahead_model_output()` need to be ajusted:
 plot_step_ahead_model_output(forecast_quantile_1, forecast_target_ma,
                              intervals = c(0.9, 0.5),
                              use_median_as_point = TRUE,
-                             x_col_name = "target_end_date")
+                             x_col_name = "target_end_date", 
+                             x_target_col_name = "target_end_date")
 ```
 
 
@@ -264,8 +265,9 @@ A "facet" (or subplot) plot can also be created for each location
 ```{r f_p2}
 forecast_quantile_1 <- dplyr::filter(forecast_quantile,
                                      reference_date == "2022-11-19")
-forecast_target <- dplyr::filter(forecast_target_ts, date >= "2022-11-01",
-                                 date <= "2023-01-01",
+forecast_target <- dplyr::filter(forecast_target_ts, 
+                                 target_end_date >= "2022-11-01",
+                                 target_end_date <= "2023-01-01",
                                  location %in% forecast_quantile_1$location)
 ```
 
@@ -273,7 +275,8 @@ forecast_target <- dplyr::filter(forecast_target_ts, date >= "2022-11-01",
 plot_step_ahead_model_output(forecast_quantile_1, forecast_target,
                              intervals = c(0.9, 0.5),
                              use_median_as_point = TRUE,
-                             x_col_name = "target_end_date",
+                             x_col_name = "target_end_date", 
+                             x_target_col_name = "target_end_date",
                              facet = "location")
 ```
 
@@ -353,7 +356,8 @@ To illustrate this we will use the forecast example for both reference date:
 plot_step_ahead_model_output(forecast_quantile, forecast_target,
                              intervals = c(0.9, 0.5),
                              use_median_as_point = TRUE,
-                             x_col_name = "target_end_date",
+                             x_col_name = "target_end_date", 
+                             x_target_col_name = "target_end_date",
                              facet = "location",
                              group = "reference_date")
 ```
