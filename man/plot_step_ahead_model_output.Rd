@@ -148,7 +148,7 @@ output type, a spaghetti plot will be generated
 \verb{0.5, 0.8, 0.9, 0.95}  and the \code{model_out_tbl} contains \code{"quantile"} output
 type, the quantiles will be used, if only \code{"sample"} output type is available
 in the \code{model_out_tbl}, the \code{"sample"} will be used to calculate the
-necessary quantiles.
+necessary quantiles using \code{hubUtils::convert_output_type()} function.
 }
 }
 \examples{

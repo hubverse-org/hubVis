@@ -95,7 +95,7 @@
 #' `0.5, 0.8, 0.9, 0.95`  and the `model_out_tbl` contains `"quantile"` output
 #' type, the quantiles will be used, if only `"sample"` output type is available
 #' in the `model_out_tbl`, the `"sample"` will be used to calculate the
-#' necessary quantiles.
+#' necessary quantiles using `hubUtils::convert_output_type()` function.
 #'
 #' @export
 #'
