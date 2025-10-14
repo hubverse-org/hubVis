@@ -224,29 +224,31 @@ plotly_proj_data <- function(plot_model, df_point, df_ribbon, df_sample,
   if (!is.null(df_sample)) {
     for (j in unique(df_sample[[fill_by]])) {
       show_leg <- show_legend
-      for (i in unique(df_sample[["output_type_id"]])) {
-        df_sample_id <- dplyr::filter(df_sample,
-                                      .data[["output_type_id"]] == i,
-                                      .data[[fill_by]] == j)
-        if (!is.null(group))
-          df_sample_id  <- dplyr::group_by(df_sample_id, .data[[group]])
-        arg_list <-
-          list(p = plot_model, data = df_sample_id,
-               x = df_sample_id[[x_col_name]], y = df_sample_id[["value"]],
-               type = "scatter", mode = "lines", showlegend = show_leg,
-               opacity = opacity, name = df_sample_id[[fill_by]],
-               legendgroup = df_sample_id[[fill_by]])
-        if (is.null(line_color)) {
-          arg_list <- c(arg_list, list(color =  df_sample_id[[fill_by]]),
-                        arguments)
-        } else {
-          arg_list <- c(arg_list, list(line = list(color = line_color)),
-                        arguments)
-        }
-        plot_model <- do.call(plotly::add_trace, arg_list)
-        plot_model <- plotly::layout(plot_model, xaxis = list(title = "Date"))
-        show_leg <- FALSE
+      df_sample_id <- dplyr::filter(df_sample,
+                                    .data[[fill_by]] == j)
+      if (!is.null(group)) {
+        df_sample_id  <- dplyr::group_by(df_sample_id, .data[[group]],
+                                         .data[["output_type_id"]])
+      } else {
+        df_sample_id <- dplyr::group_by(df_sample_id,
+                                        .data[["output_type_id"]])
       }
+      arg_list <-
+        list(p = plot_model, data = df_sample_id,
+             x = df_sample_id[[x_col_name]], y = df_sample_id[["value"]],
+             type = "scatter", mode = "lines", showlegend = show_leg,
+             opacity = opacity, name = df_sample_id[[fill_by]],
+             legendgroup = df_sample_id[[fill_by]])
+      if (is.null(line_color)) {
+        arg_list <- c(arg_list, list(color =  df_sample_id[[fill_by]]),
+                      arguments)
+      } else {
+        arg_list <- c(arg_list, list(line = list(color = line_color)),
+                      arguments)
+      }
+      plot_model <- do.call(plotly::add_trace, arg_list)
+      plot_model <- plotly::layout(plot_model, xaxis = list(title = "Date"))
+      show_leg <- FALSE
     }
     show_legend <- FALSE
   }
@@ -339,16 +341,14 @@ static_proj_data <- function(plot_model, df_point, df_ribbon, df_sample,
 
   if (!is.null(df_sample)) {
     for (fill in unique(df_sample[[fill_by]])) {
-      for (i in unique(df_sample[["output_type_id"]])) {
-        df_sample_id <- dplyr::filter(df_sample,
-                                      .data[["output_type_id"]] == i,
-                                      .data[[fill_by]] == fill)
-        plot_model <- plot_model +
-          geom_line(data = df_sample_id,
-                    aes(x = .data[[x_col_name]], y = .data$value,
-                        color = .data[[fill_by]], group = .data[[group]]),
-                    alpha = opacity)
-      }
+      df_sample_id <- dplyr::filter(df_sample, .data[[fill_by]] == fill)
+      plot_model <- plot_model +
+        geom_line(data = df_sample_id,
+                  aes(x = .data[[x_col_name]], y = .data$value,
+                      color = .data[[fill_by]],
+                      group = paste0(.data[[group]], "-",
+                                     .data[["output_type_id"]])),
+                  alpha = opacity)
     }
   }
 
