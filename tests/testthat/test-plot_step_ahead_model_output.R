@@ -7,7 +7,7 @@ projection_data <-
                 target_date = as.Date(origin_date) + (horizon * 7) - 1)
 projection_data_a_us <-
   dplyr::filter(projection_data, scenario_id == "A-2021-03-05",
-                location == "US", output_type == "quantile")
+                location == "US")
 projection_data <- hubUtils::as_model_out_tbl(projection_data)
 projection_data_a_us <- hubUtils::as_model_out_tbl(projection_data_a_us)
 
@@ -16,7 +16,7 @@ target_data_us <-
   dplyr::filter(scenario_target_ts, location == "US",
                 date < min(projection_data$target_date) + 21,
                 date > "2020-10-01")
-proj_data_q <- dplyr::filter(projection_data, output_type == "quantile")
+proj_data_q <- dplyr::filter(projection_data)
 test_date <- unique(projection_data_a_us$target_date)[1:8]
 static_proj <- dplyr::filter(projection_data_a_us, target_date %in% test_date)
 static_proj <-
