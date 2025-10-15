@@ -64,7 +64,11 @@ plot_prep_data <- function(df, plain_line, plain_type, intervals,
   # Intervals & samples
   if (is.null(intervals)) {
     ribbon_list <- NULL
-    sample_df <- dplyr::filter(df, .data[["output_type"]] == "sample")
+    if ("sample" %in% df$output_type) {
+      sample_df <- dplyr::filter(df, .data[["output_type"]] == "sample")
+    } else {
+      sample_df <- NULL
+    }
   } else {
     ribbon_list <- lapply(intervals, function(ribbon) {
       ribbon_df <- df[which(df$output_type_id %in% ribbon), ] |>

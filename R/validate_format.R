@@ -192,23 +192,26 @@ output_type_validation <- function(model_out_tbl, quant_value, plain_line) {
     }
   } else {
     out_type_plot <- "sample"
-    if (!"sample" %in% mod_out_type)
+    if (!"sample" %in% mod_out_type) {
       cli::cli_warn(c("!" = "{.arg model_out_tbl} is missing the output_type
                        {.val sample}. No intervals or samples will be
                       plotted."))
+      out_type_plot <- NULL
+    }
   }
 
-  if (!all(mod_out_type %in% c(out_type_plot, out_type_med))) {
+  all_out_type <- unique(c(out_type_plot, out_type_med))
+  if (!all(mod_out_type %in% all_out_type)) {
     cli::cli_warn(c("!" = "{.arg model_output_tbl} should only contain
-                          {.val { c(out_type_plot, out_type_med)}} output_type.
+                          {.val {all_out_type}} output_type.
                           Additional output_type will be removed."))
     model_out_tbl <-
       dplyr::filter(model_out_tbl,
-                    .data[["output_type"]] %in% c(out_type_plot, out_type_med))
+                    .data[["output_type"]] %in% all_out_type)
   }
 
 
-  if (all(c(out_type_plot, out_type_med) %in% c("median", "quantile"))) {
+  if (all(all_out_type %in% c("median", "quantile"))) {
     if (!"numeric" %in% class(model_out_tbl$output_type_id)) {
       model_out_tbl$output_type_id <-
         as.numeric(model_out_tbl$output_type_id)
