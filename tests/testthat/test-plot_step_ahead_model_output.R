@@ -171,7 +171,9 @@ test_that("Output", {
                                  facet = "scenario_id", facet_scales = "free_x",
                                  use_median_as_point = TRUE, intervals = NULL,
                                  plot_target = FALSE, ens_color = "black",
-                                 ens_name = "hub-ensemble", pal_color = "Set1")
+                                 ens_name = "hub-ensemble",
+                                 pal_color = "Set1") |>
+    suppressWarnings()
   expect_length(plot_test$x$data,
                 length(unique(proj_data_q$model_id)) *
                   length(unique(proj_data_q$scenario_id)))
@@ -242,7 +244,8 @@ test_that("Output", {
                                  pal_color = NULL, one_color = "orange",
                                  ens_color = "black", ens_name = "hub-ensemble",
                                  intervals = NULL, use_median_as_point = TRUE,
-                                 facet = "scenario_id")
+                                 facet = "scenario_id") |>
+    suppressWarnings()
   test_value <-
     purrr::map(plot_test$x$data[purrr::map(purrr::map(plot_test$x$data,
                                                       "name"), levels) %in%
