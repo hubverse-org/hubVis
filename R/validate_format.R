@@ -138,7 +138,8 @@ ensemble_validation <- function(ens_color, ens_name) {
 #' `model_out_tbl` in `"output_type_id"` column
 #'
 #' @noRd
-output_type_validation <- function(model_out_tbl, quant_value, plain_line) {
+output_type_validation <- function(model_out_tbl, quant_value, plain_line,
+                                   intervals, use_median_as_point) {
 
   mod_out_type <- unique(model_out_tbl$output_type)
   mod_out_type_id <- unique(model_out_tbl$output_type_id)
@@ -193,23 +194,28 @@ output_type_validation <- function(model_out_tbl, quant_value, plain_line) {
   } else {
     out_type_plot <- "sample"
     if (!"sample" %in% mod_out_type) {
-      cli::cli_warn(c("!" = "{.arg model_out_tbl} is missing the output_type
-                       {.val sample}. No intervals or samples will be
-                      plotted."))
+      cli::cli_warn(c("!" = "{.arg plot_set_ahead_model_output()} was expecting
+                          {.val sample} output_type due to {.arg intervals} set
+                          to {.arg NULL}. {.arg model_out_tbl} is missing the
+                          output_type {.val sample}. No intervals or samples
+                          will be plotted."))
       out_type_plot <- NULL
     }
   }
 
   all_out_type <- unique(c(out_type_plot, out_type_med))
+  if (is.null(intervals)) intervals <- "NULL"
   if (!all(mod_out_type %in% all_out_type)) {
-    cli::cli_warn(c("!" = "{.arg model_output_tbl} should only contain
-                          {.val {all_out_type}} output_type.
+    cli::cli_warn(c("!" = "{.arg plot_set_ahead_model_output()} was expecting
+                          {.val {all_out_type}} output_type due to
+                          {.arg intervals} set to {.val {intervals}} and
+                          {.arg use_median_as_point} set to
+                          {.val {use_median_as_point}}.
                           Additional output_type will be removed."))
     model_out_tbl <-
       dplyr::filter(model_out_tbl,
                     .data[["output_type"]] %in% all_out_type)
   }
-
 
   if (all(all_out_type %in% c("median", "quantile"))) {
     if (!"numeric" %in% class(model_out_tbl$output_type_id)) {

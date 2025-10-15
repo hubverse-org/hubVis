@@ -145,11 +145,11 @@ plot_step_ahead_model_output <- function(
   list_intervals <- list("0.95" = c(0.975, 0.025), "0.9" = c(0.95, 0.05),
                          "0.8" = c(0.9, 0.1), "0.5" = c(0.75, 0.25))
   if (!is.null(intervals)) {
-    intervals <- interval_validation(model_out_tbl, as.character(intervals),
-                                     list_intervals)
-    ribbon <- list_intervals[as.character(sort(intervals, decreasing = TRUE))]
+    intervals_val <- interval_validation(model_out_tbl, as.character(intervals),
+                                         list_intervals)
+    ribbon <- list_intervals[as.character(sort(intervals_val , decreasing = TRUE))]
   } else {
-    ribbon <- NULL
+    ribbon <- intervals_val <- NULL
   }
   ### Median
   if (isTRUE(use_median_as_point)) {
@@ -165,7 +165,8 @@ plot_step_ahead_model_output <- function(
   }
 
   model_out_tbl <- output_type_validation(model_out_tbl, unlist(ribbon),
-                                          plain_line)
+                                          plain_line, intervals,
+                                          use_median_as_point)
   ### Ensemble specific color
   ensemble_validation(ens_color, ens_name)
   ### Facet
@@ -202,7 +203,8 @@ plot_step_ahead_model_output <- function(
   }
   plot_model <- output_plot(all_plot, all_ens, target_data,
                             plot_target = plot_target,
-                            intervals =  intervals, pal_color = palette$color,
+                            intervals =  intervals_val,
+                            pal_color = palette$color,
                             fill_transparency = fill_transparency,
                             pal_value = palette$value, top_layer = top_layer,
                             ens_color = ens_color, ens_name = ens_name,
