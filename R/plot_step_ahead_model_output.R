@@ -161,11 +161,11 @@ plot_step_ahead_model_output <- function(
       plain_type <- "quantile"
     }
   } else {
-    plain_line <- NULL
-    plain_type <- NULL
+    plain_line <- plain_type <- NULL
   }
-  exp_value <- c(plain_line, unlist(ribbon))
-  model_out_tbl <- output_type_validation(model_out_tbl, exp_value)
+
+  model_out_tbl <- output_type_validation(model_out_tbl, unlist(ribbon),
+                                          plain_line)
   ### Ensemble specific color
   ensemble_validation(ens_color, ens_name)
   ### Facet

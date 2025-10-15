@@ -27,9 +27,12 @@ plot_prep_data <- function(df, plain_line, plain_type, intervals,
 
   # Create quantiles if necessary
   quant <- c(stats::na.omit(plain_line), unlist(intervals))
+  if (length(quant) == 0) quant <- NULL
   if (!is.null(quant) && !("quantile" %in% df$output_type) &&
         ("sample" %in% df$output_type)) {
     df_sample <- dplyr::filter(df, .data[["output_type"]] == "sample")
+    cli::cli_inform(c("i" = "{.val sample} output_type is used to calculate
+                      required {.val quantile}"))
     quant_df <- hubUtils::convert_output_type(df_sample,
                                               to = list("quantile" = quant))
     df <- rbind(df, quant_df)

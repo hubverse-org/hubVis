@@ -138,36 +138,84 @@ ensemble_validation <- function(ens_color, ens_name) {
 #' `model_out_tbl` in `"output_type_id"` column
 #'
 #' @noRd
-output_type_validation <- function(model_out_tbl, exp_value) {
+output_type_validation <- function(model_out_tbl, quant_value, plain_line) {
 
-  if (is.null(exp_value) && !any("sample" %in% model_out_tbl$output_type)) {
-    cli::cli_abort(c("x" = "{.arg model_out_tbl} did not have the
-                     expected output_type {.val sample}."))
+  mod_out_type <- unique(model_out_tbl$output_type)
+  mod_out_type_id <- unique(model_out_tbl$output_type_id)
+
+  # Median line
+  out_type_med <- NULL
+  if (!is.null(plain_line)) {
+    if (is.na(plain_line)) {
+      out_type_med <- "median"
+    } else if (plain_line == 0.5) {
+      out_type_med <- purrr::map_vec(c("quantile", "sample"), ~ .x %in%
+                                       mod_out_type)
+      if (all(isFALSE(out_type_med)))
+        cli::cli_abort(c("x" = "{.arg model_out_tbl} is missing the output_type
+                       {.val median}, {.val quantile} or {.val sample} to
+                       plot the median."))
+      out_type_med <- c("quantile", "sample")[[grep(TRUE, out_type_med)[1]]]
+      if (out_type_med == "quantile" && !(0.5 %in% mod_out_type_id)) {
+        if ("sample" %in% mod_out_type) {
+          out_type_med <- "sample"
+        } else {
+          cli::cli_abort(c("x" = "{.arg model_output_tbl} is missing the expected
+                         output_type_id value {.val 0.5} or {.val median}
+                         output_type to plot the median."))
+        }
+      }
+    }
   }
 
-  if (!is.null(exp_value) && !all(is.na(exp_value)) &&
-        "quantile" %in% model_out_tbl$output_type) {
+  # Ribbon or spaghetti plot
+  if (!is.null(quant_value)) {
+    if ("quantile" %in% mod_out_type) {
+      out_type_plot <- "quantile"
+      if (!all(quant_value %in% mod_out_type_id)) {
+        if ("sample" %in% mod_out_type) {
+          cli::cli_warn(c("x" = "{.arg model_output_tbl} did not have the
+                          expected output_type_id value {.val {quant_value}}.
+                          {.val sample} output_type will be used to calculate
+                          the quantiles."))
+          out_type_plot <- "sample"
+        } else {
+          cli::cli_abort(c("x" = "{.arg model_output_tbl} did not have the
+                         expected output_type_id value {.val {quant_value}}"))
+        }
+      }
+    } else if ("sample" %in% mod_out_type) {
+      out_type_plot <- "sample"
+    } else {
+      cli::cli_abort(c("x" = "{.arg model_out_tbl} did not have the
+                     expected output_type {.val sample} or {.val quantile}."))
+    }
+  } else {
+    out_type_plot <- "sample"
+    if (!"sample" %in% mod_out_type)
+      cli::cli_warn(c("!" = "{.arg model_out_tbl} is missing the output_type
+                       {.val sample}. No intervals or samples will be
+                      plotted."))
+  }
+
+  if (!all(mod_out_type %in% c(out_type_plot, out_type_med))) {
+    cli::cli_warn(c("!" = "{.arg model_output_tbl} should only contain
+                          {.val { c(out_type_plot, out_type_med)}} output_type.
+                          Additional output_type will be removed."))
+    model_out_tbl <-
+      dplyr::filter(model_out_tbl,
+                    .data[["output_type"]] %in% c(out_type_plot, out_type_med))
+  }
+
+
+  if (all(c(out_type_plot, out_type_med) %in% c("median", "quantile"))) {
     if (!"numeric" %in% class(model_out_tbl$output_type_id)) {
       model_out_tbl$output_type_id <-
         as.numeric(model_out_tbl$output_type_id)
       cli::cli_warn(c("!" = "{.arg output_type_id} column must be a numeric.
                     Converting to numeric."))
     }
-    model_output_type_val <- unique(model_out_tbl$output_type_id)
-    if (!all(exp_value %in% model_output_type_val)) {
-      cli::cli_abort(c("x" = "{.arg model_output_type_val} did not have the
-                     expected output_type_id value {.val {exp_value}}"))
-    }
   }
-
-  if (!is.null(exp_value) && !all(is.na(exp_value)) &&
-        !any("quantile" %in% model_out_tbl$output_type)) {
-    if (!any("sample" %in% model_out_tbl$output_type)) {
-      cli::cli_abort(c("x" = "{.arg model_out_tbl} did not have the
-                     expected output_type {.val sample} or {.val quantile}."))
-    }
-  }
-
   model_out_tbl
 }
 
