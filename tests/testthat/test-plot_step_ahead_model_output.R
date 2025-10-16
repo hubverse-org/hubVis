@@ -303,6 +303,67 @@ test_that("Output", {
 
 })
 
+test_that("sample output type functionality", {
+
+  target_data_48 <- dplyr::filter(forecast_target_ts, location == "48",
+                                  date < "2022-11-15", date > "2022-01-01")
+  forecast_data <- dplyr::filter(forecast_outputs, location == "48",
+                                 target == "wk inc flu hosp",
+                                 output_type == "sample")
+
+
+  p <- plot_step_ahead_model_output(forecast_data, target_data_48,
+                                    x_col_name = "target_end_date",
+                                    intervals = c(0.8, 0.5),
+                                    group = "reference_date") |>
+    suppressMessages()
+  test_val <- unlist(purrr::map(p$x$attrs, "hovertext")) |>
+    stringr::str_extract("\\d{2}%") |>
+    unique()
+  expect_equal(test_val, c(NA, "80%", "50%"))
+
+  p <- plot_step_ahead_model_output(forecast_data, NULL, plot_target = FALSE,
+                                    x_col_name = "target_end_date",
+                                    intervals = NULL,
+                                    group = "reference_date")
+  test_val <- purrr::map(p$x$attrs, "y") |> purrr::map_vec(length) |> unique()
+  expect_equal(test_val, c(0, 800))
+
+  ens_data <- dplyr::filter(forecast_outputs, location == "48",
+                            target == "wk inc flu hosp",
+                            output_type == "quantile", model_id == "PSI-DICE")
+  forecast_data <- rbind(dplyr::filter(forecast_data, model_id != "PSI-DICE"),
+                         ens_data)
+
+  p <- plot_step_ahead_model_output(forecast_data, target_data_48,
+                                    plot_target = FALSE,
+                                    x_col_name = "target_end_date",
+                                    ens_name = 'PSI-DICE', ens_color = "grey",
+                                    use_median_as_point = TRUE,
+                                    facet = "location",
+                                    intervals = NULL, group = "reference_date")
+  test_val <- purrr::map(p$x$attrs, "name") |>
+    purrr::map_vec(length) |>
+    unique()
+  expect_equal(test_val, c(16, 800, 8))
+
+  target_data <- dplyr::filter(forecast_target_ts, location %in% c("25", "48"),
+                               date < "2022-11-15", date > "2022-10-01")
+  forecast_data <- dplyr::filter(forecast_outputs, target == "wk inc flu hosp")
+
+  p <- plot_step_ahead_model_output(forecast_data, target_data,
+                                    facet = "location",
+                                    x_col_name = "target_end_date",
+                                    ens_name = 'PSI-DICE',
+                                    ens_color = "darkgrey",
+                                    intervals = NULL, interactive = FALSE,
+                                    group = "reference_date") |>
+    suppressWarnings()
+  test_val <- as.character(unique(p@layers$geom_line...5$data$model_id))
+  expect_equal(test_val, "PSI-DICE")
+
+})
+
 test_that("ggplot output file", {
   # Layout (static)
   plot_test <-
@@ -358,5 +419,53 @@ test_that("ggplot output file", {
                                  use_median_as_point = TRUE,
                                  interactive = FALSE, facet = "scenario_id")
   vdiffr::expect_doppelganger("Missing Value Facet Static", plot_test)
+
+  ## Static sample plots
+  target_data_48 <- dplyr::filter(forecast_target_ts, location == "48",
+                                  date < "2022-11-15", date > "2022-01-01")
+  forecast_data <- dplyr::filter(forecast_outputs, location == "48",
+                                 target == "wk inc flu hosp",
+                                 output_type == "sample")
+
+  plot_test <- plot_step_ahead_model_output(forecast_data, target_data_48,
+                                            x_col_name = "target_end_date",
+                                            interactive = FALSE,
+                                            intervals = NULL,
+                                            group = "reference_date")
+  vdiffr::expect_doppelganger("Samples plot", plot_test)
+
+  plot_test <- plot_step_ahead_model_output(forecast_data, target_data_48,
+                                            x_col_name = "target_end_date",
+                                            use_median_as_point = TRUE,
+                                            interactive = FALSE,
+                                            intervals = c(0.8, 0.5),
+                                            group = "reference_date") |>
+    suppressMessages()
+  vdiffr::expect_doppelganger("Quantiles from Samples plot", plot_test)
+
+
+  plot_test <- plot_step_ahead_model_output(forecast_data, target_data_48,
+                                            x_col_name = "target_end_date",
+                                            use_median_as_point = TRUE,
+                                            interactive = FALSE,
+                                            intervals = NULL,
+                                            group = "reference_date") |>
+    suppressMessages()
+  vdiffr::expect_doppelganger("Median and Samples plot", plot_test)
+
+  target_data <- dplyr::filter(forecast_target_ts, location %in% c("25", "48"),
+                               date < "2022-11-15", date > "2022-10-01")
+  forecast_data <- dplyr::filter(forecast_outputs, target == "wk inc flu hosp")
+
+  p <- plot_step_ahead_model_output(forecast_data, target_data,
+                                    facet = "location",
+                                    x_col_name = "target_end_date",
+                                    ens_name = 'PSI-DICE',
+                                    ens_color = "darkgrey",
+                                    intervals = NULL, interactive = FALSE,
+                                    group = "reference_date") |>
+    suppressWarnings()
+  vdiffr::expect_doppelganger("Facet Samples plot", p)
+
 
 })
