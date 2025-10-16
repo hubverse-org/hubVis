@@ -147,7 +147,8 @@ plot_step_ahead_model_output <- function(
   if (!is.null(intervals)) {
     intervals_val <- interval_validation(model_out_tbl, as.character(intervals),
                                          list_intervals)
-    ribbon <- list_intervals[as.character(sort(intervals_val , decreasing = TRUE))]
+    ribbon <- list_intervals[as.character(sort(intervals_val,
+                                               decreasing = TRUE))]
   } else {
     ribbon <- intervals_val <- NULL
   }

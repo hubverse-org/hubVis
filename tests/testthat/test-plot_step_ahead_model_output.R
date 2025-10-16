@@ -338,7 +338,7 @@ test_that("sample output type functionality", {
   p <- plot_step_ahead_model_output(forecast_data, target_data_48,
                                     plot_target = FALSE,
                                     x_col_name = "target_end_date",
-                                    ens_name = 'PSI-DICE', ens_color = "grey",
+                                    ens_name = "PSI-DICE", ens_color = "grey",
                                     use_median_as_point = TRUE,
                                     facet = "location",
                                     intervals = NULL, group = "reference_date")
@@ -354,7 +354,7 @@ test_that("sample output type functionality", {
   p <- plot_step_ahead_model_output(forecast_data, target_data,
                                     facet = "location",
                                     x_col_name = "target_end_date",
-                                    ens_name = 'PSI-DICE',
+                                    ens_name = "PSI-DICE",
                                     ens_color = "darkgrey",
                                     intervals = NULL, interactive = FALSE,
                                     group = "reference_date") |>
@@ -460,7 +460,7 @@ test_that("ggplot output file", {
   p <- plot_step_ahead_model_output(forecast_data, target_data,
                                     facet = "location",
                                     x_col_name = "target_end_date",
-                                    ens_name = 'PSI-DICE',
+                                    ens_name = "PSI-DICE",
                                     ens_color = "darkgrey",
                                     intervals = NULL, interactive = FALSE,
                                     group = "reference_date") |>

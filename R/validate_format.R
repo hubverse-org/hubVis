@@ -205,7 +205,7 @@ output_type_validation <- function(model_out_tbl, quant_value, plain_line,
 
   all_out_type <- unique(c(out_type_plot, out_type_med))
   if (is.null(intervals)) intervals <- "NULL"
-  if (!all(mod_out_type %in% all_out_type) & !is.null(all_out_type)) {
+  if (!all(mod_out_type %in% all_out_type) && !is.null(all_out_type)) {
     cli::cli_warn(c("!" = "{.arg plot_set_ahead_model_output()} was expecting
                           {.val {all_out_type}} output_type due to
                           {.arg intervals} set to {.val {intervals}} and
