@@ -4,8 +4,7 @@ library(hubExamples)
 ## Model output - Scenario
 projection_data <-
   dplyr::mutate(scenario_outputs,
-                target_date = as.Date(origin_date) + (horizon * 7) - 1,
-                output_type = "quantile")
+                target_date = as.Date(origin_date) + (horizon * 7) - 1)
 projection_data_a_us <-
   dplyr::filter(projection_data, scenario_id == "A-2021-03-05",
                 location == "US")
@@ -55,18 +54,21 @@ test_that("Input parameters", {
 
   expect_warning(plot_step_ahead_model_output(forecast_quantile, target_data_us,
                                               x_col_name = "target_end_date",
-                                              intervals = NULL),
-               '`model_out_tbl` did not have the expected output_type "sample"')
+                                              intervals = NULL))
   expect_no_error(plot_step_ahead_model_output(forecast_quantile, target_data_us,
                                                x_col_name = "target_end_date",
                                                intervals = NULL,
-                                               use_median_as_point = TRUE))
+                                               use_median_as_point = TRUE) |>
+                    suppressWarnings())
 
   forecast_median <- dplyr::filter(forecast_data, output_type == "median")
-  expect_error(plot_step_ahead_model_output(forecast_median, target_data_us,
-                                            x_col_name = "target_end_date",
-                                            intervals = NULL),
-               '`model_out_tbl` did not have the expected output_type "sample"')
+  expect_no_error(plot_step_ahead_model_output(forecast_median, target_data_us,
+                                               x_col_name = "target_end_date",
+                                               intervals = NULL))
+  expect_warning(plot_step_ahead_model_output(forecast_median, target_data_us,
+                                              x_col_name = "target_end_date",
+                                              intervals = NULL,
+                                              use_median_as_point = TRUE))
   expect_error(plot_step_ahead_model_output(forecast_median, target_data_us,
                                             x_col_name = "target_end_date",
                                             intervals = 0.9),
@@ -171,7 +173,7 @@ test_that("Input parameters", {
   expect_error(plot_step_ahead_model_output(df_test, target_data_us,
                                             show_plot = FALSE,
                                             use_median_as_point = TRUE),
-               "did not have the expected output_type_id value ")
+               " is missing the expected output_type_id value")
   expect_no_error(plot_step_ahead_model_output(df_test, target_data_us,
                                                show_plot = FALSE))
 
