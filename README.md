@@ -31,8 +31,8 @@ remotes::install_github("hubverse-org/hubVis")
 ## Usage
 
 The R package contains currently one function `plot_step_ahead_model_output()`
-plotting 50%, 80%, and 95% quantiles intervals, with a specific color per
-"model\_id".
+plotting 50%, 80%, and 95% quantiles intervals, samples and median, with a 
+specific color per "model\_id".
 
 The function can output 2 types of plots:
 
