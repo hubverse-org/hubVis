@@ -53,9 +53,9 @@ test_that("Input parameters", {
                                             x_col_name = "target_end_date"),
                err_mess)
 
-  expect_error(plot_step_ahead_model_output(forecast_quantile, target_data_us,
-                                            x_col_name = "target_end_date",
-                                            intervals = NULL),
+  expect_warning(plot_step_ahead_model_output(forecast_quantile, target_data_us,
+                                              x_col_name = "target_end_date",
+                                              intervals = NULL),
                '`model_out_tbl` did not have the expected output_type "sample"')
   expect_no_error(plot_step_ahead_model_output(forecast_quantile, target_data_us,
                                                x_col_name = "target_end_date",
