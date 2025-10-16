@@ -311,6 +311,14 @@ test_that("sample output type functionality", {
                                  target == "wk inc flu hosp",
                                  output_type == "sample")
 
+  p <-
+    plot_step_ahead_model_output(dplyr::filter(forecast_data,
+                                               reference_date == "2022-11-19"),
+                                 target_data_48,
+                                 x_col_name = "target_end_date",
+                                 intervals = NULL)
+  test_val <- purrr::map(p$x$attrs, "y") |> purrr::map_vec(length) |> unique()
+  expect_equal(test_val, c(0, 2, 400))
 
   p <- plot_step_ahead_model_output(forecast_data, target_data_48,
                                     x_col_name = "target_end_date",
@@ -349,7 +357,8 @@ test_that("sample output type functionality", {
 
   target_data <- dplyr::filter(forecast_target_ts, location %in% c("25", "48"),
                                date < "2022-11-15", date > "2022-10-01")
-  forecast_data <- dplyr::filter(forecast_outputs, target == "wk inc flu hosp")
+  forecast_data <- dplyr::filter(forecast_outputs, target == "wk inc flu hosp",
+                                 output_type == "sample")
 
   p <- plot_step_ahead_model_output(forecast_data, target_data,
                                     facet = "location",
@@ -361,6 +370,29 @@ test_that("sample output type functionality", {
     suppressWarnings()
   test_val <- as.character(unique(p@layers$geom_line...5$data$model_id))
   expect_equal(test_val, "PSI-DICE")
+
+  p <- plot_step_ahead_model_output(forecast_data, target_data,
+                                    facet = "location",
+                                    x_col_name = "target_end_date",
+                                    ens_name = "PSI-DICE",
+                                    ens_color = "darkgrey",
+                                    pal_color = "OrRd",
+                                    intervals = NULL,
+                                    group = "reference_date") |>
+    suppressWarnings()
+  test_val <- purrr::map_vec(p$x$attrs, "colors") |> unique()
+  expect_equal(test_val, "OrRd")
+
+  p <- plot_step_ahead_model_output(forecast_data, target_data,
+                                    facet = "location",
+                                    x_col_name = "target_end_date",
+                                    ens_name = "PSI-DICE",
+                                    ens_color = "darkgrey",
+                                    intervals = NULL, interactive = FALSE,
+                                    use_median_as_point = TRUE,
+                                    group = "reference_date")
+  test_val <- p@layers$geom_line...5$aes_params$linewidth
+  expect_equal(test_val, 1.3)
 
 })
 

@@ -60,6 +60,16 @@ test_that("Input parameters", {
                                                intervals = NULL,
                                                use_median_as_point = TRUE) |>
                     suppressWarnings())
+  expect_warning(plot_step_ahead_model_output(
+    dplyr::filter(forecast_data, output_type_id != 0.5,
+                  output_type != "median"), target_data_us,
+    use_median_as_point = TRUE, x_col_name = "target_end_date"
+    ))
+
+  expect_message(plot_step_ahead_model_output(
+    dplyr::filter(forecast_data, output_type == "sample"), target_data_us,
+    use_median_as_point = TRUE, x_col_name = "target_end_date", intervals = 0.5
+  ))
 
   forecast_median <- dplyr::filter(forecast_data, output_type == "median")
   expect_no_error(plot_step_ahead_model_output(forecast_median, target_data_us,

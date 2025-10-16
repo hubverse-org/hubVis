@@ -152,16 +152,12 @@ output_type_validation <- function(model_out_tbl, quant_value, plain_line,
     } else if (plain_line == 0.5) {
       out_type_med <- purrr::map_vec(c("quantile", "sample"), ~ .x %in%
                                        mod_out_type)
-      if (all(isFALSE(out_type_med)))
-        cli::cli_abort(c("x" = "{.arg model_out_tbl} is missing the output_type
-                       {.val median}, {.val quantile} or {.val sample} to
-                       plot the median."))
       out_type_med <- c("quantile", "sample")[[grep(TRUE, out_type_med)[1]]]
       if (out_type_med == "quantile" && !(0.5 %in% mod_out_type_id)) {
         if ("sample" %in% mod_out_type) {
           out_type_med <- "sample"
         } else {
-          cli::cli_abort(c("x" = "{.arg model_output_tbl} is missing the expected
+          cli::cli_abort(c("!" = "{.arg model_output_tbl} is missing the expected
                          output_type_id value {.val 0.5} or {.val median}
                          output_type to plot the median."))
         }
