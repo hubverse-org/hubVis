@@ -306,7 +306,9 @@ test_that("Output", {
 test_that("sample output type functionality", {
 
   target_data_48 <- dplyr::filter(forecast_target_ts, location == "48",
-                                  date < "2022-11-15", date > "2022-01-01")
+                                  target_end_date < "2022-11-15",
+                                  target_end_date > "2022-01-01") |>
+    dplyr::rename(date = target_end_date)
   forecast_data <- dplyr::filter(forecast_outputs, location == "48",
                                  target == "wk inc flu hosp",
                                  output_type == "sample")
@@ -356,7 +358,9 @@ test_that("sample output type functionality", {
   expect_equal(test_val, c(16, 800, 8))
 
   target_data <- dplyr::filter(forecast_target_ts, location %in% c("25", "48"),
-                               date < "2022-11-15", date > "2022-10-01")
+                               target_end_date < "2022-11-15",
+                               target_end_date > "2022-10-01") |>
+    dplyr::rename(date = target_end_date)
   forecast_data <- dplyr::filter(forecast_outputs, target == "wk inc flu hosp",
                                  output_type == "sample")
 
@@ -454,7 +458,9 @@ test_that("ggplot output file", {
 
   ## Static sample plots
   target_data_48 <- dplyr::filter(forecast_target_ts, location == "48",
-                                  date < "2022-11-15", date > "2022-01-01")
+                                  target_end_date < "2022-11-15",
+                                  target_end_date > "2022-01-01") |>
+    dplyr::rename(date = target_end_date)
   forecast_data <- dplyr::filter(forecast_outputs, location == "48",
                                  target == "wk inc flu hosp",
                                  output_type == "sample")
@@ -486,7 +492,9 @@ test_that("ggplot output file", {
   vdiffr::expect_doppelganger("Median and Samples plot", plot_test)
 
   target_data <- dplyr::filter(forecast_target_ts, location %in% c("25", "48"),
-                               date < "2022-11-15", date > "2022-10-01")
+                               target_end_date < "2022-11-15",
+                               target_end_date > "2022-10-01") |>
+    dplyr::rename(date = target_end_date)
   forecast_data <- dplyr::filter(forecast_outputs, target == "wk inc flu hosp")
 
   p <- plot_step_ahead_model_output(forecast_data, target_data,
