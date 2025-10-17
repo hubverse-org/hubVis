@@ -53,27 +53,27 @@ examples.
 
 To demonstrate the functionality of the `plot_step_ahead_model_output()` function,
 we will use the examples data from the 
-[hubExamples](https://github.com/hubverse-org/hubExamples) package. 
+[hubExamples](https://github.com/hubverse-org/hubExamples) package.
+
+#### Forecast
+
+- `forecast_outputs`: example cdf, mean, median, pmf, quantile, and sample 
+forecast data that represents model outputs from a forecast hub with 
+predictions for three influenza-related targets (wk inc flu hosp, wk flu hops 
+rate category, and wk flu hosp rate) for two reference dates in 2022. 
+
+- `forecast_target_ts`: contains time series target data associated with the
+forecast projection data.
 
 #### Scenario
 
-- `scenario_outputs`: example scenario projection data that represents
+- `scenario_outputs`: example quantile scenario projection data that represents
 model outputs and an ensemble (generated with `hubEnsemble`) from a scenario 
 hub with predictions for one target (`inc hosp`) in one location (`"US"`), 
 one round ("2021-03-07") and four scenarios.
 
 - `scenario_target_ts`: contains time series target data associated with the
 scenario projection data.
-
-#### Forecast
-
-- `forecast_outputs`: example forecast data that represents model outputs from 
-a forecast hub with predictions for three influenza-related targets (wk inc 
-flu hosp, wk flu hops rate category, and wk flu hosp rate) for two reference 
-dates in 2022.
-
-- `forecast_target_ts`: contains time series target data associated with the
-forecast projection data.
 
 
 ### Load data
@@ -99,7 +99,7 @@ In addition to the standard requirements for this class, the
 - a Date column used for the x-axis of a "step ahead" plot. By default, the 
 function expect a `"target_date"` column, although this could be over-ridden by 
 specifying a different column using the `x_col_name` argument.
-- `quantile` and `median` are the only accepted output type 
+- `quantile`, `sample`, and `median` are the only accepted output type 
 
 ```{r data_prep}
 # Add a `target_date` column in the scenario example
@@ -107,9 +107,6 @@ projection_data <- dplyr::mutate(scenario_outputs,
                                  target_date = as.Date(origin_date) +
                                    (horizon * 7) - 1)
 head(projection_data)
-# Filter only `quantile` output type in the forecast example
-forecast_quantile <- dplyr::filter(forecast_outputs, output_type == "quantile")
-head(forecast_quantile)
 ```
 
 ## Plot
@@ -117,17 +114,122 @@ head(forecast_quantile)
 The plotting function requires only 2 parameters:
 
 - `model_out_tbl`: [a `model_out_tbl` object](https://hubverse-org.github.io/hubUtils/articles/connect_hub.html#structure-of-hubverse-datasets) containing all the Hubverse
-standard columns, including `"target_date"` and `"model_id"` columns.
-As all model_output in model_out_tbl will be plotted, any filtering needs to
-happen outside this function.
+standard columns, including a date column` and `"model_id"` columns.
 
 - ` target_data`: a `data.frame` object containing the target data, including 
-the columns: `"date"` and `"observation"`.
+the columns: a date column and `"observation"`.
+
+We strongly advice to filter both inputted data frame to select only the rows
+of interest in the plot. 
+
+The function can plot three model output type: `"quantile"`, `"sample"`, and 
+`"median"`. Any other additional output type will be filtered out and a 
+warning will be issued. The two parameters: `intervals` and 
+`use_median_as_point` can be used to decide what output type to plot:
+
+- `intervals`: 
+    - a vector of `numeric` values indicating which central prediction interval 
+    levels to plot using `"quantile"` output type. If no quantile is 
+    available in the `model_out_tbl` object and if `"sample"` are present, the
+    samples will be used to calculate the required quantiles. 
+    Value possibles: `0.5`, `0.8`, `0.9`, `0.95`
+    - `NULL` can be used to indicate to plot the `"sample"` output type in a
+    spaghetti plot.
+    - By default, the `intervals` parameter is set to `c(.5, .8, .95)` and 
+    expect `"quantile"` or `"sample" `output type in the `model_out_tbl`
+    object
+
+- `use_median_as_point`: 
+    - Boolean to indicate to plot the median. If the `model_out_tbl` contains
+    `"median"` output type, it will be used preferably. If not available, the
+    `"quantile"`, value `0,5` will be used. And if both are unavaiable, the 
+    `"sample"` output type can be used to calculate the median.
 
 ### "Simple" plot
 
-The `projection_data` and `target_data` contain information for multiple 
-locations, and scenarios.
+#### Forecast
+
+To plot the forecast projections for one reference dates (2022-11-19) for 
+Massachusetts (25).
+
+```{r f_p}
+# Pre-filtering
+forecast_quantile <- dplyr::filter(forecast_outputs, 
+                                   output_type == "quantile",
+                                   reference_date == "2022-11-19",
+                                   location == 25) |>
+  dplyr::mutate(output_type_id = as.numeric(output_type_id))
+
+# Limit date for layout reason
+forecast_target_ma <- dplyr::filter(forecast_target_ts, location == 25,
+                                    target == "wk inc flu hosp",
+                                    target_end_date >= "2022-11-01",
+                                    target_end_date <= "2023-01-01")
+```
+
+As the forecast projections used the column `target_end_date` for date column
+and contains the quantiles: `"0.05"`, `"0.1"`, `"0.25"`, `"0.5"`,  `"0.75"`, 
+`"0.9"`, `"0.95"`, the parameters in the `plot_step_ahead_model_output()` needs 
+to be ajusted:
+
+```{r f_1}
+plot_step_ahead_model_output(forecast_quantile, forecast_target_ma,
+                             intervals = c(0.9, 0.5),
+                             x_col_name = "target_end_date",
+                             x_target_col_name = "target_end_date")
+```
+
+The median can be added to the plot:
+
+```{r f_1 med}
+plot_step_ahead_model_output(forecast_quantile, forecast_target_ma,
+                             intervals = c(0.9, 0.5),
+                             use_median_as_point = TRUE,
+                             x_col_name = "target_end_date",
+                             x_target_col_name = "target_end_date")
+```
+
+
+##### Samples Output Type
+
+By setting the `intervals` parameter to `NULL`, the 
+`plot_step_ahead_model_output()` function will plot the `"sample"` output
+type in a spaghetti plot
+
+```{r sample data}
+forecast_sample <- dplyr::filter(forecast_outputs, output_type == "sample",
+                                 reference_date == "2022-11-19",
+                                 location == 25)
+```
+
+```{r plot sample}
+plot_step_ahead_model_output(forecast_sample, forecast_target_ma,
+                             intervals = NULL,
+                             x_col_name = "target_end_date",
+                             x_target_col_name = "target_end_date")
+```
+
+Same as `"quantile"` output type, a median can be added to the plot by using
+the `use_median_as_point = TRUE` parameter. 
+The median is plotted either by using the `"median"` output type in the inputted
+data frame or the `"quantile"` 0.5 or the function calculate it by using the 
+`"sample"`, depending on the content of the inputted data frame
+
+```{r plot sample_med}
+forecast_sample <- dplyr::filter(forecast_outputs, output_type %in% 
+                                   c("sample", "median"),
+                                 reference_date == "2022-11-19",
+                                 location == 25)
+plot_step_ahead_model_output(forecast_sample, forecast_target_ma,
+                             intervals = NULL, use_median_as_point = TRUE,
+                             x_col_name = "target_end_date",
+                             x_target_col_name = "target_end_date")
+```
+
+The rest of the vignette is using `"quantile"` output type to show the multiple
+functionality of `plot_step_ahead_model_output()`. The same functionality is 
+also available for spaghetti plots using `"sample"` output type.
+
 
 #### Scenario
 
@@ -146,8 +248,11 @@ target_data_us <-
                 date > "2020-10-01")
 ```
 
+By default, the function will plot the quantiles intervals:
+
 ```{r plot_A_us}
-plot_step_ahead_model_output(projection_data_a_us, target_data_us)
+projection_plot <- dplyr::filter(projection_data_a_us, output_type == "quantile")
+plot_step_ahead_model_output(projection_plot, target_data_us)
 ```
 
 By default, the 50%, 80% and 95% intervals are plotted, with a specific color
@@ -157,7 +262,7 @@ In general, it is hard to see multiple intervals when multiple models are
 plotted, so specifying only one interval can be useful:
 
 ```{r plot_A_us_one_int}
-plot_step_ahead_model_output(projection_data_a_us, target_data_us,
+plot_step_ahead_model_output(projection_plot, target_data_us,
                              intervals = 0.8)
 ```
 
@@ -165,49 +270,17 @@ It is also possible to add a median line on the plot with the `use_median_as_poi
 parameter:
 
 ```{r plot_A_us_med}
-plot_step_ahead_model_output(projection_data_a_us, target_data_us,
+plot_step_ahead_model_output(projection_plot, target_data_us,
                              intervals = 0.8,
                              use_median_as_point = TRUE)
 ```
 
 By default plots are interactive, but that can be easily switched to static:
 ```{r plot_A_us_med_static}
-plot_step_ahead_model_output(projection_data_a_us, target_data_us,
+plot_step_ahead_model_output(projection_plot, target_data_us,
                              intervals = 0.8,
                              use_median_as_point = TRUE,
                              interactive = FALSE)
-```
-
-#### Forecast
-
-To plot the forecast projections for one reference dates (2022-11-19) for 
-Massachusetts (25).
-
-```{r f_p}
-# Pre-filtering
-forecast_quantile <- dplyr::mutate(forecast_quantile,
-                                   output_type_id = as.numeric(output_type_id))
-forecast_quantile_1 <- dplyr::filter(forecast_quantile,
-                                     reference_date == "2022-11-19",
-                                     location == 25)
-
-# Limit date for layout reason
-forecast_target_ma <- dplyr::filter(forecast_target_ts, location == 25,
-                                    target == "wk inc flu hosp",
-                                    target_end_date >= "2022-11-01",
-                                    target_end_date <= "2023-01-01")
-```
-
-As the forecast projections used the column `target_end_date` and contains the
-quantiles: `"0.05"`, `"0.1"`, `"0.25"`, `"0.5"`,  `"0.75"`, `"0.9"`, `"0.95"`,
-the parameters in the `plot_step_ahead_model_output()` need to be ajusted:
-
-```{r f_1}
-plot_step_ahead_model_output(forecast_quantile_1, forecast_target_ma,
-                             intervals = c(0.9, 0.5),
-                             use_median_as_point = TRUE,
-                             x_col_name = "target_end_date",
-                             x_target_col_name = "target_end_date")
 ```
 
 
@@ -266,8 +339,9 @@ plot_step_ahead_model_output(projection_data_a_us, target_data_us,
 A "facet" (or subplot) plot can also be created for each location
 
 ```{r f_p2}
-forecast_quantile_1 <- dplyr::filter(forecast_quantile,
-                                     reference_date == "2022-11-19")
+forecast_quantile_1 <- dplyr::filter(forecast_outputs,
+                                     reference_date == "2022-11-19",
+                                     output_type == "quantile")
 forecast_target <- dplyr::filter(forecast_target_ts,
                                  target_end_date >= "2022-11-01",
                                  target_end_date <= "2023-01-01",
@@ -319,7 +393,8 @@ plot_step_ahead_model_output(projection_data_mod, target_data_us,
                              fill_transparency = 0.15)
 ```
 
-Plots without intervals are also possible:
+Plots without intervals are also possible (if no `"sample"` is available). A 
+warning will be printed for the missing samples:
 ```{r plot_us_no_interv}
 plot_step_ahead_model_output(projection_data_mod, target_data_us,
                              use_median_as_point = TRUE, facet = "scenario_id",
@@ -357,7 +432,7 @@ Please refer to `ggplot2::aes_group_order` for more information.
 To illustrate this we will use the forecast example for both reference date:
 
 ```{r f_3}
-plot_step_ahead_model_output(forecast_quantile, forecast_target,
+plot_step_ahead_model_output(forecast_outputs, forecast_target,
                              intervals = c(0.9, 0.5),
                              use_median_as_point = TRUE,
                              x_col_name = "target_end_date",
