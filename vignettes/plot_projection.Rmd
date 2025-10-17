@@ -154,7 +154,7 @@ Massachusetts (25).
 
 ```{r f_p}
 # Pre-filtering
-forecast_quantile <- dplyr::filter(forecast_outputs, 
+forecast_quantile <- dplyr::filter(forecast_outputs,
                                    output_type == "quantile",
                                    reference_date == "2022-11-19",
                                    location == 25) |>
@@ -216,7 +216,7 @@ data frame or the `"quantile"` 0.5 or the function calculate it by using the
 `"sample"`, depending on the content of the inputted data frame
 
 ```{r plot sample_med}
-forecast_sample <- dplyr::filter(forecast_outputs, output_type %in% 
+forecast_sample <- dplyr::filter(forecast_outputs, output_type %in%
                                    c("sample", "median"),
                                  reference_date == "2022-11-19",
                                  location == 25)

@@ -64,7 +64,7 @@ test_that("Input parameters", {
     dplyr::filter(forecast_data, output_type_id != 0.5,
                   output_type != "median"), target_data_us,
     use_median_as_point = TRUE, x_col_name = "target_end_date"
-    ))
+  ))
 
   expect_message(plot_step_ahead_model_output(
     dplyr::filter(forecast_data, output_type == "sample"), target_data_us,
