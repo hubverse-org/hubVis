@@ -54,7 +54,8 @@ test_that("Input parameters", {
 
   expect_warning(plot_step_ahead_model_output(forecast_quantile, target_data_us,
                                               x_col_name = "target_end_date",
-                                              intervals = NULL))
+                                              intervals = NULL),
+                 "No intervals or samples will be plotted.")
   expect_no_error(plot_step_ahead_model_output(forecast_quantile, target_data_us,
                                                x_col_name = "target_end_date",
                                                intervals = NULL,
@@ -64,21 +65,26 @@ test_that("Input parameters", {
     dplyr::filter(forecast_data, output_type_id != 0.5,
                   output_type != "median"), target_data_us,
     use_median_as_point = TRUE, x_col_name = "target_end_date"
-  ))
+  ), paste0("output_type will be used to calculate the quantiles",
+            "|Additional output_type will be removed"))
 
   expect_message(plot_step_ahead_model_output(
     dplyr::filter(forecast_data, output_type == "sample"), target_data_us,
     use_median_as_point = TRUE, x_col_name = "target_end_date", intervals = 0.5
-  ))
+  ), ' output_type is used to calculate required')
 
-  forecast_median <- dplyr::filter(forecast_data, output_type == "median")
+  forecast_median <- dplyr::filter(forecast_data, output_type == "median") %>%
+    dplyr::mutate(output_type_id = as.numeric(output_type_id))
   expect_no_error(plot_step_ahead_model_output(forecast_median, target_data_us,
                                                x_col_name = "target_end_date",
-                                               intervals = NULL))
+                                               intervals = NULL) |>
+                    suppressWarnings())
   expect_warning(plot_step_ahead_model_output(forecast_median, target_data_us,
                                               x_col_name = "target_end_date",
                                               intervals = NULL,
-                                              use_median_as_point = TRUE))
+                                              use_median_as_point = TRUE),
+                 paste0(" No intervals or samples will be plotted",
+                        "|contains some empty columns") )
   expect_error(plot_step_ahead_model_output(forecast_median, target_data_us,
                                             x_col_name = "target_end_date",
                                             intervals = 0.9),
@@ -222,3 +228,4 @@ test_that("Input parameters", {
                                             top_layer = "model"),
                "should correspond to one of these possible values: ")
 })
+

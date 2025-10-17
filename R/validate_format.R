@@ -171,7 +171,7 @@ output_type_validation <- function(model_out_tbl, quant_value, plain_line,
       out_type_plot <- "quantile"
       if (!all(quant_value %in% mod_out_type_id)) {
         if ("sample" %in% mod_out_type) {
-          cli::cli_warn(c("x" = "{.arg model_output_tbl} did not have the
+          cli::cli_warn(c("!" = "{.arg model_output_tbl} did not have the
                           expected output_type_id value {.val {quant_value}}.
                           {.val sample} output_type will be used to calculate
                           the quantiles."))
