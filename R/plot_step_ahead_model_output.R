@@ -12,10 +12,11 @@
 #'@param use_median_as_point a `Boolean` for using median quantile as point
 #' in plot. Default to FALSE. If TRUE, will select first any `median`
 #' output type value and if no `median` value included in `model_out_tbl`;
-#' will select `quantile = 0.5` output type value.
+#' will select `quantile = 0.5` output type value. If no `median` or `quantile`,
+#' will used the `sample` output type to calculate the median.
 #'@param intervals a vector of `numeric` values indicating which central
 #' prediction interval levels to plot.Value possibles:
-#' `NULL, 0.5, 0.8, 0.9, 0.95`. `NULL` means no interval levels, if the
+#' `0.5, 0.8, 0.9, 0.95`. `NULL` means no interval levels, if the
 #' `model_out_tbl` table contains `"sample"` output type, the samples will be
 #' plotted. If not provided, it will default to `c(.5, .8, .95)`.
 #' When plotting 6 models or more, the plot will be reduced to show `.95`
