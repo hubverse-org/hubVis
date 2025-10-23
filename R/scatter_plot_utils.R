@@ -227,7 +227,6 @@ plotly_proj_data <- function(plot_model, df_point, df_ribbon, df_sample,
     show_legend <- arguments$showlegend
     if (is.null(show_legend)) show_legend <- TRUE
   }
-
   if (!is.null(df_sample)) {
     for (j in unique(df_sample[[fill_by]])) {
       show_leg <- show_legend
@@ -259,7 +258,6 @@ plotly_proj_data <- function(plot_model, df_point, df_ribbon, df_sample,
     }
     show_legend <- FALSE
   }
-
   if (!is.null(df_ribbon)) {
     for (n_rib in seq_along(df_ribbon)) {
       df_rib <- df_ribbon[[n_rib]]
@@ -289,11 +287,9 @@ plotly_proj_data <- function(plot_model, df_point, df_ribbon, df_sample,
           plot_model <- do.call(plotly::add_ribbons, arg_list)
           plot_model <- plotly::layout(plot_model, xaxis = list(title = "Date"))
         }
-        #show_legend <- FALSE
       }
     }
   }
-
   return(plot_model)
 }
 
@@ -345,7 +341,6 @@ static_proj_data <- function(plot_model, df_point, df_ribbon, df_sample,
       }
     }
   }
-
   if (!is.null(df_sample)) {
     for (fill in unique(df_sample[[fill_by]])) {
       df_sample_id <- dplyr::filter(df_sample, .data[[fill_by]] == fill)
@@ -358,7 +353,6 @@ static_proj_data <- function(plot_model, df_point, df_ribbon, df_sample,
                   alpha = opacity)
     }
   }
-
   if (nrow(df_point) > 0) {
     if (!is.null(df_sample)) {
       line_width <- 1.3
@@ -379,7 +373,6 @@ static_proj_data <- function(plot_model, df_point, df_ribbon, df_sample,
       geom_line(data = df_point, plot_aes, inherit.aes = FALSE,
                 linewidth = line_width)
   }
-
   return(plot_model)
 }
 
@@ -481,7 +474,6 @@ simple_model_plot <- function(
                                        x_col_name = x_target_col_name)
     }
   }
-
   return(plot_model)
 }
 

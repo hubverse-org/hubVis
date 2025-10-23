@@ -71,7 +71,7 @@ test_that("Input parameters", {
   expect_message(plot_step_ahead_model_output(
     dplyr::filter(forecast_data, output_type == "sample"), target_data_us,
     use_median_as_point = TRUE, x_col_name = "target_end_date", intervals = 0.5
-  ), ' output_type is used to calculate required')
+  ), " output_type is used to calculate required")
 
   forecast_median <- dplyr::filter(forecast_data, output_type == "median") %>%
     dplyr::mutate(output_type_id = as.numeric(output_type_id))
@@ -84,7 +84,7 @@ test_that("Input parameters", {
                                               intervals = NULL,
                                               use_median_as_point = TRUE),
                  paste0(" No intervals or samples will be plotted",
-                        "|contains some empty columns") )
+                        "|contains some empty columns"))
   expect_error(plot_step_ahead_model_output(forecast_median, target_data_us,
                                             x_col_name = "target_end_date",
                                             intervals = 0.9),
@@ -228,4 +228,3 @@ test_that("Input parameters", {
                                             top_layer = "model"),
                "should correspond to one of these possible values: ")
 })
-
