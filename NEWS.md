@@ -4,6 +4,11 @@
 allow log scale on the y-axis
 - fix shared axis on interactive plot version
 - minor fix of the vignette to adapt to last version of `hubExamples` (> 0.1)
+- add functionality to plot `"sample"` output type as spaghetti plot in the 
+`plot_step_ahead_model_output()` function.
+- update `plot_step_ahead_model_output()` function to use `"sample"` output type
+to calculate missing expected quantiles if `intervals` and/or 
+`use_median_as_point` are set to a numeric vector or `TRUE`, respectively.
 
 # hubVis 0.1.3
 
