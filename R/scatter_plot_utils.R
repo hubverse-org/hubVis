@@ -25,10 +25,13 @@ plot_prep_data <- function(df, plain_line, plain_type, intervals,
   # Factorize the fill_by column
   df[[fill_by]] <- as.factor(df[[fill_by]])
 
-  # Create quantiles if necessary
+  # Create quantiles if necessary:
+  # - if quantiles are expected to be used either for median lines or ribbon
+  #   or both and these quantiles are not available in the data frame `df` and
+  #   "sample" is available in `df`: will use the df to calculate the expected
+  #   quantiles
   quant <- c(stats::na.omit(plain_line), unlist(intervals))
-  if (length(quant) == 0) quant <- NULL
-  if (!is.null(quant) && !("quantile" %in% df$output_type) &&
+  if (length(quant) > 0 && !("quantile" %in% df$output_type) &&
         ("sample" %in% df$output_type)) {
     df_sample <- dplyr::filter(df, .data[["output_type"]] == "sample")
     cli::cli_inform(c("i" = "{.val sample} output_type is used to calculate
@@ -38,7 +41,12 @@ plot_prep_data <- function(df, plain_line, plain_type, intervals,
     df <- rbind(df, quant_df)
   }
 
-  # Median
+  # Median: create a data frame with the information for median lines plotting
+  # if plain_line is `NULL`: empty data frame, no median plotting
+  # if plain_line is `NA`: create a data frame using the output type from the
+  #   `plain_type` object and output type ID `NA`
+  # else: create a data frame using the output type matching `plain_type`
+  #   and output type matching `plain_line` parameter
   if (is.null(plain_line)) {
     plain_df <- data.frame(matrix(nrow = 0, ncol = length(colnames(df)))) |>
       setNames(colnames(df)) |>
@@ -47,18 +55,19 @@ plot_prep_data <- function(df, plain_line, plain_type, intervals,
     plain_df <- df[which(df$output_type_id == plain_line &
                            df$output_type == plain_type), ]
   } else {
-    plain_df <- df[which(is.na(df$output_type_id) &
-                           df$output_type == plain_type), ]
+    plain_df <-
+      dplyr::filter(df, dplyr::near(.data[["output_type_id"]], plain_line),
+                    .data[["output_type"]] == plain_type)
   }
   plain_df[[x_col_name]] <- as.Date(plain_df[[x_col_name]])
 
   # Remove empty column to avoid issue
-  empty_cols <- sapply(df, function(k) all(is.na(k)))
-  if (any(empty_cols)) {
-    empty_colnames <- colnames(df)[sapply(df, function (k) all(is.na(k)))] # nolint
+  is_empty_col <- sapply(df, function(k) all(is.na(k)))
+  if (any(is_empty_col)) {
+    empty_colnames <- colnames(df)[is_empty_col]
     cli::cli_warn(c("!" = "{.arg model_out_tbl} contains some empty
                     columns: {.value {empty_colnames}.}"))
-    df <- df[!empty_cols]
+    df <- df[!is_empty_col]
   }
 
   # Intervals & samples
@@ -71,8 +80,11 @@ plot_prep_data <- function(df, plain_line, plain_type, intervals,
     }
   } else {
     ribbon_list <- lapply(intervals, function(ribbon) {
-      ribbon_df <- df[which(df$output_type_id %in% ribbon), ] |>
-        dplyr::mutate(output_type_id = as.numeric(.data[["output_type_id"]]))
+      ribbon_df <-
+        dplyr::mutate(df,
+                      output_type_id = as.numeric(.data[["output_type_id"]]) |>
+                        round(3)) |>
+        dplyr::filter(.data[["output_type_id"]] %in% ribbon)
       ribbon_df <-
         transform(ribbon_df,
                   output_type_id = ifelse(dplyr::near(ribbon_df$output_type_id,
