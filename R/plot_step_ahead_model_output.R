@@ -86,13 +86,13 @@
 #' @details
 #' The function can generate a plot with:
 #' - ribbons for quantiles output type OR
-#' - spaghetti plot for samples output type
+#' - spaghetti plot for sample output type
 #'
 #' depending on the parameters `model_out_tbl` and `intervals`:
 #'
 #' - if `intervals` is set to `NULL` and the `model_out_tbl` contains `"sample"`
 #' output type, a spaghetti plot will be generated
-#' - if `intervals` set set one or multiples of the possible values:
+#' - if `intervals` is set to one or multiples of the possible values:
 #' `0.5, 0.8, 0.9, 0.95`  and the `model_out_tbl` contains `"quantile"` output
 #' type, the quantiles will be used, if only `"sample"` output type is available
 #' in the `model_out_tbl`, the `"sample"` will be used to calculate the
