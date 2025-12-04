@@ -15,7 +15,7 @@
 #' will select `quantile = 0.5` output type value. If no `median` or `quantile` value is included,
 #' will use the `sample` output type to calculate the median.
 #'@param intervals a vector of `numeric` values indicating which central
-#' prediction interval levels to plot.Value possibles:
+#' prediction interval levels to plot. Possible values:
 #' `0.5, 0.8, 0.9, 0.95`. `NULL` means no interval levels, if the
 #' `model_out_tbl` table contains `"sample"` output type, the samples will be
 #' plotted. If not provided, it will default to `c(.5, .8, .95)`.
