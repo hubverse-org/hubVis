@@ -120,7 +120,7 @@ validate_intervals <- function(model_out_tbl, intervals, list_intervals,
 #' `ens_color`(both parameter need to be provided)
 #'
 #' @noRd
-ensemble_validation <- function(ens_color, ens_name) {
+validate_ensemble <- function(ens_color, ens_name) {
   if (is.null(ens_color) + is.null(ens_name) == 1) {
     cli::cli_abort(c("x" = "Both {.arg ens_color} and {.arg ens_name} should
                      be set to a non NULL value"))

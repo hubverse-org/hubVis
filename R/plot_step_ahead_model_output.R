@@ -170,7 +170,7 @@ plot_step_ahead_model_output <- function(
                                         plain_line, intervals,
                                         use_median_as_point)
   ### Ensemble specific color
-  ensemble_validation(ens_color, ens_name)
+  validate_ensemble(ens_color, ens_name)
   ### Facet
   facet_nrow <- facet_validation(model_out_tbl, facet = facet,
                                  interactive = interactive,
