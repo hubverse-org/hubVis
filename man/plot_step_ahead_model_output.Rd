@@ -44,14 +44,14 @@ a column \code{observation}. Ignored, if \code{plot_target = FALSE}.}
 \item{use_median_as_point}{a \code{Boolean} for using median quantile as point
 in plot. Default to FALSE. If TRUE, will select first any \code{median}
 output type value and if no \code{median} value included in \code{model_out_tbl};
-will select \code{quantile = 0.5} output type value. If no \code{median} or \code{quantile},
-will used the \code{sample} output type to calculate the median.}
+will select \code{quantile = 0.5} output type value. If no \code{median} or \code{quantile} value is included,
+will use the \code{sample} output type to calculate the median.}
 
 \item{intervals}{a vector of \code{numeric} values indicating which central
-prediction interval levels to plot.Value possibles:
-\verb{0.5, 0.8, 0.9, 0.95}. \code{NULL} means no interval levels, if the
-\code{model_out_tbl} table contains \code{"sample"} output type, the samples will be
-plotted. If not provided, it will default to \code{c(.5, .8, .95)}.
+prediction interval levels to plot or \code{NULL} for sample plotting.
+Possible values: \verb{0.5, 0.8, 0.9, 0.95}. \code{NULL} means no interval levels, if
+the \code{model_out_tbl} table contains \code{"sample"} output type, the samples will
+be plotted.
 When plotting 6 models or more, the plot will be reduced to show \code{.95}
 interval only (if the parameter is not set to \code{NULL}).}
 
@@ -138,14 +138,14 @@ quantiles or samples output type, see Details for more information.
 The function can generate a plot with:
 \itemize{
 \item ribbons for quantiles output type OR
-\item spaghetti plot for samples output type
+\item spaghetti plot for sample output type
 }
 
 depending on the parameters \code{model_out_tbl} and \code{intervals}:
 \itemize{
 \item if \code{intervals} is set to \code{NULL} and the \code{model_out_tbl} contains \code{"sample"}
 output type, a spaghetti plot will be generated
-\item if \code{intervals} set set one or multiples of the possible values:
+\item if \code{intervals} is set to one or multiples of the possible values:
 \verb{0.5, 0.8, 0.9, 0.95}  and the \code{model_out_tbl} contains \code{"quantile"} output
 type, the quantiles will be used, if only \code{"sample"} output type is available
 in the \code{model_out_tbl}, the \code{"sample"} will be used to calculate the

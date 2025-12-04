@@ -83,8 +83,8 @@ target_validation <- function(target_data, col_names = NULL) {
 #'  only one value (the maximal)
 #'
 #' @noRd
-interval_validation <- function(model_out_tbl, intervals, list_intervals,
-                                max_model_id = 5) {
+validate_intervals <- function(model_out_tbl, intervals, list_intervals,
+                               max_model_id = 5) {
   if (any(!intervals %in% names(list_intervals))) {
     cli::cli_warn(c("!" = "{.arg intervals} should correspond to one or
                       multiple of these possible values
@@ -134,12 +134,26 @@ ensemble_validation <- function(ens_color, ens_name) {
 #' @param model_out_tbl a `model_out_tbl` object, containing all the
 #'  required columns including a column containing date information and a
 #'  column `value`.
-#' @param exp_value numeric vector, expected value required in
-#' `model_out_tbl` in `"output_type_id"` column
+#' @param quant_value a vector of `numeric` values indicating which
+#'  prediction interval levels to plot. `NULL` for `"sample"` output type
+#'  plotting.
+#' @param plain_line numeric (`0.5`), `NA` or `NULL` value indicating if a
+#' median line is plotted using quantile, median output type or no plotted,
+#' respectively. For `0.5`, the function will validate if expected `0.5`
+#' quantile or sample output type is available in the `model_out_tbl`.
+#' @param intervals  a vector of `numeric` values indicating which central
+#' prediction interval levels to plot or `NULL` for sample plotting.
+#'
+#' The parameters `quant_value` and `intervals` might be redundant. The
+#' `intervals` parameter is the same one here inputted by the user in the
+#' main function call and `quant_value` is an internal parameter derived from
+#' `intervals`. When plotting 6 models or more, the `intervals` parameter can
+#' contains multiple value, but `quant_value` will be reduced to one value.
+#'
 #'
 #' @noRd
-output_type_validation <- function(model_out_tbl, quant_value, plain_line,
-                                   intervals, use_median_as_point) {
+validate_output_type <- function(model_out_tbl, quant_value, plain_line,
+                                 intervals, use_median_as_point) {
 
   mod_out_type <- unique(model_out_tbl$output_type)
   mod_out_type_id <- unique(model_out_tbl$output_type_id)
