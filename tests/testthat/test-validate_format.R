@@ -73,7 +73,7 @@ test_that("Input parameters", {
     use_median_as_point = TRUE, x_col_name = "target_end_date", intervals = 0.5
   ), " output_type is used to calculate required")
 
-  forecast_median <- dplyr::filter(forecast_data, output_type == "median") %>%
+  forecast_median <- dplyr::filter(forecast_data, output_type == "median") |>
     dplyr::mutate(output_type_id = as.numeric(output_type_id))
   expect_no_error(plot_step_ahead_model_output(forecast_median, target_data_us,
                                                x_col_name = "target_end_date",

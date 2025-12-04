@@ -104,7 +104,7 @@ validate_intervals <- function(model_out_tbl, intervals, list_intervals,
                     show only one interval (the maximum interval value):
                     {.val {intervals}}"))
   }
-  return(intervals)
+  intervals
 }
 
 #' Validate `"ensembles"` parameters format
@@ -292,7 +292,7 @@ facet_validation <- function(model_out_tbl, facet = NULL,
                        these possible values: {.val {facet_title_opt}}"))
     }
   }
-  return(facet_nrow)
+  facet_nrow
 }
 
 #' Validate `"top_layer"` parameters format

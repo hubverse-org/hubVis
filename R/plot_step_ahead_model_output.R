@@ -227,7 +227,7 @@ plot_step_ahead_model_output <- function(
   # Output
   if (isTRUE(show_plot)) {
     if (interactive) show(plot_model)
-    return(plot_model)
+    plot_model
   } else {
     invisible(plot_model)
   }

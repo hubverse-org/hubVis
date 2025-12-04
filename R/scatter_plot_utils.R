@@ -56,7 +56,8 @@ plot_prep_data <- function(df, plain_line, plain_type, intervals,
                            df$output_type == plain_type), ]
   } else {
     plain_df <-
-      dplyr::filter(df, dplyr::near(.data[["output_type_id"]], plain_line),
+      dplyr::filter(df, dplyr::near(as.numeric(.data[["output_type_id"]]),
+                                    as.numeric(plain_line)),
                     .data[["output_type"]] == plain_type)
   }
   plain_df[[x_col_name]] <- as.Date(plain_df[[x_col_name]])
@@ -103,7 +104,7 @@ plot_prep_data <- function(df, plain_line, plain_type, intervals,
   }
 
   # List output
-  return(c(list("median" = plain_df), ribbon_list, list("sample" = sample_df)))
+  c(list("median" = plain_df), ribbon_list, list("sample" = sample_df))
 }
 
 #' Plot Target data with Plotly
@@ -176,7 +177,7 @@ static_target_data <- function(plot_model, target_data, plot_target,
                  aes(x = .data[[x_col_name]], y = .data$observation),
                  color = "#6e6e6e", inherit.aes = FALSE)
   }
-  return(plot_model)
+  plot_model
 }
 
 #' Plot Projection data with Plotly
@@ -302,7 +303,7 @@ plotly_proj_data <- function(plot_model, df_point, df_ribbon, df_sample,
       }
     }
   }
-  return(plot_model)
+  plot_model
 }
 
 #' Plot Projection data with GGPLOT2
@@ -385,7 +386,7 @@ static_proj_data <- function(plot_model, df_point, df_ribbon, df_sample,
       geom_line(data = df_point, plot_aes, inherit.aes = FALSE,
                 linewidth = line_width)
   }
-  return(plot_model)
+  plot_model
 }
 
 
@@ -486,7 +487,7 @@ simple_model_plot <- function(
                                        x_col_name = x_target_col_name)
     }
   }
-  return(plot_model)
+  plot_model
 }
 
 
@@ -597,5 +598,5 @@ plot_layout <- function(plot_model, interactive = TRUE, log_scale = FALSE,
       plot_model <- plot_model + scale_y_log10()
     }
   }
-  return(plot_model)
+  plot_model
 }

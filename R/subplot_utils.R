@@ -41,7 +41,7 @@ plotly_facet_data <- function(data, facet, facet_value,
   df_ribbon <- data[names(data) %in% intervals]
   df_ribbon <- prep_facet_data(df_ribbon, facet, facet_value)
   df_sample <- data$sample[which(data$sample[[facet]] == facet_value), ]
-  return(list(point = df_point, ribbon = df_ribbon, sample = df_sample))
+  list(point = df_point, ribbon = df_ribbon, sample = df_sample)
 }
 
 #' Facet plot for Plotly
@@ -138,7 +138,7 @@ plotly_facet_plot <- function(plot_model, all_plot, all_ens, target_data,
     }
     plot_model <- do.call(simple_model_plot, args)
   }
-  return(plot_model)
+  plot_model
 }
 
 #' Facet plot Layout for Plotly
@@ -177,7 +177,7 @@ plotly_facet_layout <- function(plot_model, text, facet_title = "top left") {
                                         yanchor = y_anchor,
                                         showarrow = FALSE, text = text))
   }
-  return(plot_model)
+  plot_model
 }
 
 #' Facet plot for Plotly
@@ -256,7 +256,7 @@ plotly_facet <- function(facet_value, plot_model, all_plot, all_ens, facet,
                       x_target_col_name = x_target_col_name,
                       ens_name = ens_name, ens_color = ens_color)
   plot_model <- plotly_facet_layout(plot_model, facet_value, facet_title)
-  return(plot_model)
+  plot_model
 }
 
 #' Multifaceted plot for Plotly
@@ -369,7 +369,7 @@ plotly_subplot <- function(plot_model, all_plot, all_ens, facet,
       }
     }
   }
-  return(plot_model)
+  plot_model
 }
 
 #' "Simple" output plot
@@ -464,7 +464,7 @@ simple_subplot <- function(plot_model, all_plot, all_ens, target_data,
       ggplot2::facet_wrap(facet, nrow = facet_nrow, ncol = facet_ncol,
                           scales = facet_scales)
   }
-  return(plot_model)
+  plot_model
 }
 
 #' Plot projection data
@@ -585,5 +585,5 @@ output_plot <-  function(
       scale_color_manual(values = pal_value, name = "Legend",
                          aesthetics = c("colour", "fill"))
   }
-  return(plot_model)
+  plot_model
 }

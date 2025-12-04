@@ -63,5 +63,5 @@ make_palette <- function(model_out_tbl, fill_by = "model_id",
   if (plot_target) {
     pal_value <- c(pal_value, "Target Data" = "#6e6e6e")
   }
-  return(list("value" = pal_value, "color" = pal_color))
+  list("value" = pal_value, "color" = pal_color)
 }
