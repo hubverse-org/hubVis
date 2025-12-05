@@ -209,6 +209,7 @@ plotly_proj_data <- function(plot_model, df_point, df_ribbon, df_sample,
                              line_color, opacity, arguments,
                              fill_by = "model_id", x_col_name = "target_date",
                              group = NULL) {
+  # Add median line if `df_point` contains one or multiple rows
   if (nrow(df_point) > 0) {
     if (!is.null(group))
       df_point <- dplyr::group_by(df_point, .data[[group]])
@@ -240,11 +241,12 @@ plotly_proj_data <- function(plot_model, df_point, df_ribbon, df_sample,
     show_legend <- arguments$showlegend
     if (is.null(show_legend)) show_legend <- TRUE
   }
+
+  # Add sample in the plot if `df_sample` not NULL, in a spaghetti plot format
   if (!is.null(df_sample)) {
     for (j in unique(df_sample[[fill_by]])) {
       show_leg <- show_legend
-      df_sample_id <- dplyr::filter(df_sample,
-                                    .data[[fill_by]] == j)
+      df_sample_id <- dplyr::filter(df_sample, .data[[fill_by]] == j)
       if (!is.null(group)) {
         df_sample_id  <- dplyr::group_by(df_sample_id, .data[[group]],
                                          .data[["output_type_id"]])
@@ -271,6 +273,8 @@ plotly_proj_data <- function(plot_model, df_point, df_ribbon, df_sample,
     }
     show_legend <- FALSE
   }
+
+  # Add ribbon in the plot if `df_ribbon` not NULL
   if (!is.null(df_ribbon)) {
     for (n_rib in seq_along(df_ribbon)) {
       df_rib <- df_ribbon[[n_rib]]
@@ -333,6 +337,7 @@ plotly_proj_data <- function(plot_model, df_point, df_ribbon, df_sample,
 static_proj_data <- function(plot_model, df_point, df_ribbon, df_sample,
                              line_color, opacity, fill_by = "model_id",
                              x_col_name = "target_date", group = NULL) {
+  # Add ribbon in the plot if `df_ribbon` not NULL
   if (!is.null(df_ribbon)) {
     for (fill in unique(unlist(purrr::map(df_ribbon, fill_by)))) {
       for (n_rib in seq_along(df_ribbon)) {
@@ -354,6 +359,7 @@ static_proj_data <- function(plot_model, df_point, df_ribbon, df_sample,
       }
     }
   }
+  # Add sample in the plot if `df_sample` not NULL, in a spaghetti plot format
   if (!is.null(df_sample)) {
     for (fill in unique(df_sample[[fill_by]])) {
       df_sample_id <- dplyr::filter(df_sample, .data[[fill_by]] == fill)
@@ -366,6 +372,7 @@ static_proj_data <- function(plot_model, df_point, df_ribbon, df_sample,
                   alpha = opacity)
     }
   }
+  # Add median line if `df_point` contains one or multiple rows
   if (nrow(df_point) > 0) {
     if (!is.null(df_sample)) {
       line_width <- 1.3
