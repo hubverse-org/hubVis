@@ -307,7 +307,8 @@ test_that("sample output type functionality", {
 
   target_data_48 <- dplyr::filter(forecast_target_ts, location == "48",
                                   target_end_date < "2022-11-15",
-                                  target_end_date > "2022-01-01") |>
+                                  target_end_date > "2022-01-01",
+                                  target == "wk inc flu hosp") |>
     dplyr::rename(date = target_end_date)
   forecast_data <- dplyr::filter(forecast_outputs, location == "48",
                                  target == "wk inc flu hosp",
@@ -359,7 +360,8 @@ test_that("sample output type functionality", {
 
   target_data <- dplyr::filter(forecast_target_ts, location %in% c("25", "48"),
                                target_end_date < "2022-11-15",
-                               target_end_date > "2022-10-01") |>
+                               target_end_date > "2022-10-01",
+                               target == "wk inc flu hosp") |>
     dplyr::rename(date = target_end_date)
   forecast_data <- dplyr::filter(forecast_outputs, target == "wk inc flu hosp",
                                  output_type == "sample")
