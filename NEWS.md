@@ -9,6 +9,8 @@ allow log scale on the y-axis
 - update `plot_step_ahead_model_output()` function to use `"sample"` output type
 to calculate missing expected quantiles if `intervals` and/or 
 `use_median_as_point` are set to a numeric vector or `TRUE`, respectively.
+- `plot_step_ahead_model_output()` is now marked with a "questioning" lifecycle badge. The function API will change in a future version to improve usability and maintainability (see #71).
+
 
 # hubVis 0.1.3
 
