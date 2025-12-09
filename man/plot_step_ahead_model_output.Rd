@@ -131,6 +131,8 @@ the the value in the column. Please refer to \link[ggplot2:aes_group_order]{ggpl
 more information. By default, NULL (no partitioning).}
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#questioning}{\figure{lifecycle-questioning.svg}{options: alt='[Questioning]'}}}{\strong{[Questioning]}}
+
 Create a simple time-series plot for model projection outputs. Plot either
 quantiles or samples output type, see Details for more information.
 }
