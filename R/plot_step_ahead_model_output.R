@@ -1,5 +1,8 @@
 #' Basic Plot for model outputs
 #'
+#' @description
+#' `r lifecycle::badge("questioning")`
+#'
 #' Create a simple time-series plot for model projection outputs. Plot either
 #' quantiles or samples output type, see Details for more information.
 #'
