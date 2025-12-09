@@ -17,7 +17,10 @@ target_data_us <-
 
 ## Model output - Forecast
 forecast_data <- dplyr::filter(forecast_outputs, location == "48")
-target_data_48 <- dplyr::filter(forecast_target_ts, location == "48")
+target_data_48 <- dplyr::filter(forecast_target_ts, location == "48",
+                                target == "wk inc flu hosp",
+                                target_end_date < "2022-11-02",
+                                target_end_date > "2022-10-02")
 
 
 # Test input information
@@ -56,11 +59,18 @@ test_that("Input parameters", {
                                               x_col_name = "target_end_date",
                                               intervals = NULL),
                  "No intervals or samples will be plotted.")
-  expect_no_error(plot_step_ahead_model_output(forecast_quantile, target_data_us,
-                                               x_col_name = "target_end_date",
-                                               intervals = NULL,
-                                               use_median_as_point = TRUE) |>
-                    suppressWarnings())
+
+  p <- plot_step_ahead_model_output(forecast_quantile, target_data_48,
+                                    x_col_name = "target_end_date",
+                                    intervals = NULL,
+                                    x_target_col_name = "target_end_date",
+                                    use_median_as_point = TRUE) |>
+    suppressWarnings()
+  expect_equal(grep("Median", p$x$attrs[[p$x$cur_data]]$hovertext) |> length(),
+               dplyr::filter(forecast_quantile,
+                             dplyr::near(.data[["output_type_id"]], 0.5)) |>
+                 nrow())
+
   expect_warning(plot_step_ahead_model_output(
     dplyr::filter(forecast_data, output_type_id != 0.5,
                   output_type != "median"), target_data_us,
@@ -75,16 +85,33 @@ test_that("Input parameters", {
 
   forecast_median <- dplyr::filter(forecast_data, output_type == "median") |>
     dplyr::mutate(output_type_id = as.numeric(output_type_id))
-  expect_no_error(plot_step_ahead_model_output(forecast_median, target_data_us,
-                                               x_col_name = "target_end_date",
-                                               intervals = NULL) |>
-                    suppressWarnings())
-  expect_warning(plot_step_ahead_model_output(forecast_median, target_data_us,
-                                              x_col_name = "target_end_date",
-                                              intervals = NULL,
-                                              use_median_as_point = TRUE),
-                 paste0(" No intervals or samples will be plotted",
-                        "|contains some empty columns"))
+  # No median plotted
+  p <- plot_step_ahead_model_output(forecast_median, target_data_48,
+                                    x_target_col_name = "target_end_date",
+                                    x_col_name = "target_end_date",
+                                    intervals = NULL) |>
+    suppressWarnings()
+  expect_equal(grep("Median", p$x$attrs[[p$x$cur_data]]$hovertext) |> length(),
+               0)
+  # Median plotted
+  p <- plot_step_ahead_model_output(forecast_median, target_data_48,
+                                    x_target_col_name = "target_end_date",
+                                    x_col_name = "target_end_date",
+                                    intervals = NULL,
+                                    use_median_as_point = TRUE) |>
+    suppressWarnings()
+  expect_equal(grep("Median", p$x$attrs[[p$x$cur_data]]$hovertext) |> length(),
+               nrow(forecast_median))
+
+  expect_warning(
+    plot_step_ahead_model_output(forecast_median, target_data_48,
+                                 x_col_name = "target_end_date",
+                                 intervals = NULL,
+                                 x_target_col_name = "target_end_date",
+                                 use_median_as_point = TRUE),
+    paste0(" No intervals or samples will be plotted",
+           "|contains some empty columns")
+  )
   expect_error(plot_step_ahead_model_output(forecast_median, target_data_us,
                                             x_col_name = "target_end_date",
                                             intervals = 0.9),
@@ -144,15 +171,20 @@ test_that("Input parameters", {
   df_test$output_type_id <- NA
   df_test <- rbind(df_test, projection_data_a_us)
   ## Add Median
-  expect_no_error(plot_test <-
-                    plot_step_ahead_model_output(df_test, target_data_us,
-                                                 use_median_as_point = TRUE))
+  p <-
+    plot_step_ahead_model_output(df_test, target_data_us,
+                                 use_median_as_point = TRUE)
+  expect_equal(grep("Median", unlist(purrr::map(p$x$attrs, "hovertext"))) |>
+                 length(),
+               nrow(dplyr::filter(df_test, is.na(output_type_id))))
   ## Add Mean
   df_test <- dplyr::mutate(projection_data_a_us,
                            output_type = gsub("median", "mean", output_type))
-  expect_no_error(plot_step_ahead_model_output(df_test, target_data_us,
-                                               show_plot = FALSE))
-  ## Add CDF
+  p <- plot_step_ahead_model_output(df_test, target_data_us)
+  ### No error and no median expected
+  expect_equal(grep("Median", unlist(purrr::map(p$x$attrs, "hovertext"))) |>
+                 length(), 0)
+  ## Change output type to CDF
   df_test <- dplyr::mutate(projection_data_a_us, output_type = "cdf")
   expect_error(plot_step_ahead_model_output(df_test, target_data_us,
                                             show_plot = FALSE),
@@ -180,18 +212,24 @@ test_that("Input parameters", {
   expect_warning(plot_step_ahead_model_output(d_proj, target_data_us,
                                               show_plot = FALSE),
                  "the plot will be reduced to show only one interval")
-  ## 50% Interval
-  expect_no_error(plot_step_ahead_model_output(d_proj, target_data_us,
-                                               show_plot = FALSE,
-                                               intervals = 0.5))
+  ## 50% Interval - expect only 50% interval plotted (+ target)
+  p <- plot_step_ahead_model_output(d_proj, target_data_us, intervals = 0.5)
+  expect_equal(grep("Intervals", unlist(purrr::map(p$x$attrs, "hovertext")),
+                    value = TRUE)  |> length(),
+               grep("50% Intervals", unlist(purrr::map(p$x$attrs, "hovertext")),
+                    value = TRUE)  |> length())
+
   # Median
   df_test <- dplyr::filter(projection_data_a_us, output_type_id != 0.5)
   expect_error(plot_step_ahead_model_output(df_test, target_data_us,
                                             show_plot = FALSE,
                                             use_median_as_point = TRUE),
                " is missing the expected output_type_id value")
-  expect_no_error(plot_step_ahead_model_output(df_test, target_data_us,
-                                               show_plot = FALSE))
+  p <- plot_step_ahead_model_output(df_test, target_data_us)
+  expect_equal(unlist(purrr::map(p$x$attrs, "hovertext")) |>
+                 stringr::str_extract("\\d+(?=% Intervals)") |>
+                 unique(),
+               c(NA, "95", "80", "50"))
 
   # Parameter input
   ## Parameters `ens_name` & `ens_color`
