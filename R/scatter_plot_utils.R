@@ -52,12 +52,13 @@ plot_prep_data <- function(df, plain_line, plain_type, intervals,
       setNames(colnames(df)) |>
       dplyr::as_tibble()
   } else if (!is.na(plain_line)) {
-    plain_df <- df[which(df$output_type_id == plain_line &
-                           df$output_type == plain_type), ]
+    plain_df <- dplyr::filter(df,
+                              dplyr::near(as.numeric(.data[["output_type_id"]]),
+                                          as.numeric(plain_line)),
+                              .data[["output_type"]] == plain_type)
   } else {
     plain_df <-
-      dplyr::filter(df, dplyr::near(as.numeric(.data[["output_type_id"]]),
-                                    as.numeric(plain_line)),
+      dplyr::filter(df, is.na(.data[["output_type_id"]]),
                     .data[["output_type"]] == plain_type)
   }
   plain_df[[x_col_name]] <- as.Date(plain_df[[x_col_name]])
