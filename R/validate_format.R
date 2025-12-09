@@ -163,11 +163,14 @@ validate_output_type <- function(model_out_tbl, quant_value, plain_line,
   if (!is.null(plain_line)) {
     if (is.na(plain_line)) {
       out_type_med <- "median"
-    } else if (plain_line == 0.5) {
+    } else if (dplyr::near(as.numeric(plain_line), 0.5)) {
       out_type_med <- purrr::map_vec(c("quantile", "sample"), ~ .x %in%
                                        mod_out_type)
       out_type_med <- c("quantile", "sample")[[grep(TRUE, out_type_med)[1]]]
-      if (out_type_med == "quantile" && !(0.5 %in% mod_out_type_id)) {
+      if (out_type_med == "quantile" &&
+          !any(dplyr::near(0.5, as.numeric(mod_out_type_id) |>
+                           suppressWarnings()) |>
+               na.omit())) {
         if ("sample" %in% mod_out_type) {
           out_type_med <- "sample"
         } else {
