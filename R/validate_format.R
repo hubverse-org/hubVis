@@ -168,9 +168,9 @@ validate_output_type <- function(model_out_tbl, quant_value, plain_line,
                                        mod_out_type)
       out_type_med <- c("quantile", "sample")[[grep(TRUE, out_type_med)[1]]]
       if (out_type_med == "quantile" &&
-          !any(dplyr::near(0.5, as.numeric(mod_out_type_id) |>
-                           suppressWarnings()) |>
-               na.omit())) {
+            !any(dplyr::near(0.5, as.numeric(mod_out_type_id) |>
+                             suppressWarnings()) |>
+                 na.omit())) {
         if ("sample" %in% mod_out_type) {
           out_type_med <- "sample"
         } else {
