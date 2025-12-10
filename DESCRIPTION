@@ -13,12 +13,13 @@ Authors@R: c(
 Description: Plotting methods for hub models output.
 License: MIT + file LICENSE
 Encoding: UTF-8
-Imports: 
+Imports:
     cli,
     dplyr,
     ggplot2,
     grDevices,
     hubUtils (>= 0.0.1),
+    lifecycle,
     methods,
     plotly,
     purrr,
@@ -33,6 +34,7 @@ Suggests:
     hubData,
     hubExamples (>= 0.0.0.9001),
     rmarkdown,
+    stringr,
     testthat (>= 3.0.0),
     vdiffr
 Roxygen: list(markdown = TRUE)

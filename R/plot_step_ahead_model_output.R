@@ -1,6 +1,10 @@
 #' Basic Plot for model outputs
 #'
-#' Create a simple Plotly time-series plot for model projection outputs.
+#' @description
+#' `r lifecycle::badge("questioning")`
+#'
+#' Create a simple time-series plot for model projection outputs. Plot either
+#' quantiles or samples output type, see Details for more information.
 #'
 #'@param model_out_tbl a `model_out_tbl` object, containing all the required
 #' columns including a column containing date information (`x_col_name`
@@ -11,7 +15,15 @@
 #'@param use_median_as_point a `Boolean` for using median quantile as point
 #' in plot. Default to FALSE. If TRUE, will select first any `median`
 #' output type value and if no `median` value included in `model_out_tbl`;
-#' will select `quantile = 0.5` output type value.
+#' will select `quantile = 0.5` output type value. If no `median` or `quantile` value is included,
+#' will use the `sample` output type to calculate the median.
+#'@param intervals a vector of `numeric` values indicating which central
+#' prediction interval levels to plot or `NULL` for sample plotting.
+#' Possible values: `0.5, 0.8, 0.9, 0.95`. `NULL` means no interval levels, if
+#' the `model_out_tbl` table contains `"sample"` output type, the samples will
+#' be plotted.
+#' When plotting 6 models or more, the plot will be reduced to show `.95`
+#' interval only (if the parameter is not set to `NULL`).
 #'@param log_scale a `boolean` to plot y-axis output on a log scale. Default to
 #' FALSE
 #'@param show_plot a `boolean` for showing the plot. Default to TRUE.
@@ -46,11 +58,6 @@
 #' to [colors()] for accepted color names. Default to `"blue"`
 #'@param fill_transparency numeric value used to set transparency of intervals.
 #' 0 means fully transparent, 1 means opaque. Default to `0.25`
-#'@param intervals a vector of `numeric` values indicating which central
-#' prediction interval levels to plot. `NULL` means no interval levels.
-#' If not provided, it will default to `c(.5, .8, .95)`.
-#' When plotting 6 models or more, the plot will be reduced to show `.95`
-#' interval only. Value possibles: `0.5, 0.8, 0.9, 0.95`
 #'@param top_layer character vector, where the first element indicates the top
 #'  layer of the resulting plot. Possible options are `"model_output"` (default)
 #'  and `"target"`
@@ -79,6 +86,21 @@
 #' @importFrom grDevices col2rgb rgb colors
 #' @importFrom ggplot2 labs guides scale_y_log10
 #'
+#' @details
+#' The function can generate a plot with:
+#' - ribbons for quantiles output type OR
+#' - spaghetti plot for sample output type
+#'
+#' depending on the parameters `model_out_tbl` and `intervals`:
+#'
+#' - if `intervals` is set to `NULL` and the `model_out_tbl` contains `"sample"`
+#' output type, a spaghetti plot will be generated
+#' - if `intervals` is set to one or multiples of the possible values:
+#' `0.5, 0.8, 0.9, 0.95`  and the `model_out_tbl` contains `"quantile"` output
+#' type, the quantiles will be used, if only `"sample"` output type is available
+#' in the `model_out_tbl`, the `"sample"` will be used to calculate the
+#' necessary quantiles using `hubUtils::convert_output_type()` function.
+#'
 #' @export
 #'
 #' @examples
@@ -102,19 +124,19 @@
 #' plot_step_ahead_model_output(projection_data, target_data_us)
 #'
 plot_step_ahead_model_output <- function(
-    model_out_tbl, target_data, use_median_as_point = FALSE, log_scale = FALSE,
-    show_plot = TRUE, plot_target = TRUE, x_col_name = "target_date",
-    x_target_col_name = "date", show_legend = TRUE, facet = NULL,
-    facet_scales = "fixed", facet_nrow = NULL, facet_ncol = NULL,
-    facet_title = "top left", interactive = TRUE, fill_by = "model_id",
-    pal_color = "Set2", one_color = "blue", fill_transparency = 0.25,
-    intervals = c(.5, .8, .95), top_layer = "model_output", title = NULL,
+    model_out_tbl, target_data, use_median_as_point = FALSE,
+    intervals = c(.5, .8, .95), log_scale = FALSE, show_plot = TRUE,
+    plot_target = TRUE, x_col_name = "target_date", x_target_col_name = "date",
+    show_legend = TRUE, facet = NULL, facet_scales = "fixed", facet_nrow = NULL,
+    facet_ncol = NULL, facet_title = "top left", interactive = TRUE,
+    fill_by = "model_id", pal_color = "Set2", one_color = "blue",
+    fill_transparency = 0.25, top_layer = "model_output", title = NULL,
     ens_color = NULL, ens_name = NULL, group = NULL) {
 
   # Test format input
   ## Model Output Table
-  exp_f_col <- unique(c("model_id", "output_type_id", x_col_name, "value",
-                        fill_by, group))
+  exp_f_col <- unique(c("model_id", "output_type", "output_type_id", x_col_name,
+                        "value", fill_by, group))
   mdl_out_validation(model_out_tbl, col_names = exp_f_col)
 
   ## Target Data
@@ -127,11 +149,12 @@ plot_step_ahead_model_output <- function(
   list_intervals <- list("0.95" = c(0.975, 0.025), "0.9" = c(0.95, 0.05),
                          "0.8" = c(0.9, 0.1), "0.5" = c(0.75, 0.25))
   if (!is.null(intervals)) {
-    intervals <- interval_validation(model_out_tbl, as.character(intervals),
-                                     list_intervals)
-    ribbon <- list_intervals[as.character(sort(intervals, decreasing = TRUE))]
+    intervals_val <- validate_intervals(model_out_tbl, as.character(intervals),
+                                        list_intervals)
+    ribbon <- list_intervals[as.character(sort(intervals_val,
+                                               decreasing = TRUE))]
   } else {
-    ribbon <- NULL
+    ribbon <- intervals_val <- NULL
   }
   ### Median
   if (isTRUE(use_median_as_point)) {
@@ -143,13 +166,14 @@ plot_step_ahead_model_output <- function(
       plain_type <- "quantile"
     }
   } else {
-    plain_line <- NULL
-    plain_type <- NULL
+    plain_line <- plain_type <- NULL
   }
-  exp_value <- c(plain_line, unlist(ribbon))
-  model_out_tbl <- output_type_validation(model_out_tbl, exp_value)
+
+  model_out_tbl <- validate_output_type(model_out_tbl, unlist(ribbon),
+                                        plain_line, intervals,
+                                        use_median_as_point)
   ### Ensemble specific color
-  ensemble_validation(ens_color, ens_name)
+  validate_ensemble(ens_color, ens_name)
   ### Facet
   facet_nrow <- facet_validation(model_out_tbl, facet = facet,
                                  interactive = interactive,
@@ -184,7 +208,8 @@ plot_step_ahead_model_output <- function(
   }
   plot_model <- output_plot(all_plot, all_ens, target_data,
                             plot_target = plot_target,
-                            intervals =  intervals, pal_color = palette$color,
+                            intervals =  intervals_val,
+                            pal_color = palette$color,
                             fill_transparency = fill_transparency,
                             pal_value = palette$value, top_layer = top_layer,
                             ens_color = ens_color, ens_name = ens_name,
@@ -205,7 +230,7 @@ plot_step_ahead_model_output <- function(
   # Output
   if (isTRUE(show_plot)) {
     if (interactive) show(plot_model)
-    return(plot_model)
+    plot_model
   } else {
     invisible(plot_model)
   }

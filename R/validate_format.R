@@ -12,7 +12,8 @@
 #'
 #' @noRd
 mdl_out_validation <- function(model_out_tbl, col_names = NULL,
-                               valid_types = c("median", "quantile")) {
+                               valid_types = c("median", "quantile",
+                                               "sample")) {
   if (!is.data.frame(model_out_tbl)) {
     cli::cli_abort(c("x" = "{.arg model_out_tbl} must be a `data.frame`."))
   }
@@ -82,8 +83,8 @@ target_validation <- function(target_data, col_names = NULL) {
 #'  only one value (the maximal)
 #'
 #' @noRd
-interval_validation <- function(model_out_tbl, intervals, list_intervals,
-                                max_model_id = 5) {
+validate_intervals <- function(model_out_tbl, intervals, list_intervals,
+                               max_model_id = 5) {
   if (any(!intervals %in% names(list_intervals))) {
     cli::cli_warn(c("!" = "{.arg intervals} should correspond to one or
                       multiple of these possible values
@@ -103,7 +104,7 @@ interval_validation <- function(model_out_tbl, intervals, list_intervals,
                     show only one interval (the maximum interval value):
                     {.val {intervals}}"))
   }
-  return(intervals)
+  intervals
 }
 
 #' Validate `"ensembles"` parameters format
@@ -119,7 +120,7 @@ interval_validation <- function(model_out_tbl, intervals, list_intervals,
 #' `ens_color`(both parameter need to be provided)
 #'
 #' @noRd
-ensemble_validation <- function(ens_color, ens_name) {
+validate_ensemble <- function(ens_color, ens_name) {
   if (is.null(ens_color) + is.null(ens_name) == 1) {
     cli::cli_abort(c("x" = "Both {.arg ens_color} and {.arg ens_name} should
                      be set to a non NULL value"))
@@ -133,21 +134,109 @@ ensemble_validation <- function(ens_color, ens_name) {
 #' @param model_out_tbl a `model_out_tbl` object, containing all the
 #'  required columns including a column containing date information and a
 #'  column `value`.
-#' @param exp_value numeric vector, expected value required in
-#' `model_out_tbl` in `"output_type_id"` column
+#' @param quant_value a vector of `numeric` values indicating which
+#'  prediction interval levels to plot. `NULL` for `"sample"` output type
+#'  plotting.
+#' @param plain_line numeric (`0.5`), `NA` or `NULL` value indicating if a
+#' median line is plotted using quantile, median output type or no plotted,
+#' respectively. For `0.5`, the function will validate if expected `0.5`
+#' quantile or sample output type is available in the `model_out_tbl`.
+#' @param intervals  a vector of `numeric` values indicating which central
+#' prediction interval levels to plot or `NULL` for sample plotting.
+#'
+#' The parameters `quant_value` and `intervals` might be redundant. The
+#' `intervals` parameter is the same one here inputted by the user in the
+#' main function call and `quant_value` is an internal parameter derived from
+#' `intervals`. When plotting 6 models or more, the `intervals` parameter can
+#' contains multiple value, but `quant_value` will be reduced to one value.
+#'
 #'
 #' @noRd
-output_type_validation <- function(model_out_tbl, exp_value) {
-  if (!"numeric" %in% class(model_out_tbl$output_type_id)) {
-    model_out_tbl$output_type_id <-
-      as.numeric(model_out_tbl$output_type_id)
-    cli::cli_warn(c("!" = "{.arg output_type_id} column must be a numeric.
-                    Converting to numeric."))
+validate_output_type <- function(model_out_tbl, quant_value, plain_line,
+                                 intervals, use_median_as_point) {
+
+  mod_out_type <- unique(model_out_tbl$output_type)
+  mod_out_type_id <- unique(model_out_tbl$output_type_id)
+
+  # Median line
+  out_type_med <- NULL
+  if (!is.null(plain_line)) {
+    if (is.na(plain_line)) {
+      out_type_med <- "median"
+    } else if (dplyr::near(as.numeric(plain_line), 0.5)) {
+      out_type_med <- purrr::map_vec(c("quantile", "sample"), ~ .x %in%
+                                       mod_out_type)
+      out_type_med <- c("quantile", "sample")[[grep(TRUE, out_type_med)[1]]]
+      if (out_type_med == "quantile" &&
+            !any(dplyr::near(0.5, as.numeric(mod_out_type_id) |>
+                               suppressWarnings()) |>
+                   na.omit())) {
+        if ("sample" %in% mod_out_type) {
+          out_type_med <- "sample"
+        } else {
+          cli::cli_abort(c("!" = "{.arg model_output_tbl} is missing the expected
+                         output_type_id value {.val 0.5} or {.val median}
+                         output_type to plot the median."))
+        }
+      }
+    }
   }
-  model_output_type_val <- unique(model_out_tbl$output_type_id)
-  if (!all(exp_value %in% model_output_type_val)) {
-    cli::cli_abort(c("x" = "{.arg model_output_type_val} did not have the
-                     expected output_type_id value {.val {exp_value}}"))
+
+  # Ribbon or spaghetti plot
+  if (!is.null(quant_value)) {
+    if ("quantile" %in% mod_out_type) {
+      out_type_plot <- "quantile"
+      if (!all(quant_value %in% mod_out_type_id)) {
+        if ("sample" %in% mod_out_type) {
+          cli::cli_warn(c("!" = "{.arg model_output_tbl} did not have the
+                          expected output_type_id value {.val {quant_value}}.
+                          {.val sample} output_type will be used to calculate
+                          the quantiles."))
+          out_type_plot <- "sample"
+        } else {
+          cli::cli_abort(c("x" = "{.arg model_output_tbl} did not have the
+                         expected output_type_id value {.val {quant_value}}"))
+        }
+      }
+    } else if ("sample" %in% mod_out_type) {
+      out_type_plot <- "sample"
+    } else {
+      cli::cli_abort(c("x" = "{.arg model_out_tbl} did not have the
+                     expected output_type {.val sample} or {.val quantile}."))
+    }
+  } else {
+    out_type_plot <- "sample"
+    if (!"sample" %in% mod_out_type) {
+      cli::cli_warn(c("!" = "{.arg plot_set_ahead_model_output()} was expecting
+                          {.val sample} output_type due to {.arg intervals} set
+                          to {.arg NULL}. {.arg model_out_tbl} is missing the
+                          output_type {.val sample}. No intervals or samples
+                          will be plotted."))
+      out_type_plot <- NULL
+    }
+  }
+
+  all_out_type <- unique(c(out_type_plot, out_type_med))
+  if (is.null(intervals)) intervals <- "NULL"
+  if (!all(mod_out_type %in% all_out_type) && !is.null(all_out_type)) {
+    cli::cli_warn(c("!" = "{.arg plot_set_ahead_model_output()} was expecting
+                          {.val {all_out_type}} output_type due to
+                          {.arg intervals} set to {.val {intervals}} and
+                          {.arg use_median_as_point} set to
+                          {.val {use_median_as_point}}.
+                          Additional output_type will be removed."))
+    model_out_tbl <-
+      dplyr::filter(model_out_tbl,
+                    .data[["output_type"]] %in% all_out_type)
+  }
+
+  if (all(all_out_type %in% c("median", "quantile"))) {
+    if (!"numeric" %in% class(model_out_tbl$output_type_id)) {
+      model_out_tbl$output_type_id <-
+        as.numeric(model_out_tbl$output_type_id)
+      cli::cli_warn(c("!" = "{.arg output_type_id} column must be a numeric.
+                    Converting to numeric."))
+    }
   }
   model_out_tbl
 }
@@ -206,7 +295,7 @@ facet_validation <- function(model_out_tbl, facet = NULL,
                        these possible values: {.val {facet_title_opt}}"))
     }
   }
-  return(facet_nrow)
+  facet_nrow
 }
 
 #' Validate `"top_layer"` parameters format

@@ -8,6 +8,7 @@ plot_step_ahead_model_output(
   model_out_tbl,
   target_data,
   use_median_as_point = FALSE,
+  intervals = c(0.5, 0.8, 0.95),
   log_scale = FALSE,
   show_plot = TRUE,
   plot_target = TRUE,
@@ -24,7 +25,6 @@ plot_step_ahead_model_output(
   pal_color = "Set2",
   one_color = "blue",
   fill_transparency = 0.25,
-  intervals = c(0.5, 0.8, 0.95),
   top_layer = "model_output",
   title = NULL,
   ens_color = NULL,
@@ -44,7 +44,16 @@ a column \code{observation}. Ignored, if \code{plot_target = FALSE}.}
 \item{use_median_as_point}{a \code{Boolean} for using median quantile as point
 in plot. Default to FALSE. If TRUE, will select first any \code{median}
 output type value and if no \code{median} value included in \code{model_out_tbl};
-will select \code{quantile = 0.5} output type value.}
+will select \code{quantile = 0.5} output type value. If no \code{median} or \code{quantile} value is included,
+will use the \code{sample} output type to calculate the median.}
+
+\item{intervals}{a vector of \code{numeric} values indicating which central
+prediction interval levels to plot or \code{NULL} for sample plotting.
+Possible values: \verb{0.5, 0.8, 0.9, 0.95}. \code{NULL} means no interval levels, if
+the \code{model_out_tbl} table contains \code{"sample"} output type, the samples will
+be plotted.
+When plotting 6 models or more, the plot will be reduced to show \code{.95}
+interval only (if the parameter is not set to \code{NULL}).}
 
 \item{log_scale}{a \code{boolean} to plot y-axis output on a log scale. Default to
 FALSE}
@@ -102,12 +111,6 @@ to \code{\link[=colors]{colors()}} for accepted color names. Default to \code{"b
 \item{fill_transparency}{numeric value used to set transparency of intervals.
 0 means fully transparent, 1 means opaque. Default to \code{0.25}}
 
-\item{intervals}{a vector of \code{numeric} values indicating which central
-prediction interval levels to plot. \code{NULL} means no interval levels.
-If not provided, it will default to \code{c(.5, .8, .95)}.
-When plotting 6 models or more, the plot will be reduced to show \code{.95}
-interval only. Value possibles: \verb{0.5, 0.8, 0.9, 0.95}}
-
 \item{top_layer}{character vector, where the first element indicates the top
 layer of the resulting plot. Possible options are \code{"model_output"} (default)
 and \code{"target"}}
@@ -128,7 +131,28 @@ the the value in the column. Please refer to \link[ggplot2:aes_group_order]{ggpl
 more information. By default, NULL (no partitioning).}
 }
 \description{
-Create a simple Plotly time-series plot for model projection outputs.
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#questioning}{\figure{lifecycle-questioning.svg}{options: alt='[Questioning]'}}}{\strong{[Questioning]}}
+
+Create a simple time-series plot for model projection outputs. Plot either
+quantiles or samples output type, see Details for more information.
+}
+\details{
+The function can generate a plot with:
+\itemize{
+\item ribbons for quantiles output type OR
+\item spaghetti plot for sample output type
+}
+
+depending on the parameters \code{model_out_tbl} and \code{intervals}:
+\itemize{
+\item if \code{intervals} is set to \code{NULL} and the \code{model_out_tbl} contains \code{"sample"}
+output type, a spaghetti plot will be generated
+\item if \code{intervals} is set to one or multiples of the possible values:
+\verb{0.5, 0.8, 0.9, 0.95}  and the \code{model_out_tbl} contains \code{"quantile"} output
+type, the quantiles will be used, if only \code{"sample"} output type is available
+in the \code{model_out_tbl}, the \code{"sample"} will be used to calculate the
+necessary quantiles using \code{hubUtils::convert_output_type()} function.
+}
 }
 \examples{
 

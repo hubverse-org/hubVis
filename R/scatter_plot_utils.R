@@ -18,38 +18,75 @@
 #' @noRd
 #' @importFrom dplyr near
 #' @importFrom cli cli_warn
-#' @importFrom stats reshape setNames
+#' @importFrom stats reshape setNames na.omit
+#' @importFrom hubUtils convert_output_type
 plot_prep_data <- function(df, plain_line, plain_type, intervals,
                            x_col_name = "target_date", fill_by = "model_id") {
-  # Remove empty column to avoid issue
-  empty_cols <- sapply(df, function(k) all(is.na(k)))
-  if (any(empty_cols)) {
-    empty_colnames <- colnames(df)[sapply(df, function (k) all(is.na(k)))] # nolint
-    cli::cli_warn(c("!" = "{.arg model_out_tbl} contains some empty
-                    columns: {.value {empty_colnames}.}"))
-    df <- df[!empty_cols]
-  }
   # Factorize the fill_by column
   df[[fill_by]] <- as.factor(df[[fill_by]])
 
-  # Median
+  # Create quantiles if necessary:
+  # - if quantiles are expected to be used either for median lines or ribbon
+  #   or both and these quantiles are not available in the data frame `df` and
+  #   "sample" is available in `df`: will use the df to calculate the expected
+  #   quantiles
+  quant <- c(stats::na.omit(plain_line), unlist(intervals))
+  if (length(quant) > 0 && !("quantile" %in% df$output_type) &&
+        ("sample" %in% df$output_type)) {
+    df_sample <- dplyr::filter(df, .data[["output_type"]] == "sample")
+    cli::cli_inform(c("i" = "{.val sample} output_type is used to calculate
+                      required {.val quantile}"))
+    quant_df <- hubUtils::convert_output_type(df_sample,
+                                              to = list("quantile" = quant))
+    df <- rbind(df, quant_df)
+  }
+
+  # Median: create a data frame with the information for median lines plotting
+  # if plain_line is `NULL`: empty data frame, no median plotting
+  # if plain_line is `NA`: create a data frame using the output type from the
+  #   `plain_type` object and output type ID `NA`
+  # else: create a data frame using the output type matching `plain_type`
+  #   and output type matching `plain_line` parameter
   if (is.null(plain_line)) {
-    plain_df <- df[which(df$output_type_id == plain_line &
-                           df$output_type == plain_type), ]
+    plain_df <- data.frame(matrix(nrow = 0, ncol = length(colnames(df)))) |>
+      setNames(colnames(df)) |>
+      dplyr::as_tibble()
   } else if (!is.na(plain_line)) {
-    plain_df <- df[which(df$output_type_id == plain_line &
-                           df$output_type == plain_type), ]
+    plain_df <- dplyr::filter(df,
+                              dplyr::near(as.numeric(.data[["output_type_id"]]),
+                                          as.numeric(plain_line)),
+                              .data[["output_type"]] == plain_type)
   } else {
-    plain_df <- df[which(is.na(df$output_type_id) &
-                           df$output_type == plain_type), ]
+    plain_df <-
+      dplyr::filter(df, is.na(.data[["output_type_id"]]),
+                    .data[["output_type"]] == plain_type)
   }
   plain_df[[x_col_name]] <- as.Date(plain_df[[x_col_name]])
-  # Intervals
+
+  # Remove empty column to avoid issue
+  is_empty_col <- sapply(df, function(k) all(is.na(k)))
+  if (any(is_empty_col)) {
+    empty_colnames <- colnames(df)[is_empty_col] # nolint
+    cli::cli_warn(c("!" = "{.arg model_out_tbl} contains some empty
+                    columns: {.value {empty_colnames}.}"))
+    df <- df[!is_empty_col]
+  }
+
+  # Intervals & samples
   if (is.null(intervals)) {
     ribbon_list <- NULL
+    if ("sample" %in% df$output_type) {
+      sample_df <- dplyr::filter(df, .data[["output_type"]] == "sample")
+    } else {
+      sample_df <- NULL
+    }
   } else {
     ribbon_list <- lapply(intervals, function(ribbon) {
-      ribbon_df <- df[which(df$output_type_id %in% ribbon), ]
+      ribbon_df <-
+        dplyr::mutate(df,
+                      output_type_id = as.numeric(.data[["output_type_id"]]) |>
+                        round(3)) |>
+        dplyr::filter(.data[["output_type_id"]] %in% ribbon)
       ribbon_df <-
         transform(ribbon_df,
                   output_type_id = ifelse(dplyr::near(ribbon_df$output_type_id,
@@ -64,9 +101,11 @@ plot_prep_data <- function(df, plain_line, plain_type, intervals,
       ribbon_df
     })
     ribbon_list <- stats::setNames(ribbon_list, names(intervals))
+    sample_df <- NULL
   }
+
   # List output
-  return(c(list("median" = plain_df), ribbon_list))
+  c(list("median" = plain_df), ribbon_list, list("sample" = sample_df))
 }
 
 #' Plot Target data with Plotly
@@ -139,7 +178,7 @@ static_target_data <- function(plot_model, target_data, plot_target,
                  aes(x = .data[[x_col_name]], y = .data$observation),
                  color = "#6e6e6e", inherit.aes = FALSE)
   }
-  return(plot_model)
+  plot_model
 }
 
 #' Plot Projection data with Plotly
@@ -167,16 +206,23 @@ static_target_data <- function(plot_model, target_data, plot_target,
 #' @noRd
 #' @importFrom plotly add_lines add_ribbons
 #' @importFrom dplyr group_by
-plotly_proj_data <- function(plot_model, df_point, df_ribbon,
+plotly_proj_data <- function(plot_model, df_point, df_ribbon, df_sample,
                              line_color, opacity, arguments,
                              fill_by = "model_id", x_col_name = "target_date",
                              group = NULL) {
+  # Add median line if `df_point` contains one or multiple rows
   if (nrow(df_point) > 0) {
     if (!is.null(group))
       df_point <- dplyr::group_by(df_point, .data[[group]])
+    if (!is.null(df_sample)) {
+      line_width <- 4
+    } else {
+      line_width <- 2
+    }
     arg_list <-
       list(p = plot_model, data = df_point, x = df_point[[x_col_name]],
            y = ~value, legendgroup = df_point[[fill_by]],
+           line = list(width = line_width),
            name = df_point[[fill_by]], hoverinfo = "text",
            hovertext = paste("Date: ", df_point[[x_col_name]], "<br>",
                              "Median: ", format(round(df_point$value, 2),
@@ -186,7 +232,8 @@ plotly_proj_data <- function(plot_model, df_point, df_ribbon,
       plot_model <- do.call(plotly::add_lines, arg_list)
       plot_model <- plotly::layout(plot_model, xaxis = list(title = "Date"))
     } else {
-      arg_list <- c(arg_list, list(line = list(color = line_color)), arguments)
+      arg_list$line <-  list(width = line_width, color = line_color)
+      arg_list <- c(arg_list, arguments)
       plot_model <- do.call(plotly::add_lines, arg_list)
       plot_model <- plotly::layout(plot_model, xaxis = list(title = "Date"))
     }
@@ -196,6 +243,39 @@ plotly_proj_data <- function(plot_model, df_point, df_ribbon,
     if (is.null(show_legend)) show_legend <- TRUE
   }
 
+  # Add sample in the plot if `df_sample` not NULL, in a spaghetti plot format
+  if (!is.null(df_sample)) {
+    for (j in unique(df_sample[[fill_by]])) {
+      show_leg <- show_legend
+      df_sample_id <- dplyr::filter(df_sample, .data[[fill_by]] == j)
+      if (!is.null(group)) {
+        df_sample_id  <- dplyr::group_by(df_sample_id, .data[[group]],
+                                         .data[["output_type_id"]])
+      } else {
+        df_sample_id <- dplyr::group_by(df_sample_id,
+                                        .data[["output_type_id"]])
+      }
+      arg_list <-
+        list(p = plot_model, data = df_sample_id,
+             x = df_sample_id[[x_col_name]], y = df_sample_id[["value"]],
+             type = "scatter", mode = "lines", showlegend = show_leg,
+             opacity = opacity, name = df_sample_id[[fill_by]],
+             legendgroup = df_sample_id[[fill_by]])
+      if (is.null(line_color)) {
+        arg_list <- c(arg_list, list(color =  df_sample_id[[fill_by]]),
+                      arguments)
+      } else {
+        arg_list <- c(arg_list, list(line = list(color = line_color)),
+                      arguments)
+      }
+      plot_model <- do.call(plotly::add_trace, arg_list)
+      plot_model <- plotly::layout(plot_model, xaxis = list(title = "Date"))
+      show_leg <- FALSE
+    }
+    show_legend <- FALSE
+  }
+
+  # Add ribbon in the plot if `df_ribbon` not NULL
   if (!is.null(df_ribbon)) {
     for (n_rib in seq_along(df_ribbon)) {
       df_rib <- df_ribbon[[n_rib]]
@@ -228,7 +308,7 @@ plotly_proj_data <- function(plot_model, df_point, df_ribbon,
       }
     }
   }
-  return(plot_model)
+  plot_model
 }
 
 #' Plot Projection data with GGPLOT2
@@ -255,10 +335,10 @@ plotly_proj_data <- function(plot_model, df_point, df_ribbon,
 #' @noRd
 #' @importFrom ggplot2 geom_ribbon
 #' @importFrom purrr map
-static_proj_data <- function(plot_model, df_point, df_ribbon,
+static_proj_data <- function(plot_model, df_point, df_ribbon, df_sample,
                              line_color, opacity, fill_by = "model_id",
                              x_col_name = "target_date", group = NULL) {
-
+  # Add ribbon in the plot if `df_ribbon` not NULL
   if (!is.null(df_ribbon)) {
     for (fill in unique(unlist(purrr::map(df_ribbon, fill_by)))) {
       for (n_rib in seq_along(df_ribbon)) {
@@ -280,8 +360,27 @@ static_proj_data <- function(plot_model, df_point, df_ribbon,
       }
     }
   }
-
+  # Add sample in the plot if `df_sample` not NULL, in a spaghetti plot format
+  if (!is.null(df_sample)) {
+    for (fill in unique(df_sample[[fill_by]])) {
+      df_sample_id <- dplyr::filter(df_sample, .data[[fill_by]] == fill)
+      plot_model <- plot_model +
+        geom_line(data = df_sample_id,
+                  aes(x = .data[[x_col_name]], y = .data$value,
+                      color = .data[[fill_by]],
+                      group = paste0(.data[[group]], "-",
+                                     .data[["output_type_id"]])),
+                  alpha = opacity)
+    }
+  }
+  # Add median line if `df_point` contains one or multiple rows
   if (nrow(df_point) > 0) {
+    if (!is.null(df_sample)) {
+      line_width <- 1.3
+    } else {
+      line_width <- 1
+    }
+
     if (is.null(group)) {
       plot_aes <- aes(x = .data[[x_col_name]], y = .data$value,
                       color = .data[[fill_by]])
@@ -292,10 +391,10 @@ static_proj_data <- function(plot_model, df_point, df_ribbon,
                       color = .data[[fill_by]], group = .data[["group"]])
     }
     plot_model <- plot_model  +
-      geom_line(data = df_point, plot_aes, inherit.aes = FALSE, linewidth = 1)
+      geom_line(data = df_point, plot_aes, inherit.aes = FALSE,
+                linewidth = line_width)
   }
-
-  return(plot_model)
+  plot_model
 }
 
 
@@ -347,10 +446,10 @@ static_proj_data <- function(plot_model, df_point, df_ribbon,
 #' @noRd
 #' @importFrom plotly plot_ly
 simple_model_plot <- function(
-    plot_model, df_point, df_ribbon, plot_target, target_data, opacity = 0.25,
-    line_color = NULL, top_layer = "model_output", show_target_legend = TRUE,
-    interactive = TRUE, fill_by = "model_id", x_col_name = "target_date",
-    x_target_col_name = "date", group = NULL, ...) {
+    plot_model, df_point, df_ribbon, df_sample, plot_target, target_data,
+    opacity = 0.25, line_color = NULL, top_layer = "model_output",
+    show_target_legend = TRUE, interactive = TRUE, fill_by = "model_id",
+    x_col_name = "target_date", x_target_col_name = "date", group = NULL, ...) {
   # prerequisite
   arguments <- list(...)
 
@@ -361,7 +460,7 @@ simple_model_plot <- function(
                                        show_target_legend, arguments,
                                        x_col_name = x_target_col_name)
       # Projection data
-      plot_model <- plotly_proj_data(plot_model, df_point, df_ribbon,
+      plot_model <- plotly_proj_data(plot_model, df_point, df_ribbon, df_sample,
                                      line_color, opacity, arguments,
                                      fill_by = fill_by, x_col_name = x_col_name,
                                      group = group)
@@ -370,7 +469,7 @@ simple_model_plot <- function(
       plot_model <- static_target_data(plot_model, target_data, plot_target,
                                        x_col_name = x_target_col_name)
       # Projection data
-      plot_model <- static_proj_data(plot_model, df_point, df_ribbon,
+      plot_model <- static_proj_data(plot_model, df_point, df_ribbon, df_sample,
                                      line_color, opacity, fill_by = fill_by,
                                      x_col_name = x_col_name, group = group)
     }
@@ -378,7 +477,7 @@ simple_model_plot <- function(
   } else if (top_layer == "target") {
     if (interactive) {
       # Projection data
-      plot_model <- plotly_proj_data(plot_model, df_point, df_ribbon,
+      plot_model <- plotly_proj_data(plot_model, df_point, df_ribbon, df_sample,
                                      line_color, opacity, arguments,
                                      fill_by = fill_by, x_col_name = x_col_name,
                                      group = group)
@@ -388,7 +487,7 @@ simple_model_plot <- function(
                                        x_col_name = x_target_col_name)
     } else {
       # Projection data
-      plot_model <- static_proj_data(plot_model, df_point, df_ribbon,
+      plot_model <- static_proj_data(plot_model, df_point, df_ribbon, df_sample,
                                      line_color, opacity, group = group,
                                      fill_by = fill_by, x_col_name = x_col_name)
       # Target Data
@@ -396,8 +495,7 @@ simple_model_plot <- function(
                                        x_col_name = x_target_col_name)
     }
   }
-
-  return(plot_model)
+  plot_model
 }
 
 
@@ -508,5 +606,5 @@ plot_layout <- function(plot_model, interactive = TRUE, log_scale = FALSE,
       plot_model <- plot_model + scale_y_log10()
     }
   }
-  return(plot_model)
+  plot_model
 }
