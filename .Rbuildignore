@@ -13,3 +13,5 @@
 ^\.httr-oauth$
 ^\.secrets$
 ^\.lintr$
+^[.]?air[.]toml$
+^\.vscode$

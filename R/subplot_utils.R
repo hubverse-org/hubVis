@@ -11,9 +11,12 @@
 #'
 #'@noRd
 prep_facet_data <- function(df, facet, facet_value) {
-  list_df <- stats::setNames(lapply(df, function(df_rib) {
-    df_rib[which(df_rib[[facet]] == facet_value), ]
-  }), names(df))
+  list_df <- stats::setNames(
+    lapply(df, function(df_rib) {
+      df_rib[which(df_rib[[facet]] == facet_value), ]
+    }),
+    names(df)
+  )
   list_df
 }
 
@@ -35,8 +38,12 @@ prep_facet_data <- function(df, facet, facet_value) {
 #' interval only. Value possibles: `0.5, 0.8, 0.9, 0.95`
 #'
 #'@noRd
-plotly_facet_data <- function(data, facet, facet_value,
-                              intervals = c(.5, .8, .95)) {
+plotly_facet_data <- function(
+  data,
+  facet,
+  facet_value,
+  intervals = c(.5, .8, .95)
+) {
   df_point <- data$median[which(data$median[[facet]] == facet_value), ]
   df_ribbon <- data[names(data) %in% intervals]
   df_ribbon <- prep_facet_data(df_ribbon, facet, facet_value)
@@ -97,14 +104,25 @@ plotly_facet_data <- function(data, facet, facet_value,
 #' `ens_color`(both parameter need to be provided)
 #'
 #' @noRd
-plotly_facet_plot <- function(plot_model, all_plot, all_ens, target_data,
-                              facet, facet_value, all_facet_value,
-                              plot_target = TRUE, intervals = c(.5, .8, .95),
-                              top_layer = "model_output",
-                              fill_transparency = 0.25, fill_by = "model_id",
-                              x_col_name = "target_date",
-                              x_target_col_name = "date", group = NULL,
-                              ens_name = NULL, ens_color = NULL) {
+plotly_facet_plot <- function(
+  plot_model,
+  all_plot,
+  all_ens,
+  target_data,
+  facet,
+  facet_value,
+  all_facet_value,
+  plot_target = TRUE,
+  intervals = c(.5, .8, .95),
+  top_layer = "model_output",
+  fill_transparency = 0.25,
+  fill_by = "model_id",
+  x_col_name = "target_date",
+  x_target_col_name = "date",
+  group = NULL,
+  ens_name = NULL,
+  ens_color = NULL
+) {
   # Data
   all_plot_data <- plotly_facet_data(all_plot, facet, facet_value, intervals)
   if (plot_target && facet %in% colnames(target_data)) {
@@ -112,27 +130,49 @@ plotly_facet_plot <- function(plot_model, all_plot, all_ens, target_data,
   }
   # plot
   args <-
-    list(plot_model, all_plot_data$point,  all_plot_data$ribbon,
-         all_plot_data$sample, plot_target, target_data,
-         opacity = fill_transparency, top_layer = top_layer, interactive = TRUE,
-         fill_by = fill_by, x_col_name = x_col_name,
-         x_target_col_name = x_target_col_name, group = group,
-         show_target_legend = FALSE, showlegend = FALSE)
+    list(
+      plot_model,
+      all_plot_data$point,
+      all_plot_data$ribbon,
+      all_plot_data$sample,
+      plot_target,
+      target_data,
+      opacity = fill_transparency,
+      top_layer = top_layer,
+      interactive = TRUE,
+      fill_by = fill_by,
+      x_col_name = x_col_name,
+      x_target_col_name = x_target_col_name,
+      group = group,
+      show_target_legend = FALSE,
+      showlegend = FALSE
+    )
   plot_model <- do.call(simple_model_plot, args)
   if (!is.null(all_ens)) {
     ens_plot_data <- plotly_facet_data(all_ens, facet, facet_value, intervals)
     args <-
-      list(plot_model, ens_plot_data$point, ens_plot_data$ribbon,
-           ens_plot_data$sample, FALSE, target_data,
-           opacity = fill_transparency, top_layer = top_layer,
-           interactive = TRUE, fill_by = fill_by, x_col_name = x_col_name,
-           x_target_col_name = x_target_col_name, line_color = ens_color,
-           group = group)
+      list(
+        plot_model,
+        ens_plot_data$point,
+        ens_plot_data$ribbon,
+        ens_plot_data$sample,
+        FALSE,
+        target_data,
+        opacity = fill_transparency,
+        top_layer = top_layer,
+        interactive = TRUE,
+        fill_by = fill_by,
+        x_col_name = x_col_name,
+        x_target_col_name = x_target_col_name,
+        line_color = ens_color,
+        group = group
+      )
     if (facet_value == all_facet_value[1]) {
-      args <-  c(args, show_target_legend = TRUE)
+      args <- c(args, show_target_legend = TRUE)
     } else if (facet == fill_by) {
-      if (facet == "model_id" && ens_name == facet_value)
+      if (facet == "model_id" && ens_name == facet_value) {
         args <- c(args, show_target_legend = FALSE)
+      }
     } else {
       args <- c(args, show_target_legend = FALSE, showlegend = FALSE)
     }
@@ -158,24 +198,31 @@ plotly_facet_layout <- function(plot_model, text, facet_title = "top left") {
     if (grepl("top", facet_title)) {
       y_title <- 1
       y_anchor <- "top"
-    } else if  (grepl("bottom", facet_title)) {
+    } else if (grepl("bottom", facet_title)) {
       y_title <- 0
       y_anchor <- "bottom"
     }
     if (grepl("left", facet_title)) {
       x_title <- 0
       x_anchor <- "left"
-    } else if  (grepl("right", facet_title)) {
+    } else if (grepl("right", facet_title)) {
       x_title <- 1
       x_anchor <- "right"
     }
     plot_model <-
-      plotly::layout(plot_model,
-                     annotations = list(x = x_title, y = y_title,
-                                        xref = "paper", yref = "paper",
-                                        xanchor = x_anchor,
-                                        yanchor = y_anchor,
-                                        showarrow = FALSE, text = text))
+      plotly::layout(
+        plot_model,
+        annotations = list(
+          x = x_title,
+          y = y_title,
+          xref = "paper",
+          yref = "paper",
+          xanchor = x_anchor,
+          yanchor = y_anchor,
+          showarrow = FALSE,
+          text = text
+        )
+      )
   }
   plot_model
 }
@@ -238,23 +285,46 @@ plotly_facet_layout <- function(plot_model, text, facet_title = "top left") {
 #'  more information. By default, NULL (no partitioning).
 #'
 #' @noRd
-plotly_facet <- function(facet_value, plot_model, all_plot, all_ens, facet,
-                         all_facet_value, target_data,
-                         intervals = c(.5, .8, .95), plot_target = TRUE,
-                         fill_transparency = 0.25,
-                         top_layer = "model_output", facet_title = "top left",
-                         fill_by = "model_id", x_col_name = "target_date",
-                         x_target_col_name = "date", ens_name = NULL,
-                         ens_color = NULL, group = NULL) {
+plotly_facet <- function(
+  facet_value,
+  plot_model,
+  all_plot,
+  all_ens,
+  facet,
+  all_facet_value,
+  target_data,
+  intervals = c(.5, .8, .95),
+  plot_target = TRUE,
+  fill_transparency = 0.25,
+  top_layer = "model_output",
+  facet_title = "top left",
+  fill_by = "model_id",
+  x_col_name = "target_date",
+  x_target_col_name = "date",
+  ens_name = NULL,
+  ens_color = NULL,
+  group = NULL
+) {
   plot_model <-
-    plotly_facet_plot(plot_model, all_plot, all_ens, target_data,
-                      facet, facet_value, all_facet_value,
-                      plot_target = plot_target, intervals = intervals,
-                      top_layer = top_layer, fill_by = fill_by,
-                      fill_transparency = fill_transparency,
-                      x_col_name = x_col_name, group = group,
-                      x_target_col_name = x_target_col_name,
-                      ens_name = ens_name, ens_color = ens_color)
+    plotly_facet_plot(
+      plot_model,
+      all_plot,
+      all_ens,
+      target_data,
+      facet,
+      facet_value,
+      all_facet_value,
+      plot_target = plot_target,
+      intervals = intervals,
+      top_layer = top_layer,
+      fill_by = fill_by,
+      fill_transparency = fill_transparency,
+      x_col_name = x_col_name,
+      group = group,
+      x_target_col_name = x_target_col_name,
+      ens_name = ens_name,
+      ens_color = ens_color
+    )
   plot_model <- plotly_facet_layout(plot_model, facet_value, facet_title)
   plot_model
 }
@@ -319,14 +389,28 @@ plotly_facet <- function(facet_value, plot_model, all_plot, all_ens, facet,
 #'  more information. By default, NULL (no partitioning).
 #'
 #' @noRd
-plotly_subplot <- function(plot_model, all_plot, all_ens, facet,
-                           all_facet_value, target_data, plot_target = TRUE,
-                           intervals = c(.5, .8, .95), facet_scales = "fixed",
-                           facet_nrow = NULL, fill_transparency = 0.25,
-                           top_layer = "model_output", facet_title = "top left",
-                           fill_by = "model_id", x_col_name = "target_date",
-                           x_target_col_name = "date", ens_name = NULL,
-                           ens_color = NULL, pal_value = NULL, group = NULL) {
+plotly_subplot <- function(
+  plot_model,
+  all_plot,
+  all_ens,
+  facet,
+  all_facet_value,
+  target_data,
+  plot_target = TRUE,
+  intervals = c(.5, .8, .95),
+  facet_scales = "fixed",
+  facet_nrow = NULL,
+  fill_transparency = 0.25,
+  top_layer = "model_output",
+  facet_title = "top left",
+  fill_by = "model_id",
+  x_col_name = "target_date",
+  x_target_col_name = "date",
+  ens_name = NULL,
+  ens_color = NULL,
+  pal_value = NULL,
+  group = NULL
+) {
   sharex <- FALSE
   sharey <- FALSE
   if (facet_scales == "fixed") {
@@ -340,24 +424,45 @@ plotly_subplot <- function(plot_model, all_plot, all_ens, facet,
   if (is.null(facet_nrow)) {
     facet_nrow <- 1
   }
-  subplot <- lapply(all_facet_value, plotly_facet, plot_model, all_plot,
-                    all_ens, facet, all_facet_value, target_data,
-                    intervals = intervals, plot_target = plot_target,
-                    fill_transparency = fill_transparency,
-                    top_layer = top_layer, facet_title = facet_title,
-                    fill_by = fill_by, x_col_name = x_col_name,
-                    x_target_col_name = x_target_col_name,
-                    ens_name = ens_name, group = group, ens_color = ens_color)
-  plot_model <- plotly::subplot(subplot, nrows = facet_nrow, shareX = sharex,
-                                shareY = sharey)
+  subplot <- lapply(
+    all_facet_value,
+    plotly_facet,
+    plot_model,
+    all_plot,
+    all_ens,
+    facet,
+    all_facet_value,
+    target_data,
+    intervals = intervals,
+    plot_target = plot_target,
+    fill_transparency = fill_transparency,
+    top_layer = top_layer,
+    facet_title = facet_title,
+    fill_by = fill_by,
+    x_col_name = x_col_name,
+    x_target_col_name = x_target_col_name,
+    ens_name = ens_name,
+    group = group,
+    ens_color = ens_color
+  )
+  plot_model <- plotly::subplot(
+    subplot,
+    nrows = facet_nrow,
+    shareX = sharex,
+    shareY = sharey
+  )
   exp_legend <- unlist(unique(purrr::map(all_plot, \(x) levels(x[[fill_by]]))))
-  if (plot_target) exp_legend <- c("target", exp_legend)
+  if (plot_target) {
+    exp_legend <- c("target", exp_legend)
+  }
   for (i in seq_along(exp_legend)) {
     # find the first matching element and make sure that element is shown in
     # the legend
-    vis_leg_sel <- grep(TRUE,
-                        purrr::map(purrr::map(plot_model$x$data, "name"),
-                                   as.character) == exp_legend[i])[1]
+    vis_leg_sel <- grep(
+      TRUE,
+      purrr::map(purrr::map(plot_model$x$data, "name"), as.character) ==
+        exp_legend[i]
+    )[1]
     plot_model$x$data[[vis_leg_sel]]$showlegend <- TRUE
   }
   if (facet == fill_by) {
@@ -365,7 +470,7 @@ plotly_subplot <- function(plot_model, all_plot, all_ens, facet,
       if (purrr::map(plot_model$x$data, "name")[[i]] %in% all_facet_value) {
         plot_model$x$data[[i]]$fillcolor <-
           plot_model$x$data[[i]]$line$color <-
-          pal_value[as.vector(purrr::map(plot_model$x$data, "name")[[i]])]
+            pal_value[as.vector(purrr::map(plot_model$x$data, "name")[[i]])]
       }
     }
   }
@@ -426,26 +531,44 @@ plotly_subplot <- function(plot_model, all_plot, all_ens, facet,
 #'  more information. By default, NULL (no partitioning)
 #'
 #' @noRd
-simple_subplot <- function(plot_model, all_plot, all_ens, target_data,
-                           facet = NULL, intervals = c(.5, .8, .95),
-                           plot_target = TRUE, interactive = TRUE,
-                           fill_transparency = 0.25, top_layer = "model_output",
-                           fill_by = "model_id", x_col_name = "target_date",
-                           x_target_col_name = "date",
-                           facet_scales = "fixed",
-                           facet_nrow = NULL, facet_ncol = NULL,
-                           group = NULL, ens_color = NULL) {
+simple_subplot <- function(
+  plot_model,
+  all_plot,
+  all_ens,
+  target_data,
+  facet = NULL,
+  intervals = c(.5, .8, .95),
+  plot_target = TRUE,
+  interactive = TRUE,
+  fill_transparency = 0.25,
+  top_layer = "model_output",
+  fill_by = "model_id",
+  x_col_name = "target_date",
+  x_target_col_name = "date",
+  facet_scales = "fixed",
+  facet_nrow = NULL,
+  facet_ncol = NULL,
+  group = NULL,
+  ens_color = NULL
+) {
   df_point <- all_plot$median
   df_ribbon <- all_plot[names(all_plot) %in% intervals]
   df_sample <- all_plot$sample
-  args <- list(plot_model, df_point = df_point, df_ribbon = df_ribbon,
-               df_sample = df_sample, plot_target = plot_target,
-               target_data = target_data, opacity = fill_transparency,
-               top_layer = top_layer, fill_by = fill_by,
-               interactive = interactive,
-               x_col_name = x_col_name,
-               x_target_col_name = x_target_col_name,
-               group = group)
+  args <- list(
+    plot_model,
+    df_point = df_point,
+    df_ribbon = df_ribbon,
+    df_sample = df_sample,
+    plot_target = plot_target,
+    target_data = target_data,
+    opacity = fill_transparency,
+    top_layer = top_layer,
+    fill_by = fill_by,
+    interactive = interactive,
+    x_col_name = x_col_name,
+    x_target_col_name = x_target_col_name,
+    group = group
+  )
   plot_model <- do.call(simple_model_plot, args)
   # Ensemble color
   if (!is.null(all_ens)) {
@@ -460,9 +583,13 @@ simple_subplot <- function(plot_model, all_plot, all_ens, target_data,
     plot_model <- do.call(simple_model_plot, args)
   }
   if (!is.null(facet)) {
-    plot_model <-  plot_model +
-      ggplot2::facet_wrap(facet, nrow = facet_nrow, ncol = facet_ncol,
-                          scales = facet_scales)
+    plot_model <- plot_model +
+      ggplot2::facet_wrap(
+        facet,
+        nrow = facet_nrow,
+        ncol = facet_ncol,
+        scales = facet_scales
+      )
   }
   plot_model
 }
@@ -536,54 +663,89 @@ simple_subplot <- function(plot_model, all_plot, all_ens, target_data,
 #' @noRd
 #' @importFrom plotly plot_ly layout subplot
 #' @importFrom ggplot2 ggplot scale_color_manual scale_fill_manual facet_wrap
-output_plot <-  function(
-    all_plot, all_ens, target_data, plot_target = TRUE,
-    intervals = c(.5, .8, .95), pal_color = "Set2", fill_transparency = 0.25,
-    pal_value = NULL, top_layer = "model_output", ens_color = NULL,
-    ens_name = NULL, facet = NULL, facet_scales = "fixed", facet_nrow = NULL,
-    facet_ncol = NULL, facet_title = "top left", facet_value = NULL,
-    interactive = TRUE, fill_by = "model_id", x_col_name = "target_date",
-    x_target_col_name = "date", group = NULL) {
-
+output_plot <- function(
+  all_plot,
+  all_ens,
+  target_data,
+  plot_target = TRUE,
+  intervals = c(.5, .8, .95),
+  pal_color = "Set2",
+  fill_transparency = 0.25,
+  pal_value = NULL,
+  top_layer = "model_output",
+  ens_color = NULL,
+  ens_name = NULL,
+  facet = NULL,
+  facet_scales = "fixed",
+  facet_nrow = NULL,
+  facet_ncol = NULL,
+  facet_title = "top left",
+  facet_value = NULL,
+  interactive = TRUE,
+  fill_by = "model_id",
+  x_col_name = "target_date",
+  x_target_col_name = "date",
+  group = NULL
+) {
   if (interactive) {
-    plot_model <- plotly::plot_ly(colors =  pal_color)
+    plot_model <- plotly::plot_ly(colors = pal_color)
   } else {
     plot_model <- ggplot2::ggplot()
   }
 
   if (!is.null(facet) && interactive) {
-    plot_model <- plotly_subplot(plot_model, all_plot, all_ens, facet,
-                                 facet_value, target_data,
-                                 plot_target = plot_target,
-                                 intervals = intervals,
-                                 facet_scales = facet_scales,
-                                 facet_nrow = facet_nrow,
-                                 fill_transparency = fill_transparency,
-                                 top_layer = top_layer,
-                                 facet_title = facet_title,
-                                 fill_by = fill_by, x_col_name = x_col_name,
-                                 x_target_col_name = x_target_col_name,
-                                 ens_name = ens_name, ens_color = ens_color,
-                                 pal_value = pal_value, group = group)
+    plot_model <- plotly_subplot(
+      plot_model,
+      all_plot,
+      all_ens,
+      facet,
+      facet_value,
+      target_data,
+      plot_target = plot_target,
+      intervals = intervals,
+      facet_scales = facet_scales,
+      facet_nrow = facet_nrow,
+      fill_transparency = fill_transparency,
+      top_layer = top_layer,
+      facet_title = facet_title,
+      fill_by = fill_by,
+      x_col_name = x_col_name,
+      x_target_col_name = x_target_col_name,
+      ens_name = ens_name,
+      ens_color = ens_color,
+      pal_value = pal_value,
+      group = group
+    )
   } else {
-    plot_model <- simple_subplot(plot_model, all_plot, all_ens, target_data,
-                                 intervals = intervals, facet = facet,
-                                 plot_target = plot_target,
-                                 interactive = interactive,
-                                 fill_transparency = fill_transparency,
-                                 top_layer = top_layer, fill_by = fill_by,
-                                 x_col_name = x_col_name,
-                                 facet_scales = facet_scales,
-                                 facet_nrow = facet_nrow,
-                                 facet_ncol = facet_ncol,
-                                 x_target_col_name = x_target_col_name,
-                                 group = group, ens_color = ens_color)
+    plot_model <- simple_subplot(
+      plot_model,
+      all_plot,
+      all_ens,
+      target_data,
+      intervals = intervals,
+      facet = facet,
+      plot_target = plot_target,
+      interactive = interactive,
+      fill_transparency = fill_transparency,
+      top_layer = top_layer,
+      fill_by = fill_by,
+      x_col_name = x_col_name,
+      facet_scales = facet_scales,
+      facet_nrow = facet_nrow,
+      facet_ncol = facet_ncol,
+      x_target_col_name = x_target_col_name,
+      group = group,
+      ens_color = ens_color
+    )
   }
 
   if (!interactive) {
     plot_model <- plot_model +
-      scale_color_manual(values = pal_value, name = "Legend",
-                         aesthetics = c("colour", "fill"))
+      scale_color_manual(
+        values = pal_value,
+        name = "Legend",
+        aesthetics = c("colour", "fill")
+      )
   }
   plot_model
 }
