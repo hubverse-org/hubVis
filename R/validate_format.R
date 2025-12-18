@@ -11,24 +11,32 @@
 #' `model_out_tbl` should contain at least one of the input type.
 #'
 #' @noRd
-mdl_out_validation <- function(model_out_tbl, col_names = NULL,
-                               valid_types = c("median", "quantile",
-                                               "sample")) {
+mdl_out_validation <- function(
+  model_out_tbl,
+  col_names = NULL,
+  valid_types = c("median", "quantile", "sample")
+) {
   if (!is.data.frame(model_out_tbl)) {
     cli::cli_abort(c("x" = "{.arg model_out_tbl} must be a `data.frame`."))
   }
   if (isFALSE("model_out_tbl" %in% class(model_out_tbl))) {
-    cli::cli_warn(c("!" = "{.arg model_out_tbl} must be a `model_out_tbl`.
-                    Class applied by default"))
-    model_out_tbl <- hubUtils::as_model_out_tbl(model_out_tbl,
-                                                remove_empty = TRUE)
+    cli::cli_warn(c(
+      "!" = "{.arg model_out_tbl} must be a `model_out_tbl`.
+                    Class applied by default"
+    ))
+    model_out_tbl <- hubUtils::as_model_out_tbl(
+      model_out_tbl,
+      remove_empty = TRUE
+    )
   }
 
   if (!is.null(col_names)) {
     model_output_col <- colnames(model_out_tbl)
     if (!all(col_names %in% model_output_col)) {
-      cli::cli_abort(c("x" = "{.arg model_out_tbl} did not have all required
-                       columns {.val {col_names}}"))
+      cli::cli_abort(c(
+        "x" = "{.arg model_out_tbl} did not have all required
+                       columns {.val {col_names}}"
+      ))
     }
   }
 
@@ -60,11 +68,12 @@ target_validation <- function(target_data, col_names = NULL) {
   if (!is.null(col_names)) {
     target_data_col <- colnames(target_data)
     if (!all(col_names %in% target_data_col)) {
-      cli::cli_abort(c("x" = "{.arg target_data} did not have all required
-                     columns {.val {col_names}}"))
+      cli::cli_abort(c(
+        "x" = "{.arg target_data} did not have all required
+                     columns {.val {col_names}}"
+      ))
     }
   }
-
 }
 
 #' Validate parameter `intervals` format
@@ -83,26 +92,36 @@ target_validation <- function(target_data, col_names = NULL) {
 #'  only one value (the maximal)
 #'
 #' @noRd
-validate_intervals <- function(model_out_tbl, intervals, list_intervals,
-                               max_model_id = 5) {
+validate_intervals <- function(
+  model_out_tbl,
+  intervals,
+  list_intervals,
+  max_model_id = 5
+) {
   if (any(!intervals %in% names(list_intervals))) {
-    cli::cli_warn(c("!" = "{.arg intervals} should correspond to one or
+    cli::cli_warn(c(
+      "!" = "{.arg intervals} should correspond to one or
                       multiple of these possible values
                       {.val {names(list_intervals)}}.
                       Only the matching value(s) will be used (if no matching
-                      value, the default will be used)."))
+                      value, the default will be used)."
+    ))
     intervals <- intervals[intervals %in% names(list_intervals)]
     if (length(intervals) == 0) {
       intervals <- as.character(c(.5, .8, .95))
     }
   }
-  if (length(unique(model_out_tbl[["model_id"]])) > max_model_id &&
-        length(intervals) > 1) {
+  if (
+    length(unique(model_out_tbl[["model_id"]])) > max_model_id &&
+      length(intervals) > 1
+  ) {
     intervals <- max(intervals)[1]
-    cli::cli_warn(c("!" = "{.arg model_out_tbl} contains more than
+    cli::cli_warn(c(
+      "!" = "{.arg model_out_tbl} contains more than
                     {.val {max_model_id}} models, the plot will be reduced to
                     show only one interval (the maximum interval value):
-                    {.val {intervals}}"))
+                    {.val {intervals}}"
+    ))
   }
   intervals
 }
@@ -122,8 +141,10 @@ validate_intervals <- function(model_out_tbl, intervals, list_intervals,
 #' @noRd
 validate_ensemble <- function(ens_color, ens_name) {
   if (is.null(ens_color) + is.null(ens_name) == 1) {
-    cli::cli_abort(c("x" = "Both {.arg ens_color} and {.arg ens_name} should
-                     be set to a non NULL value"))
+    cli::cli_abort(c(
+      "x" = "Both {.arg ens_color} and {.arg ens_name} should
+                     be set to a non NULL value"
+    ))
   }
 }
 
@@ -152,9 +173,13 @@ validate_ensemble <- function(ens_color, ens_name) {
 #'
 #'
 #' @noRd
-validate_output_type <- function(model_out_tbl, quant_value, plain_line,
-                                 intervals, use_median_as_point) {
-
+validate_output_type <- function(
+  model_out_tbl,
+  quant_value,
+  plain_line,
+  intervals,
+  use_median_as_point
+) {
   mod_out_type <- unique(model_out_tbl$output_type)
   mod_out_type_id <- unique(model_out_tbl$output_type_id)
 
@@ -164,19 +189,31 @@ validate_output_type <- function(model_out_tbl, quant_value, plain_line,
     if (is.na(plain_line)) {
       out_type_med <- "median"
     } else if (dplyr::near(as.numeric(plain_line), 0.5)) {
-      out_type_med <- purrr::map_vec(c("quantile", "sample"), ~ .x %in%
-                                       mod_out_type)
+      out_type_med <- purrr::map_vec(
+        c("quantile", "sample"),
+        ~ .x %in%
+          mod_out_type
+      )
       out_type_med <- c("quantile", "sample")[[grep(TRUE, out_type_med)[1]]]
-      if (out_type_med == "quantile" &&
-            !any(dplyr::near(0.5, as.numeric(mod_out_type_id) |>
-                               suppressWarnings()) |>
-                   na.omit())) {
+      if (
+        out_type_med == "quantile" &&
+          !any(
+            dplyr::near(
+              0.5,
+              as.numeric(mod_out_type_id) |>
+                suppressWarnings()
+            ) |>
+              na.omit()
+          )
+      ) {
         if ("sample" %in% mod_out_type) {
           out_type_med <- "sample"
         } else {
-          cli::cli_abort(c("!" = "{.arg model_output_tbl} is missing the expected
+          cli::cli_abort(c(
+            "!" = "{.arg model_output_tbl} is missing the expected
                          output_type_id value {.val 0.5} or {.val median}
-                         output_type to plot the median."))
+                         output_type to plot the median."
+          ))
         }
       }
     }
@@ -188,54 +225,67 @@ validate_output_type <- function(model_out_tbl, quant_value, plain_line,
       out_type_plot <- "quantile"
       if (!all(quant_value %in% mod_out_type_id)) {
         if ("sample" %in% mod_out_type) {
-          cli::cli_warn(c("!" = "{.arg model_output_tbl} did not have the
+          cli::cli_warn(c(
+            "!" = "{.arg model_output_tbl} did not have the
                           expected output_type_id value {.val {quant_value}}.
                           {.val sample} output_type will be used to calculate
-                          the quantiles."))
+                          the quantiles."
+          ))
           out_type_plot <- "sample"
         } else {
-          cli::cli_abort(c("x" = "{.arg model_output_tbl} did not have the
-                         expected output_type_id value {.val {quant_value}}"))
+          cli::cli_abort(c(
+            "x" = "{.arg model_output_tbl} did not have the
+                         expected output_type_id value {.val {quant_value}}"
+          ))
         }
       }
     } else if ("sample" %in% mod_out_type) {
       out_type_plot <- "sample"
     } else {
-      cli::cli_abort(c("x" = "{.arg model_out_tbl} did not have the
-                     expected output_type {.val sample} or {.val quantile}."))
+      cli::cli_abort(c(
+        "x" = "{.arg model_out_tbl} did not have the
+                     expected output_type {.val sample} or {.val quantile}."
+      ))
     }
   } else {
     out_type_plot <- "sample"
     if (!"sample" %in% mod_out_type) {
-      cli::cli_warn(c("!" = "{.arg plot_set_ahead_model_output()} was expecting
+      cli::cli_warn(c(
+        "!" = "{.arg plot_set_ahead_model_output()} was expecting
                           {.val sample} output_type due to {.arg intervals} set
                           to {.arg NULL}. {.arg model_out_tbl} is missing the
                           output_type {.val sample}. No intervals or samples
-                          will be plotted."))
+                          will be plotted."
+      ))
       out_type_plot <- NULL
     }
   }
 
   all_out_type <- unique(c(out_type_plot, out_type_med))
-  if (is.null(intervals)) intervals <- "NULL"
+  if (is.null(intervals)) {
+    intervals <- "NULL"
+  }
   if (!all(mod_out_type %in% all_out_type) && !is.null(all_out_type)) {
-    cli::cli_warn(c("!" = "{.arg plot_set_ahead_model_output()} was expecting
+    cli::cli_warn(c(
+      "!" = "{.arg plot_set_ahead_model_output()} was expecting
                           {.val {all_out_type}} output_type due to
                           {.arg intervals} set to {.val {intervals}} and
                           {.arg use_median_as_point} set to
                           {.val {use_median_as_point}}.
-                          Additional output_type will be removed."))
+                          Additional output_type will be removed."
+    ))
     model_out_tbl <-
-      dplyr::filter(model_out_tbl,
-                    .data[["output_type"]] %in% all_out_type)
+      dplyr::filter(model_out_tbl, .data[["output_type"]] %in% all_out_type)
   }
 
   if (all(all_out_type %in% c("median", "quantile"))) {
     if (!"numeric" %in% class(model_out_tbl$output_type_id)) {
       model_out_tbl$output_type_id <-
         as.numeric(model_out_tbl$output_type_id)
-      cli::cli_warn(c("!" = "{.arg output_type_id} column must be a numeric.
-                    Converting to numeric."))
+      cli::cli_warn(c(
+        "!" = "{.arg output_type_id} column must be a numeric.
+                    Converting to numeric."
+      ))
     }
   }
   model_out_tbl
@@ -265,25 +315,40 @@ validate_output_type <- function(model_out_tbl, quant_value, plain_line,
 #'  title. For interactive plot only.
 #'
 #' @noRd
-facet_validation <- function(model_out_tbl, facet = NULL,
-                             interactive = TRUE, facet_nrow = NULL,
-                             facet_title = "top left") {
+facet_validation <- function(
+  model_out_tbl,
+  facet = NULL,
+  interactive = TRUE,
+  facet_nrow = NULL,
+  facet_title = "top left"
+) {
   if (!is.null(facet)) {
-    if ((length(facet) != 1) ||
-          !all(facet %in%
-                 setdiff(colnames(model_out_tbl),
-                         hubUtils::std_colnames[names(hubUtils::std_colnames) !=
-                                                  "model_id"]))) {
-      cli::cli_abort(c("x" = "if {.arg facet} is not NULL, the argument should
+    if (
+      (length(facet) != 1) ||
+        !all(
+          facet %in%
+            setdiff(
+              colnames(model_out_tbl),
+              hubUtils::std_colnames[
+                names(hubUtils::std_colnames) != "model_id"
+              ]
+            )
+        )
+    ) {
+      cli::cli_abort(c(
+        "x" = "if {.arg facet} is not NULL, the argument should
                        be of length 1 and should match one of the task_id columns
-                       of {.arg model_out_tbl}"))
+                       of {.arg model_out_tbl}"
+      ))
     }
     facet_max <- length(unique(model_out_tbl[[facet]]))
     if ((interactive) && !is.null(facet_nrow)) {
       if (facet_nrow > facet_max) {
-        cli::cli_warn(c("!" = "{.arg facet_nrow} should be less or equal to the
+        cli::cli_warn(c(
+          "!" = "{.arg facet_nrow} should be less or equal to the
                     number of unique {.arg facet} values. By default, the
-                    parameter will be set to {.val {facet_max}}"))
+                    parameter will be set to {.val {facet_max}}"
+        ))
         facet_nrow <- facet_max
       }
     }
@@ -291,8 +356,10 @@ facet_validation <- function(model_out_tbl, facet = NULL,
   if (!is.null(facet_title)) {
     facet_title_opt <- c("top right", "top left", "bottom right", "bottom left")
     if (!facet_title %in% facet_title_opt) {
-      cli::cli_abort(c("x" = "{.arg facet_title} should correspond to one of
-                       these possible values: {.val {facet_title_opt}}"))
+      cli::cli_abort(c(
+        "x" = "{.arg facet_title} should correspond to one of
+                       these possible values: {.val {facet_title_opt}}"
+      ))
     }
   }
   facet_nrow
@@ -309,8 +376,10 @@ facet_validation <- function(model_out_tbl, facet = NULL,
 #' @noRd
 layer_validation <- function(top_layer) {
   if (!any(top_layer %in% c("model_output", "target"))) {
-    cli::cli_abort(c("x" = "{.arg top_layer} should correspond to one of
+    cli::cli_abort(c(
+      "x" = "{.arg top_layer} should correspond to one of
                        these possible values: {.val model_output},
-                     {.val target}"))
+                     {.val target}"
+    ))
   }
 }
