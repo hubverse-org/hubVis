@@ -124,19 +124,43 @@
 #' plot_step_ahead_model_output(projection_data, target_data_us)
 #'
 plot_step_ahead_model_output <- function(
-    model_out_tbl, target_data, use_median_as_point = FALSE,
-    intervals = c(.5, .8, .95), log_scale = FALSE, show_plot = TRUE,
-    plot_target = TRUE, x_col_name = "target_date", x_target_col_name = "date",
-    show_legend = TRUE, facet = NULL, facet_scales = "fixed", facet_nrow = NULL,
-    facet_ncol = NULL, facet_title = "top left", interactive = TRUE,
-    fill_by = "model_id", pal_color = "Set2", one_color = "blue",
-    fill_transparency = 0.25, top_layer = "model_output", title = NULL,
-    ens_color = NULL, ens_name = NULL, group = NULL) {
-
+  model_out_tbl,
+  target_data,
+  use_median_as_point = FALSE,
+  intervals = c(.5, .8, .95),
+  log_scale = FALSE,
+  show_plot = TRUE,
+  plot_target = TRUE,
+  x_col_name = "target_date",
+  x_target_col_name = "date",
+  show_legend = TRUE,
+  facet = NULL,
+  facet_scales = "fixed",
+  facet_nrow = NULL,
+  facet_ncol = NULL,
+  facet_title = "top left",
+  interactive = TRUE,
+  fill_by = "model_id",
+  pal_color = "Set2",
+  one_color = "blue",
+  fill_transparency = 0.25,
+  top_layer = "model_output",
+  title = NULL,
+  ens_color = NULL,
+  ens_name = NULL,
+  group = NULL
+) {
   # Test format input
   ## Model Output Table
-  exp_f_col <- unique(c("model_id", "output_type", "output_type_id", x_col_name,
-                        "value", fill_by, group))
+  exp_f_col <- unique(c(
+    "model_id",
+    "output_type",
+    "output_type_id",
+    x_col_name,
+    "value",
+    fill_by,
+    group
+  ))
   mdl_out_validation(model_out_tbl, col_names = exp_f_col)
 
   ## Target Data
@@ -146,13 +170,22 @@ plot_step_ahead_model_output <- function(
   }
   ## Parameters
   ### Intervals
-  list_intervals <- list("0.95" = c(0.975, 0.025), "0.9" = c(0.95, 0.05),
-                         "0.8" = c(0.9, 0.1), "0.5" = c(0.75, 0.25))
+  list_intervals <- list(
+    "0.95" = c(0.975, 0.025),
+    "0.9" = c(0.95, 0.05),
+    "0.8" = c(0.9, 0.1),
+    "0.5" = c(0.75, 0.25)
+  )
   if (!is.null(intervals)) {
-    intervals_val <- validate_intervals(model_out_tbl, as.character(intervals),
-                                        list_intervals)
-    ribbon <- list_intervals[as.character(sort(intervals_val,
-                                               decreasing = TRUE))]
+    intervals_val <- validate_intervals(
+      model_out_tbl,
+      as.character(intervals),
+      list_intervals
+    )
+    ribbon <- list_intervals[as.character(sort(
+      intervals_val,
+      decreasing = TRUE
+    ))]
   } else {
     ribbon <- intervals_val <- NULL
   }
@@ -169,36 +202,59 @@ plot_step_ahead_model_output <- function(
     plain_line <- plain_type <- NULL
   }
 
-  model_out_tbl <- validate_output_type(model_out_tbl, unlist(ribbon),
-                                        plain_line, intervals,
-                                        use_median_as_point)
+  model_out_tbl <- validate_output_type(
+    model_out_tbl,
+    unlist(ribbon),
+    plain_line,
+    intervals,
+    use_median_as_point
+  )
   ### Ensemble specific color
   validate_ensemble(ens_color, ens_name)
   ### Facet
-  facet_nrow <- facet_validation(model_out_tbl, facet = facet,
-                                 interactive = interactive,
-                                 facet_nrow = facet_nrow,
-                                 facet_title = facet_title)
+  facet_nrow <- facet_validation(
+    model_out_tbl,
+    facet = facet,
+    interactive = interactive,
+    facet_nrow = facet_nrow,
+    facet_title = facet_title
+  )
   #### Top layer
   layer_validation(top_layer)
   #### Palette
-  palette <- make_palette(model_out_tbl, fill_by = fill_by,
-                          pal_color = pal_color, one_color = one_color,
-                          ens_color = ens_color, ens_name = ens_name,
-                          plot_target = plot_target)
+  palette <- make_palette(
+    model_out_tbl,
+    fill_by = fill_by,
+    pal_color = pal_color,
+    one_color = one_color,
+    ens_color = ens_color,
+    ens_name = ens_name,
+    plot_target = plot_target
+  )
 
   # Data process
   if (!is.null(ens_color) && !is.null(ens_name)) {
     ens_df <- model_out_tbl[which(model_out_tbl$model_id == ens_name), ]
-    all_ens <- plot_prep_data(ens_df, plain_line, plain_type, ribbon,
-                              x_col_name = x_col_name)
+    all_ens <- plot_prep_data(
+      ens_df,
+      plain_line,
+      plain_type,
+      ribbon,
+      x_col_name = x_col_name
+    )
     plot_df <- model_out_tbl[which(model_out_tbl$model_id != ens_name), ]
   } else {
     all_ens <- NULL
     plot_df <- model_out_tbl
   }
-  all_plot <- plot_prep_data(plot_df, plain_line, plain_type, ribbon,
-                             x_col_name = x_col_name, fill_by = fill_by)
+  all_plot <- plot_prep_data(
+    plot_df,
+    plain_line,
+    plain_type,
+    ribbon,
+    x_col_name = x_col_name,
+    fill_by = fill_by
+  )
 
   # Plot
   if (!is.null(facet)) {
@@ -206,33 +262,49 @@ plot_step_ahead_model_output <- function(
   } else {
     facet_value <- NULL
   }
-  plot_model <- output_plot(all_plot, all_ens, target_data,
-                            plot_target = plot_target,
-                            intervals =  intervals_val,
-                            pal_color = palette$color,
-                            fill_transparency = fill_transparency,
-                            pal_value = palette$value, top_layer = top_layer,
-                            ens_color = ens_color, ens_name = ens_name,
-                            facet = facet, facet_scales = facet_scales,
-                            facet_nrow = facet_nrow,  facet_title = facet_title,
-                            facet_value = facet_value, facet_ncol = facet_ncol,
-                            interactive = interactive, fill_by = fill_by,
-                            x_col_name = x_col_name,
-                            x_target_col_name = x_target_col_name,
-                            group = group)
+  plot_model <- output_plot(
+    all_plot,
+    all_ens,
+    target_data,
+    plot_target = plot_target,
+    intervals = intervals_val,
+    pal_color = palette$color,
+    fill_transparency = fill_transparency,
+    pal_value = palette$value,
+    top_layer = top_layer,
+    ens_color = ens_color,
+    ens_name = ens_name,
+    facet = facet,
+    facet_scales = facet_scales,
+    facet_nrow = facet_nrow,
+    facet_title = facet_title,
+    facet_value = facet_value,
+    facet_ncol = facet_ncol,
+    interactive = interactive,
+    fill_by = fill_by,
+    x_col_name = x_col_name,
+    x_target_col_name = x_target_col_name,
+    group = group
+  )
 
   # Layout
-  plot_model <- plot_layout(plot_model, interactive = interactive,
-                            log_scale = log_scale, show_legend = show_legend,
-                            title = title, facet = facet,
-                            facet_scales = facet_scales)
+  plot_model <- plot_layout(
+    plot_model,
+    interactive = interactive,
+    log_scale = log_scale,
+    show_legend = show_legend,
+    title = title,
+    facet = facet,
+    facet_scales = facet_scales
+  )
 
   # Output
   if (isTRUE(show_plot)) {
-    if (interactive) show(plot_model)
+    if (interactive) {
+      show(plot_model)
+    }
     plot_model
   } else {
     invisible(plot_model)
   }
-
 }
