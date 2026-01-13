@@ -469,8 +469,10 @@ plotly_subplot <- function(
     for (i in seq_along(plot_model$x$data)) {
       if (purrr::map(plot_model$x$data, "name")[[i]] %in% all_facet_value) {
         plot_model$x$data[[i]]$fillcolor <-
-          plot_model$x$data[[i]]$line$color <-
-            pal_value[as.vector(purrr::map(plot_model$x$data, "name")[[i]])]
+          plot_model$x$data[[i]]$line$color <- pal_value[as.vector(purrr::map(
+            plot_model$x$data,
+            "name"
+          )[[i]])]
       }
     }
   }
