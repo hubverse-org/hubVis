@@ -409,8 +409,7 @@ test_that("Output", {
   ## Interactive plot with 3 model, 1 model did not submit one scenario
   test_data <- dplyr::filter(
     projection_data,
-    !(model_id == "HUBuni-simexamp" &
-      scenario_id == "A-2021-03-05")
+    !(model_id == "HUBuni-simexamp" & scenario_id == "A-2021-03-05")
   )
   plot_test <-
     plot_step_ahead_model_output(
@@ -428,10 +427,8 @@ test_that("Output", {
 
   test_data <- dplyr::filter(
     projection_data,
-    !(model_id == "HUBuni-simexamp" &
-      scenario_id %in% c("A-2021-03-05", "B-2021-03-05")),
-    !(model_id == "hubcomp_examp" &
-      scenario_id %in% c("A-2021-03-05", "C-2021-03-05", "D-2021-03-05"))
+    !(model_id == "HUBuni-simexamp" & grepl("A|B", scenario_id)),
+    !(model_id == "hubcomp_examp" & grepl("A|C|D", scenario_id))
   )
   plot_test <-
     plot_step_ahead_model_output(
@@ -660,8 +657,7 @@ test_that("ggplot output file", {
   ## Static plot with 3 model, 1 model did not submit one scenario
   test_data <- dplyr::filter(
     projection_data,
-    !(model_id == "HUBuni-simexamp" &
-      scenario_id == "A-2021-03-05")
+    !(model_id == "HUBuni-simexamp" & scenario_id == "A-2021-03-05")
   )
   plot_test <-
     plot_step_ahead_model_output(
