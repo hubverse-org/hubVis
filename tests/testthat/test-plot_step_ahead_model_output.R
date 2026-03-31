@@ -458,7 +458,7 @@ test_that("sample output type functionality", {
     .data[["target_end_date"]] > "2022-01-01",
     .data[["target"]] == "wk inc flu hosp"
   ) |>
-    dplyr::rename(date = .data[["target_end_date"]])
+    dplyr::rename(date = dplyr::all_of(c("target_end_date")))
   forecast_data <- dplyr::filter(
     hubExamples::forecast_outputs,
     .data[["location"]] == "48",
@@ -536,7 +536,7 @@ test_that("sample output type functionality", {
     .data[["target_end_date"]] > "2022-10-01",
     .data[["target"]] == "wk inc flu hosp"
   ) |>
-    dplyr::rename(date = .data[["target_end_date"]])
+    dplyr::rename(date = dplyr::all_of(c("target_end_date")))
   forecast_data <- dplyr::filter(
     hubExamples::forecast_outputs,
     .data[["target"]] == "wk inc flu hosp",
@@ -683,7 +683,7 @@ test_that("ggplot output file", {
     .data[["target_end_date"]] > "2022-01-01",
     .data[["target"]] == "wk inc flu hosp"
   ) |>
-    dplyr::rename(date = .data[["target_end_date"]])
+    dplyr::rename(date = dplyr::all_of(c("target_end_date")))
   forecast_data <- dplyr::filter(
     hubExamples::forecast_outputs,
     .data[["location"]] == "48",
@@ -732,7 +732,7 @@ test_that("ggplot output file", {
     .data[["target_end_date"]] > "2022-10-01",
     .data[["target"]] == "wk inc flu hosp"
   ) |>
-    dplyr::rename(date = .data[["target_end_date"]])
+    dplyr::rename(date = dplyr::all_of(c("target_end_date")))
   forecast_data <- dplyr::filter(hubExamples::forecast_outputs,
                                  .data[["target"]] == "wk inc flu hosp")
 
