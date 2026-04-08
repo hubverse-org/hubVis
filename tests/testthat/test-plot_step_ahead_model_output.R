@@ -6,7 +6,8 @@ projection_data <-
   dplyr::mutate(
     hubExamples::scenario_outputs,
     target_date = as.Date(.data[["origin_date"]]) +
-      (.data[["horizon"]] * 7) - 1
+      (.data[["horizon"]] * 7) -
+      1
   )
 projection_data_a_us <-
   dplyr::filter(
@@ -27,8 +28,10 @@ target_data_us <-
   )
 proj_data_q <- dplyr::filter(projection_data)
 test_date <- unique(projection_data_a_us$target_date)[1:8]
-static_proj <- dplyr::filter(projection_data_a_us,
-                             .data[["target_date"]] %in% test_date)
+static_proj <- dplyr::filter(
+  projection_data_a_us,
+  .data[["target_date"]] %in% test_date
+)
 static_proj <-
   dplyr::mutate(
     static_proj,
@@ -412,7 +415,7 @@ test_that("Output", {
   test_data <- dplyr::filter(
     projection_data,
     !(.data[["model_id"]] == "HUBuni-simexamp" &
-        .data[["scenario_id"]] == "A-2021-03-05")
+      .data[["scenario_id"]] == "A-2021-03-05") # nolint
   )
   plot_test <-
     plot_step_ahead_model_output(
@@ -431,9 +434,9 @@ test_that("Output", {
   test_data <- dplyr::filter(
     projection_data,
     !(.data[["model_id"]] == "HUBuni-simexamp" &
-        grepl("A|B", .data[["scenario_id"]])),
+      grepl("A|B", .data[["scenario_id"]])), # nolint
     !(.data[["model_id"]] == "hubcomp_examp" &
-        grepl("A|C|D", .data[["scenario_id"]]))
+      grepl("A|C|D", .data[["scenario_id"]])) #nolint
   )
   plot_test <-
     plot_step_ahead_model_output(
@@ -663,7 +666,7 @@ test_that("ggplot output file", {
   test_data <- dplyr::filter(
     projection_data,
     !(.data[["model_id"]] == "HUBuni-simexamp" &
-        .data[["scenario_id"]] == "A-2021-03-05")
+      .data[["scenario_id"]] == "A-2021-03-05") # nolint
   )
   plot_test <-
     plot_step_ahead_model_output(
@@ -733,8 +736,10 @@ test_that("ggplot output file", {
     .data[["target"]] == "wk inc flu hosp"
   ) |>
     dplyr::rename(date = dplyr::all_of(c("target_end_date")))
-  forecast_data <- dplyr::filter(hubExamples::forecast_outputs,
-                                 .data[["target"]] == "wk inc flu hosp")
+  forecast_data <- dplyr::filter(
+    hubExamples::forecast_outputs,
+    .data[["target"]] == "wk inc flu hosp"
+  )
 
   p <- plot_step_ahead_model_output(
     forecast_data,
