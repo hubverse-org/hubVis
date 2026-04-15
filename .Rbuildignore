@@ -15,3 +15,4 @@
 ^\.lintr$
 ^[.]?air[.]toml$
 ^\.vscode$
+^data-raw$

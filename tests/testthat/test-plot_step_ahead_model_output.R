@@ -1,10 +1,10 @@
 # Data Preparation
-library(hubExamples)
+#library(hubExamples)
 
 ## Model output - Scenario
 projection_data <-
   dplyr::mutate(
-    hubExamples::scenario_outputs,
+    scenario_outputs,
     target_date = as.Date(.data[["origin_date"]]) +
       (.data[["horizon"]] * 7) -
       1
@@ -21,7 +21,7 @@ projection_data_a_us <- hubUtils::as_model_out_tbl(projection_data_a_us)
 ## Target data
 target_data_us <-
   dplyr::filter(
-    hubExamples::scenario_target_ts,
+    scenario_target_ts,
     .data[["location"]] == "US",
     date < min(projection_data$target_date) + 21,
     date > "2020-10-01"
@@ -455,7 +455,7 @@ test_that("Output", {
 
 test_that("sample output type functionality", {
   target_data_48 <- dplyr::filter(
-    hubExamples::forecast_target_ts,
+    forecast_target_ts,
     .data[["location"]] == "48",
     .data[["target_end_date"]] < "2022-11-15",
     .data[["target_end_date"]] > "2022-01-01",
@@ -463,7 +463,7 @@ test_that("sample output type functionality", {
   ) |>
     dplyr::rename(date = dplyr::all_of(c("target_end_date")))
   forecast_data <- dplyr::filter(
-    hubExamples::forecast_outputs,
+    forecast_outputs,
     .data[["location"]] == "48",
     .data[["target"]] == "wk inc flu hosp",
     .data[["output_type"]] == "sample"
@@ -504,7 +504,7 @@ test_that("sample output type functionality", {
   expect_equal(test_val, c(0, 800))
 
   ens_data <- dplyr::filter(
-    hubExamples::forecast_outputs,
+    forecast_outputs,
     .data[["location"]] == "48",
     .data[["target"]] == "wk inc flu hosp",
     .data[["output_type"]] == "quantile",
@@ -533,7 +533,7 @@ test_that("sample output type functionality", {
   expect_equal(test_val, c(16, 800, 8))
 
   target_data <- dplyr::filter(
-    hubExamples::forecast_target_ts,
+    forecast_target_ts,
     .data[["location"]] %in% c("25", "48"),
     .data[["target_end_date"]] < "2022-11-15",
     .data[["target_end_date"]] > "2022-10-01",
@@ -541,7 +541,7 @@ test_that("sample output type functionality", {
   ) |>
     dplyr::rename(date = dplyr::all_of(c("target_end_date")))
   forecast_data <- dplyr::filter(
-    hubExamples::forecast_outputs,
+    forecast_outputs,
     .data[["target"]] == "wk inc flu hosp",
     .data[["output_type"]] == "sample"
   )
@@ -680,7 +680,7 @@ test_that("ggplot output file", {
 
   ## Static sample plots
   target_data_48 <- dplyr::filter(
-    hubExamples::forecast_target_ts,
+    forecast_target_ts,
     .data[["location"]] == "48",
     .data[["target_end_date"]] < "2022-11-15",
     .data[["target_end_date"]] > "2022-01-01",
@@ -688,7 +688,7 @@ test_that("ggplot output file", {
   ) |>
     dplyr::rename(date = dplyr::all_of(c("target_end_date")))
   forecast_data <- dplyr::filter(
-    hubExamples::forecast_outputs,
+    forecast_outputs,
     .data[["location"]] == "48",
     .data[["target"]] == "wk inc flu hosp",
     .data[["output_type"]] == "sample"
@@ -729,7 +729,7 @@ test_that("ggplot output file", {
   vdiffr::expect_doppelganger("Median and Samples plot", plot_test)
 
   target_data <- dplyr::filter(
-    hubExamples::forecast_target_ts,
+    forecast_target_ts,
     .data[["location"]] %in% c("25", "48"),
     .data[["target_end_date"]] < "2022-11-15",
     .data[["target_end_date"]] > "2022-10-01",
@@ -737,7 +737,7 @@ test_that("ggplot output file", {
   ) |>
     dplyr::rename(date = dplyr::all_of(c("target_end_date")))
   forecast_data <- dplyr::filter(
-    hubExamples::forecast_outputs,
+    forecast_outputs,
     .data[["target"]] == "wk inc flu hosp"
   )
 

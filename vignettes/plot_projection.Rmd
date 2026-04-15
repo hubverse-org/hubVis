@@ -79,7 +79,8 @@ scenario projection data.
 ### Load data
 
 ```{r load_data}
-library(hubExamples)
+# Data are also available in the HubExamples package
+# library(hubExamples)
 
 # Scenario examples
 head(scenario_outputs)
