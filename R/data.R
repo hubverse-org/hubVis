@@ -16,11 +16,11 @@ NULL
 #' when retrieved from a hub via the `hubData` package (which is slightly different than they look
 #' when originally submitted by modelers).
 #'
-#' Data from `hubExample` package: https://github.com/hubverse-org/hubExamples
+#' Data from `hubExamples` package: https://github.com/hubverse-org/hubExamples
 #'
 #' @format ## `forecast_outputs`
-#' A data frame with `r format(nrow(hubExamples::forecast_outputs), big.mark = ",")`
-#' rows and `r ncol(hubExamples::forecast_outputs)` columns:
+#' A data frame with `r format(nrow(forecast_outputs), big.mark = ",")`
+#' rows and `r ncol(forecast_outputs)` columns:
 #' \describe{
 #'   \item{model_id}{the name of the model}
 #'   \item{reference_date}{the starting point of the forecast in yyyy-mm-dd format}
@@ -44,11 +44,11 @@ NULL
 #'
 #' `forecast_target_ts` contains time series target data from a hub that predicts influenza-related targets.
 #'
-#' Data from `hubExample` package: https://github.com/hubverse-org/hubExamples
+#' Data from `hubExamples` package: https://github.com/hubverse-org/hubExamples
 #'
 #' @format ## `forecast_target_ts`
-#' A data frame with `r format(nrow(hubExamples::forecast_target_ts), big.mark = ",")` rows and
-#' `r ncol(hubExamples::forecast_target_ts)` columns:
+#' A data frame with `r format(nrow(forecast_target_ts), big.mark = ",")` rows and
+#' `r ncol(forecast_target_ts)` columns:
 #' \describe{
 #'   \item{target_end_date}{the date of the target observation in yyyy-mm-dd format}
 #'   \item{target}{a unique identifier for the target}
@@ -70,7 +70,7 @@ NULL
 
 #' Scenario outputs
 #'
-#' Data from `hubExample` package: https://github.com/hubverse-org/hubExamples
+#' Data from `hubExamples` package: https://github.com/hubverse-org/hubExamples
 #'
 #' `scenario_outputs` contains example scenario projection data that represents
 #' model outputs and an ensemble from a scenario hub with predictions for one
@@ -111,10 +111,10 @@ NULL
 #' `scenario_target_ts` contains time series target data associated with the
 #' scenario projection data.
 #'
-#' Data from `hubExample` package: https://github.com/hubverse-org/hubExamples
+#' Data from `hubExamples` package: https://github.com/hubverse-org/hubExamples
 #'
 #' @format ## `scenario_target_ts`
-#' A data frame with 127 rows and 3 columns:
+#' A data frame with 127 rows and 4 columns:
 #' \describe{
 #'   \item{location}{FIPS code identifying a location}
 #'   \item{date}{the date of the target observation in yyyy-mm-dd format}

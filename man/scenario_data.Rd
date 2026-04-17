@@ -31,7 +31,7 @@ level for the quantile prediction}
 
 \subsection{\code{scenario_target_ts}}{
 
-A data frame with 127 rows and 3 columns:
+A data frame with 127 rows and 4 columns:
 \describe{
 \item{location}{FIPS code identifying a location}
 \item{date}{the date of the target observation in yyyy-mm-dd format}
@@ -53,7 +53,7 @@ scenario_target_ts
 The hubExamples package provides two data sets that contain example model output and
 target data for an example scenario hub: \code{scenario_outputs} and \code{scenario_target_ts}.
 
-Data from \code{hubExample} package: https://github.com/hubverse-org/hubExamples
+Data from \code{hubExamples} package: https://github.com/hubverse-org/hubExamples
 
 \code{scenario_target_ts} contains time series target data associated with the
 scenario projection data.
@@ -71,6 +71,6 @@ The date of occurrence of the outcome of interest in yyyy-mm-dd format
 can be calculated directly from the \code{origin_date} and \code{horizon} as follows:
 \code{target_end_date = origin_date + (7 * horizon) - 1}
 
-Data from \code{hubExample} package: https://github.com/hubverse-org/hubExamples
+Data from \code{hubExamples} package: https://github.com/hubverse-org/hubExamples
 }
 \keyword{datasets}

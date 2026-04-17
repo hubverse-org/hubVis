@@ -64,8 +64,8 @@ when originally submitted by modelers).
 \code{forecast_target_ts} contains time series target data from a hub that predicts influenza-related targets.
 }
 \details{
-Data from \code{hubExample} package: https://github.com/hubverse-org/hubExamples
+Data from \code{hubExamples} package: https://github.com/hubverse-org/hubExamples
 
-Data from \code{hubExample} package: https://github.com/hubverse-org/hubExamples
+Data from \code{hubExamples} package: https://github.com/hubverse-org/hubExamples
 }
 \keyword{datasets}
