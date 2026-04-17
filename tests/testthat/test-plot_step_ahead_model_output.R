@@ -1,17 +1,19 @@
 # Data Preparation
-library(hubExamples)
+#library(hubExamples)
 
 ## Model output - Scenario
 projection_data <-
   dplyr::mutate(
     scenario_outputs,
-    target_date = as.Date(origin_date) + (horizon * 7) - 1
+    target_date = as.Date(.data[["origin_date"]]) +
+      (.data[["horizon"]] * 7) -
+      1
   )
 projection_data_a_us <-
   dplyr::filter(
     projection_data,
-    scenario_id == "A-2021-03-05",
-    location == "US"
+    .data[["scenario_id"]] == "A-2021-03-05",
+    .data[["location"]] == "US"
   )
 projection_data <- hubUtils::as_model_out_tbl(projection_data)
 projection_data_a_us <- hubUtils::as_model_out_tbl(projection_data_a_us)
@@ -20,18 +22,21 @@ projection_data_a_us <- hubUtils::as_model_out_tbl(projection_data_a_us)
 target_data_us <-
   dplyr::filter(
     scenario_target_ts,
-    location == "US",
+    .data[["location"]] == "US",
     date < min(projection_data$target_date) + 21,
     date > "2020-10-01"
   )
 proj_data_q <- dplyr::filter(projection_data)
 test_date <- unique(projection_data_a_us$target_date)[1:8]
-static_proj <- dplyr::filter(projection_data_a_us, target_date %in% test_date)
+static_proj <- dplyr::filter(
+  projection_data_a_us,
+  .data[["target_date"]] %in% test_date
+)
 static_proj <-
   dplyr::mutate(
     static_proj,
     forecast_date = ifelse(
-      target_date <= test_date[4],
+      .data[["target_date"]] <= test_date[4],
       as.character(test_date[1]),
       as.character(test_date[5])
     )
@@ -101,7 +106,7 @@ test_that("Output", {
   ## Traces grouped by forecast date
   plot_test <-
     plot_step_ahead_model_output(
-      dplyr::filter(static_proj, model_id != "hubcomp_examp"),
+      dplyr::filter(static_proj, .data[["model_id"]] != "hubcomp_examp"),
       target_data_us,
       use_median_as_point = TRUE,
       ens_color = "black",
@@ -136,7 +141,7 @@ test_that("Output", {
   ## model input and traces grouped by forecast date
   plot_test <-
     plot_step_ahead_model_output(
-      dplyr::filter(static_proj, model_id != "hubcomp_examp"),
+      dplyr::filter(static_proj, .data[["model_id"]] != "hubcomp_examp"),
       target_data_us,
       ens_color = "black",
       ens_name = "hub-ensemble",
@@ -409,7 +414,8 @@ test_that("Output", {
   ## Interactive plot with 3 model, 1 model did not submit one scenario
   test_data <- dplyr::filter(
     projection_data,
-    !(model_id == "HUBuni-simexamp" & scenario_id == "A-2021-03-05")
+    !(.data[["model_id"]] == "HUBuni-simexamp" &
+      .data[["scenario_id"]] == "A-2021-03-05") # nolint
   )
   plot_test <-
     plot_step_ahead_model_output(
@@ -427,8 +433,10 @@ test_that("Output", {
 
   test_data <- dplyr::filter(
     projection_data,
-    !(model_id == "HUBuni-simexamp" & grepl("A|B", scenario_id)),
-    !(model_id == "hubcomp_examp" & grepl("A|C|D", scenario_id))
+    !(.data[["model_id"]] == "HUBuni-simexamp" &
+      grepl("A|B", .data[["scenario_id"]])), # nolint
+    !(.data[["model_id"]] == "hubcomp_examp" &
+      grepl("A|C|D", .data[["scenario_id"]])) #nolint
   )
   plot_test <-
     plot_step_ahead_model_output(
@@ -448,22 +456,22 @@ test_that("Output", {
 test_that("sample output type functionality", {
   target_data_48 <- dplyr::filter(
     forecast_target_ts,
-    location == "48",
-    target_end_date < "2022-11-15",
-    target_end_date > "2022-01-01",
-    target == "wk inc flu hosp"
+    .data[["location"]] == "48",
+    .data[["target_end_date"]] < "2022-11-15",
+    .data[["target_end_date"]] > "2022-01-01",
+    .data[["target"]] == "wk inc flu hosp"
   ) |>
-    dplyr::rename(date = target_end_date)
+    dplyr::rename(date = dplyr::all_of(c("target_end_date")))
   forecast_data <- dplyr::filter(
     forecast_outputs,
-    location == "48",
-    target == "wk inc flu hosp",
-    output_type == "sample"
+    .data[["location"]] == "48",
+    .data[["target"]] == "wk inc flu hosp",
+    .data[["output_type"]] == "sample"
   )
 
   p <-
     plot_step_ahead_model_output(
-      dplyr::filter(forecast_data, reference_date == "2022-11-19"),
+      dplyr::filter(forecast_data, .data[["reference_date"]] == "2022-11-19"),
       target_data_48,
       x_col_name = "target_end_date",
       intervals = NULL
@@ -497,13 +505,13 @@ test_that("sample output type functionality", {
 
   ens_data <- dplyr::filter(
     forecast_outputs,
-    location == "48",
-    target == "wk inc flu hosp",
-    output_type == "quantile",
-    model_id == "PSI-DICE"
+    .data[["location"]] == "48",
+    .data[["target"]] == "wk inc flu hosp",
+    .data[["output_type"]] == "quantile",
+    .data[["model_id"]] == "PSI-DICE"
   )
   forecast_data <- rbind(
-    dplyr::filter(forecast_data, model_id != "PSI-DICE"),
+    dplyr::filter(forecast_data, .data[["model_id"]] != "PSI-DICE"),
     ens_data
   )
 
@@ -526,16 +534,16 @@ test_that("sample output type functionality", {
 
   target_data <- dplyr::filter(
     forecast_target_ts,
-    location %in% c("25", "48"),
-    target_end_date < "2022-11-15",
-    target_end_date > "2022-10-01",
-    target == "wk inc flu hosp"
+    .data[["location"]] %in% c("25", "48"),
+    .data[["target_end_date"]] < "2022-11-15",
+    .data[["target_end_date"]] > "2022-10-01",
+    .data[["target"]] == "wk inc flu hosp"
   ) |>
-    dplyr::rename(date = target_end_date)
+    dplyr::rename(date = dplyr::all_of(c("target_end_date")))
   forecast_data <- dplyr::filter(
     forecast_outputs,
-    target == "wk inc flu hosp",
-    output_type == "sample"
+    .data[["target"]] == "wk inc flu hosp",
+    .data[["output_type"]] == "sample"
   )
 
   p <- plot_step_ahead_model_output(
@@ -657,7 +665,8 @@ test_that("ggplot output file", {
   ## Static plot with 3 model, 1 model did not submit one scenario
   test_data <- dplyr::filter(
     projection_data,
-    !(model_id == "HUBuni-simexamp" & scenario_id == "A-2021-03-05")
+    !(.data[["model_id"]] == "HUBuni-simexamp" &
+      .data[["scenario_id"]] == "A-2021-03-05") # nolint
   )
   plot_test <-
     plot_step_ahead_model_output(
@@ -672,17 +681,17 @@ test_that("ggplot output file", {
   ## Static sample plots
   target_data_48 <- dplyr::filter(
     forecast_target_ts,
-    location == "48",
-    target_end_date < "2022-11-15",
-    target_end_date > "2022-01-01",
-    target == "wk inc flu hosp"
+    .data[["location"]] == "48",
+    .data[["target_end_date"]] < "2022-11-15",
+    .data[["target_end_date"]] > "2022-01-01",
+    .data[["target"]] == "wk inc flu hosp"
   ) |>
-    dplyr::rename(date = target_end_date)
+    dplyr::rename(date = dplyr::all_of(c("target_end_date")))
   forecast_data <- dplyr::filter(
     forecast_outputs,
-    location == "48",
-    target == "wk inc flu hosp",
-    output_type == "sample"
+    .data[["location"]] == "48",
+    .data[["target"]] == "wk inc flu hosp",
+    .data[["output_type"]] == "sample"
   )
 
   plot_test <- plot_step_ahead_model_output(
@@ -721,13 +730,16 @@ test_that("ggplot output file", {
 
   target_data <- dplyr::filter(
     forecast_target_ts,
-    location %in% c("25", "48"),
-    target_end_date < "2022-11-15",
-    target_end_date > "2022-10-01",
-    target == "wk inc flu hosp"
+    .data[["location"]] %in% c("25", "48"),
+    .data[["target_end_date"]] < "2022-11-15",
+    .data[["target_end_date"]] > "2022-10-01",
+    .data[["target"]] == "wk inc flu hosp"
   ) |>
-    dplyr::rename(date = target_end_date)
-  forecast_data <- dplyr::filter(forecast_outputs, target == "wk inc flu hosp")
+    dplyr::rename(date = dplyr::all_of(c("target_end_date")))
+  forecast_data <- dplyr::filter(
+    forecast_outputs,
+    .data[["target"]] == "wk inc flu hosp"
+  )
 
   p <- plot_step_ahead_model_output(
     forecast_data,
